@@ -1,0 +1,150 @@
+const { registerSchema, loginSchema,updateNameSchema,updatePasswordSchema,otpSchema,emailSchema } = require("../schemas/authSchema");
+const { courseSchema } = require("../schemas/courseSchema");
+const { dateSchema } = require("../schemas/dateSchema");
+const { projectSchema } = require("../schemas/projectSchema");
+const { remarkSchema } = require("../schemas/remarkSchema");
+const { statusSchema } = require("../schemas/statusSchema");
+const { vivaSchema } = require("../schemas/vivaSchema");
+const { reviewSchema } = require("../schemas/reviewSchema");
+const { announcementSchema } = require("../schemas/announcementSchema");
+
+const AppError = require("../utilities/AppError");
+
+module.exports.validateRegister = (req, res, next) => {
+  console.log(req.body);
+  const { error } = registerSchema.validate(req.body);
+  if (error) {
+    const msg = error.details.map((el) => el.message).join(",");
+    throw new AppError(msg, 400);
+  } else {
+    next();
+  }
+};
+
+module.exports.validateLogin = (req, res, next) => {
+  const { error } = loginSchema.validate(req.body);
+  if (error) {
+    const msg = error.details.map((el) => el.message).join(",");
+    throw new AppError(msg, 400);
+  } else {
+    next();
+  }
+};
+
+module.exports.validateCourse = (req, res, next) => {
+  // console.log(req.body);
+  const { error } = courseSchema.validate(req.body);
+  if (error) {
+    const msg = error.details.map((el) => el.message).join(",");
+    throw new AppError(msg, 400);
+  } else {
+    next();
+  }
+};
+
+module.exports.validateDate = (req, res, next) => {
+  // console.log(req.body);
+  const { error } = dateSchema.validate(req.body);
+  if (error) {
+    const msg = error.details.map((el) => el.message).join(",");
+    throw new AppError(msg, 400);
+  } else {
+    next();
+  }
+};
+
+module.exports.validateProject = (req, res, next) => {
+  // console.log(req.body);
+  const { error } = projectSchema.validate(req.body);
+  if (error) {
+    const msg = error.details.map((el) => el.message).join(",");
+    throw new AppError(msg, 400);
+  } else {
+    next();
+  }
+};
+
+module.exports.validateRemark = (req, res, next) => {
+  // console.log(req.body);
+  const { error } = remarkSchema.validate(req.body);
+  if (error) {
+    const msg = error.details.map((el) => el.message).join(",");
+    throw new AppError(msg, 400);
+  } else {
+    next();
+  }
+};
+
+module.exports.validateStatus = (req, res, next) => {
+  // console.log(req.body);
+  const { error } = statusSchema.validate(req.body);
+  if (error) {
+    const msg = error.details.map((el) => el.message).join(",");
+    throw new AppError(msg, 400);
+  } else {
+    next();
+  }
+};
+
+module.exports.validateViva = (req, res, next) => {
+  // console.log(req.body);
+  const { error } = vivaSchema.validate(req.body);
+  if (error) {
+    const msg = error.details.map((el) => el.message).join(",");
+    throw new AppError(msg, 400);
+  } else {
+    next();
+  }
+};
+
+module.exports.validateReview = (req, res, next) => {
+  // console.log(req.body);
+  const { error } = reviewSchema.validate(req.body);
+  if (error) {
+    const msg = error.details.map((el) => el.message).join(",");
+    throw new AppError(msg, 400);
+  } else {
+    next();
+  }
+};
+
+module.exports.validateAnnouncement = (req, res, next) => {
+  // console.log(req.body);
+  const { error } = announcementSchema.validate(req.body);
+  if (error) {
+    const msg = error.details.map((el) => el.message).join(",");
+    throw new AppError(msg, 400);
+  } else {
+    next();
+  }
+};
+
+module.exports.validateUpdatePassword = (req, res, next) => {
+  const { error } = updatePasswordSchema.validate(req.body);
+  if (error) {
+    const msg = error.details.map((el) => el.message).join(",");
+    throw new AppError(msg, 400);
+  } else {
+    next();
+  }
+};
+
+module.exports.validateUpdateName = (req, res, next) => {
+  const { error } = updateNameSchema.validate(req.body);
+  if (error) {
+    const msg = error.details.map((el) => el.message).join(",");
+    throw new AppError(msg, 400);
+  } else {
+    next();
+  }
+};
+
+module.exports.validateOtp = (req, res, next) => {
+  const { error } = otpSchema.validate(req.body);
+  if (error) {
+    const msg = error.details.map((el) => el.message).join(",");
+    throw new AppError(msg, 400);
+  } else {
+    next();
+  }
+};
