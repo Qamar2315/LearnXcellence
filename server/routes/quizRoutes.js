@@ -1,20 +1,20 @@
 const express = require('express');
 const router = express.Router();
 const quizController = require('../controllers/quizController');
+const {isLogin} = require('../middlewares/isLogin');
+const {isTeacher,isCourseCreator} = require('../middlewares/authorization');
+const {isEmailVerified} = require('../middlewares/isEmailVerified');
+const { validateQuiz } = require('../middlewares/schemaValidator'); 
 
-router.route('/create')
-    .post(quizController.createQuiz);
-
-router.route('/update/:id')
-    .patch(quizController.updateQuiz);
-
-router.route('/delete/:id')
-    .delete(quizController.deleteQuiz);
-
-router.route('/:id')
-    .get(quizController.getQuiz);
+router.route('/:courseId/create')
+    .post(isLogin,isEmailVerified,isTeacher,isCourseCreator,validateQuiz,quizController.createQuiz);
 
 router.route('/course/:courseId')
-    .get(quizController.getQuizzesByCourse);
+    .get(isLogin,isEmailVerified ,quizController.getQuizzesByCourse);
+
+router.route('/:courseId/:id')
+    .get(isLogin,isEmailVerified,quizController.getQuiz)
+    .patch(isLogin,isEmailVerified,isTeacher,isCourseCreator,validateQuiz,quizController.updateQuiz)
+    .delete(isLogin,isEmailVerified,isTeacher,isCourseCreator,quizController.deleteQuiz);
 
 module.exports = router;

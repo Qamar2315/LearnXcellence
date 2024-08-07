@@ -10,6 +10,7 @@ const quizSchema = new schema({
     type: schema.Types.ObjectId,
     ref: "Remarks",
   },
+  deadline: Date,
   created_at: { type: Date, default: Date.now },
   updated_at: { type: Date, default: Date.now },
 });

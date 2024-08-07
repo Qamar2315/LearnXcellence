@@ -1,19 +1,38 @@
-const Quiz = require('../models/Quiz');
+const Quiz = require("../models/Quiz");
 
-const createQuiz = (quizData) => Quiz.create(quizData);
+// Create a new quiz
+const createQuiz = async (quizData) => {
+  return await Quiz.create(quizData);
+};
 
-const updateQuiz = (id, updates) => Quiz.findByIdAndUpdate(id, updates, { new: true });
+const getQuizById = async (quizId) => {
+  return await Quiz.findById(quizId);
+};
 
-const deleteQuiz = (id) => Quiz.findByIdAndDelete(id);
+// Find a quiz by its ID
+const findQuizById = async (quizId) => {
+  return await Quiz.findById(quizId).populate("questions");
+};
 
-const getQuiz = (id) => Quiz.findById(id).populate('questions');
+const getQuizzesByCourse = async (courseId) => {
+  return await Quiz.find({ course: courseId });
+};
 
-const getQuizzesByCourse = (courseId) => Quiz.find({ course: courseId }).populate('questions');
+// Update a quiz by its ID
+const updateQuizById = async (quizId, updateData) => {
+  return await Quiz.findByIdAndUpdate(quizId, updateData, { new: true });
+};
+
+// Delete a quiz by its ID
+const deleteQuizById = async (quizId) => {
+  return await Quiz.findByIdAndDelete(quizId);
+};
 
 module.exports = {
-    createQuiz,
-    updateQuiz,
-    deleteQuiz,
-    getQuiz,
-    getQuizzesByCourse,
+  createQuiz,
+  findQuizById,
+  updateQuizById,
+  deleteQuizById,
+  getQuizById,
+  getQuizzesByCourse,
 };

@@ -25,6 +25,8 @@ const removeCourseFromStudent = (studentId, courseId) =>
   Student.findByIdAndUpdate(studentId, { $pull: { courses: courseId } });
 const getStudentFromCourse = (courseId, studentId) =>
   Student.findOne({ _id: studentId, courses: courseId });
+const getCourseById = (courseId) => Course.findById(courseId);
+
 
 module.exports = {
   findTeacherById,
@@ -42,4 +44,5 @@ module.exports = {
   removeStudentFromCourse,
   removeCourseFromStudent,
   getStudentFromCourse,
+  getCourseById,
 };

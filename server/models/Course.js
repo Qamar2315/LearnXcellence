@@ -45,7 +45,7 @@ const courseSchema = new schema({
       ref: "Assignment",
     },
   ],
-  quizez:[
+  quizzes:[
     {
       type: schema.Types.ObjectId,
       ref: "Quiz",  

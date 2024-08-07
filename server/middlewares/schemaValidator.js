@@ -7,6 +7,7 @@ const { statusSchema } = require("../schemas/statusSchema");
 const { vivaSchema } = require("../schemas/vivaSchema");
 const { reviewSchema } = require("../schemas/reviewSchema");
 const { announcementSchema } = require("../schemas/announcementSchema");
+const { quizSchema } = require("../schemas/quizSchema");
 
 const AppError = require("../utilities/AppError");
 
@@ -141,6 +142,16 @@ module.exports.validateUpdateName = (req, res, next) => {
 
 module.exports.validateOtp = (req, res, next) => {
   const { error } = otpSchema.validate(req.body);
+  if (error) {
+    const msg = error.details.map((el) => el.message).join(",");
+    throw new AppError(msg, 400);
+  } else {
+    next();
+  }
+};
+
+module.exports.validateQuiz = (req, res, next) => {
+  const { error } = quizSchema.validate(req.body);
   if (error) {
     const msg = error.details.map((el) => el.message).join(",");
     throw new AppError(msg, 400);

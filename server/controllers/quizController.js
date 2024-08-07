@@ -1,48 +1,57 @@
-const asyncHandler = require('../utilities/CatchAsync');
-const quizService = require('../services/quizService');
+const asyncHandler = require("../utilities/CatchAsync");
+const quizService = require("../services/quizService");
 
 const createQuiz = asyncHandler(async (req, res) => {
-    const { title, topic, questions } = req.body;
-    const course = req.params.courseId;
-    const quiz = await quizService.createQuiz(course, title, topic, questions);
-    res.status(201).json({
-        success: true,
-        message: 'Quiz created successfully',
-        data: {
-            quiz,
-        },
-    });
+  const { title, topic, questions, deadline } = req.body;
+  const { courseId } = req.params;
+  const quiz = await quizService.createQuiz(courseId, title, topic, questions, deadline);
+  res.status(201).json({
+    success: true,
+    message: "Quiz created successfully",
+    data: {
+      quiz,
+    },
+  });
 });
 
 const updateQuiz = asyncHandler(async (req, res) => {
+    const { title, topic, questions, deadline } = req.body;
     const { id } = req.params;
-    const updates = req.body;
-    const quiz = await quizService.updateQuiz(id, updates);
-    res.status(200).json(quiz);
+    const quiz = await quizService.updateQuiz(id, title, topic, questions, deadline);
+    res.status(200).json({
+        success: true,
+        message: "Quiz updated successfully",
+        data: { quiz },
+    });
 });
 
 const deleteQuiz = asyncHandler(async (req, res) => {
-    const { id } = req.params;
-    await quizService.deleteQuiz(id);
-    res.status(204).send();
+  const { id,courseId } = req.params;
+  await quizService.deleteQuiz(id,courseId);
+  res.status(200).json(
+    {
+      success:true,
+      message:"Quiz deleted successfully"
+    }
+  )
 });
 
 const getQuiz = asyncHandler(async (req, res) => {
-    const { id } = req.params;
-    const quiz = await quizService.getQuiz(id);
-    res.status(200).json(quiz);
+  const { id, courseId } = req.params;
+  const quiz = await quizService.getQuiz(id,courseId);
+  res.status(200).json(quiz);
 });
 
 const getQuizzesByCourse = asyncHandler(async (req, res) => {
-    const { courseId } = req.params;
-    const quizzes = await quizService.getQuizzesByCourse(courseId);
-    res.status(200).json(quizzes);
+  const { courseId } = req.params;
+  const quizzes = await quizService.getQuizzesByCourse(courseId);
+  res.status(200).json(quizzes);
 });
 
 module.exports = {
-    createQuiz,
-    updateQuiz,
-    deleteQuiz,
-    getQuiz,
-    getQuizzesByCourse,
+  createQuiz,
+  updateQuiz,
+  deleteQuiz,
+  getQuiz,
+  getQuizzesByCourse,
 };
