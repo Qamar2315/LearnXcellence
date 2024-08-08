@@ -6,11 +6,10 @@ const quizSchema = new schema({
   title: String,
   topic:String,
   questions: [{ type: schema.Types.ObjectId, ref: "Question" }],
-  remarks: {
-    type: schema.Types.ObjectId,
-    ref: "Remarks",
-  },
+  duration: Number,
+  number_of_questions: Number,
   deadline: Date,
+  submissions: [{ type: schema.Types.ObjectId, ref: "QuizSubmission" }],
   created_at: { type: Date, default: Date.now },
   updated_at: { type: Date, default: Date.now },
 });

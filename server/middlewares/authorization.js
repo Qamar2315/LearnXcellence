@@ -35,7 +35,8 @@ const isCourseCreator = asyncHandler(async (req, res, next) => {
 
 const isCourseStudent = asyncHandler(async (req, res, next) => {
     var isStudent=false;
-    const { courseId } = req.body;
+    const  courseId  = req.body.courseId || req.params.courseId;
+
     for (const course_ of req.user.courses) {
         if (course_ == courseId) {
             isStudent=true;

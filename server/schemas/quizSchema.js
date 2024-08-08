@@ -10,5 +10,7 @@ module.exports.quizSchema = Joi.object({
       correct_option: Joi.string().required()
     })
   ).required(),
-  deadline: Joi.date().required()
+  number_of_questions: Joi.number().required(),
+  deadline: Joi.date().required(),
+  duration: Joi.number().required()
 });
