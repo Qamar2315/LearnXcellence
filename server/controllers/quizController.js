@@ -73,11 +73,11 @@ const getQuizzesByCourse = asyncHandler(async (req, res) => {
 const startQuiz = asyncHandler(async (req, res) => {
   const { id } = req.params;
   const studentId = req.user._id;
-  const { newSubmission, proctoringReport } = await quizService.startQuiz(id, studentId);
+  const submission = await quizService.startQuiz(id, studentId);
   res.status(200).json({
       success: true,
       message: "Quiz started successfully",
-      data: { submission: newSubmission, proctoringReport },
+      data: submission,
   });
 });
 

@@ -6,6 +6,7 @@ const proctoringReportRepository = require("../repositories/proctoringReportRepo
 const { calculateQuizScore } = require("../utilities/calculateQuizScore");
 const _ = require("lodash");
 const AppError = require("../utilities/AppError");
+const axios = require("axios");
 
 const createQuiz = async (
   courseId,
@@ -198,54 +199,112 @@ const startQuiz = async (quizId, studentId) => {
   // Create the proctoring report and link it to the submission
   const proctoringReport =
     await proctoringReportRepository.createProctoringReport({
-      submission: newSubmission._id,
+      images: [],
+      cheating_indicators: {
+        mobile_phone: 0,
+        extra_person: 0,
+        mouth_open: 0,
+        no_person: 0,
+        eye_left_right: 0,
+      },
     });
 
-  return { newSubmission, proctoringReport };
+  newSubmission.proctoringReport = proctoringReport;
+  await newSubmission.save();
+
+  return newSubmission;
 };
 
 const submitQuiz = async (quizId, studentId, answers) => {
+  // Find the submission for the given quiz and student
   const submission = await quizSubmissionRepository.findSubmission(
     quizId,
     studentId
   );
+
+  // Validate if answers are provided
   if (!answers) {
     throw new AppError("Input answers");
   }
+
+  // Fetch the quiz details by ID
   const quiz = await quizRepository.findQuizById(quizId);
   if (!quiz) {
     throw new AppError("Quiz not found", 404);
   }
+
+  // Check if the submission exists
   if (!submission) {
     throw new AppError("Submission not found", 404);
   }
 
+  // Check if the quiz has already been submitted
   if (submission.isCompleted) {
     throw new AppError("Quiz already submitted", 400);
   }
 
+  // Ensure the submission is within the allowed time
   const currentTime = new Date();
   if (currentTime > submission.endTime) {
     throw new AppError("Quiz time has expired", 400);
   }
 
+  // Update submission with the provided answers
   submission.answers = answers;
   submission.submittedAt = currentTime;
   submission.isCompleted = true;
-  const isFlagged = false;
+
+  // Fetch the proctoring report linked to the submission
+  const proctoringReport =
+    await proctoringReportRepository.getProctoringReportById(
+      submission.proctoringReport
+    );
+
+  // Extract features from the proctoring report for cheating detection
+  const features = [
+    proctoringReport.images.length,
+    proctoringReport.cheating_indicators.mobile_phone,
+    proctoringReport.cheating_indicators.extra_person,
+    proctoringReport.cheating_indicators.mouth_open,
+    proctoringReport.cheating_indicators.no_person,
+    proctoringReport.cheating_indicators.eye_left_right,
+  ];
+
+  // Make a request to the Flask API to assess cheating probability
+  let isFlagged = false;
+  const response = await axios.post(
+    `${process.env.FLASK_URL}/predict-cheating`,
+    {
+      features: features,
+    }
+  );
+
+  // Extract cheating probability from the response
+  const cheatingProbability = response.data.data.cheating_probability;
+
+  // Flag the submission if cheating probability is above the threshold
+  if (cheatingProbability > 60) {
+    isFlagged = true;
+  }
 
   if (isFlagged) {
     submission.isFlagged = true;
-    await submission.save();
-    return submission;
   }
-  submission.score = calculateQuizScore(
-    answers,
-    quiz.questions
-  );
+
+  // Update the proctoring report with the cheating probability
+  proctoringReport.cheating_probability = cheatingProbability;
+
+  // Calculate and assign the quiz score based on the submitted answers
+  submission.score = calculateQuizScore(answers, quiz.questions);
+
+  // Save the updated proctoring report and submission
+  await proctoringReport.save();
   await submission.save();
+
+  // Return the updated submission
   return submission;
 };
+
 
 module.exports = {
   createQuiz,

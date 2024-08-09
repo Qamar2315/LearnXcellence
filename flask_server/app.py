@@ -8,6 +8,8 @@ from otp_utils import generate_otp, send_otp
 import numpy as np
 from ultralytics import YOLO
 from ai_protoring import analyze_image
+import joblib
+from cheating_detection import predict_cheating_probability
 
 # Load environment variables from .env file
 load_dotenv()
@@ -24,6 +26,7 @@ CORS(app, resources={r"/*": {"origins": allowed_origin}})
 # model = load_model("./models/face_antispoofing_model.keras")
 model= YOLO("./models/yolo_custom_model.pt")
 model_yolo = YOLO("./models/yolov8x.pt")
+loaded_model = joblib.load("./models/cheating_detection_model.pkl")
 
 protoring_output_dir = "C://Users//Dell//OneDrive//Desktop//qamar//Projects//LearnXcellence//server//uploads//protoring_result_db//"
 
@@ -111,6 +114,22 @@ def analyze_image_api():
     except Exception as e:
         return jsonify(error=str(e)), 500
 
+@app.route('/predict-cheating', methods=['POST'])
+def predict_cheating_api():
+    try:
+        data = request.json
+        features = data.get('features')
 
+        if not features or not isinstance(features, list) or len(features) != 6:
+            return jsonify(error="Features not provided or invalid format"), 400
+
+        try:
+            probabilities = predict_cheating_probability(features, loaded_model)
+            return jsonify(success=True, message="Prediction successful", data=probabilities)
+        except Exception as e:
+            return jsonify(success=False, error=f"Failed to predict cheating: {str(e)}"), 500
+    except Exception as e:
+        return jsonify(error=str(e)), 500
+    
 if __name__ == '__main__':
     app.run(debug=True)

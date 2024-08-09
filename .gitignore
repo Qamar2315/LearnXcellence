@@ -132,3 +132,5 @@ dist
 .pnp.*
 
 /flask_server/models/
+
+/server/uploads/

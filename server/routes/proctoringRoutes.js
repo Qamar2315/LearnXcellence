@@ -7,7 +7,7 @@ const { uploadProctoringImage } = require("../middlewares/multer/uploadProctorin
 const proctoringController = require("../controllers/proctoringController");
 
 router
-  .route("/analyze-image")
+  .route("/:courseId/:quizId/analyze-image")
   .post(
     isLogin,
     isEmailVerified,
