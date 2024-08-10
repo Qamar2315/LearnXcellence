@@ -75,9 +75,9 @@ const startQuiz = asyncHandler(async (req, res) => {
   const studentId = req.user._id;
   const submission = await quizService.startQuiz(id, studentId);
   res.status(200).json({
-      success: true,
-      message: "Quiz started successfully",
-      data: submission,
+    success: true,
+    message: "Quiz started successfully",
+    data: submission,
   });
 });
 
@@ -87,9 +87,37 @@ const submitQuiz = asyncHandler(async (req, res) => {
   const { answers } = req.body;
   const submission = await quizService.submitQuiz(id, studentId, answers);
   res.status(200).json({
+    success: true,
+    message: "Quiz submitted successfully",
+    data: { submission },
+  });
+});
+
+const updateSubmissionMarks = asyncHandler(async (req, res) => {
+  const { courseId, quizId, submissionId } = req.params;
+  const {newScore} = req.body;
+  const submission = await quizService.updateSubmissionMarks(courseId, quizId, submissionId, newScore);
+  res.status(200).json({
+    success: true,
+    message: "Quiz submission marks updated successfully",
+    data: { submission },
+  });
+});
+
+// Update the isFlagged status of a submission
+const updateSubmissionFlag = asyncHandler(async (req, res) => {
+  const { courseId, quizId, submissionId } = req.params;
+  const { isFlagged } = req.body;
+
+  // Call the service to update the flag status
+  const updatedSubmission = await quizService.updateSubmissionFlag(courseId, quizId, submissionId, isFlagged);
+
+  res.status(200).json({
       success: true,
-      message: "Quiz submitted successfully",
-      data: { submission },
+      message: 'Submission flag status updated successfully',
+      data: {
+          submission: updatedSubmission,
+      },
   });
 });
 
@@ -103,4 +131,6 @@ module.exports = {
   getQuizStudent,
   startQuiz,
   submitQuiz,
+  updateSubmissionMarks,
+  updateSubmissionFlag
 };

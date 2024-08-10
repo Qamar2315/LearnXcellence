@@ -16,6 +16,7 @@ const submissionSchema = new schema({
   endTime: { type: Date },
   submittedAt: { type: Date },
   isCompleted: { type: Boolean, default: false },
+  isFlagged: { type: Boolean, default: false },
 });
 
 module.exports = mongoose.model("QuizSubmission", submissionSchema);

@@ -3,6 +3,8 @@ const axios = require("axios");
 const AppError = require("../utilities/AppError");
 const proctoringService = require("../services/proctoringService");
 
+
+
 const analyzeImage = asyncHandler(async (req, res) => {
   if (!req.file) {
     throw new AppError("Please provide an image", 400);
@@ -18,7 +20,20 @@ const analyzeImage = asyncHandler(async (req, res) => {
   res.status(200).json(result);
 });
 
+const generateReport = asyncHandler(async (req, res) => {
+  const { courseId, quizId, studentId } = req.params;
+
+  // Generate PDF report
+  const pdfBuffer = await proctoringService.generatePdfReport(courseId, quizId, studentId);
+
+  // Send the generated PDF as a response
+  res.setHeader('Content-Type', 'application/pdf');
+  res.setHeader('Content-Disposition', `attachment; filename=report_${studentId}.pdf`);
+  res.send(pdfBuffer);
+});
+
 
 module.exports = {
   analyzeImage,
+  generateReport,
 };

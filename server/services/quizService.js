@@ -305,6 +305,85 @@ const submitQuiz = async (quizId, studentId, answers) => {
   return submission;
 };
 
+const updateSubmissionMarks = async (courseId, quizId, submissionId, newScore) => {
+  // Get the course by its ID
+  const course = await courseRepository.getCourseById(courseId);
+  
+  // Check if the course exists
+  if (!course) {
+    throw new AppError("Course not found", 404);
+  }
+
+  // Check if the quiz belongs to the course
+  const quizBelongsToCourse = course.quizzes.includes(quizId);
+  if (!quizBelongsToCourse) {
+    throw new AppError("Quiz does not belong to the specified course", 400);
+  }
+
+  // Fetch the quiz details by ID
+  const quiz = await quizRepository.findQuizById(quizId);
+  if (!quiz) {
+    throw new AppError("Quiz not found", 404);
+  }
+
+  // Find the submission for the given quiz and student
+  const submission = await quizSubmissionRepository.findSubmissionById(submissionId);
+  
+  // Check if the submission exists
+  if (!submission) {
+    throw new AppError("Submission not found", 404);
+  }
+
+  // Check if the quiz has already been submitted
+  if (!submission.isCompleted) {
+    throw new AppError("Quiz has not been submitted yet", 400);
+  }
+
+  if (newScore < 0) {
+    throw new AppError("Score cannot be negative", 400);
+  }
+
+  if(newScore > quiz.number_of_questions){
+    throw new AppError("Score cannot be greater than the number of questions", 400);
+  }
+  // Update the submission score
+  submission.score = newScore;
+
+  // Save the updated submission
+  await submission.save();
+
+  return submission;
+};
+
+const updateSubmissionFlag = async (courseId, quizId, submissionId, isFlagged) => {
+  // Fetch the course to ensure the quiz belongs to it
+  const course = await courseRepository.getCourseById(courseId);
+
+  // Ensure the quiz belongs to the course
+  if (!course.quizzes.includes(quizId)) {
+      throw new AppError("Quiz does not belong to the specified course", 404);
+  }
+
+  // Fetch the submission
+  const submission = await quizSubmissionRepository.findSubmissionById(submissionId);
+  if (!submission) {
+      throw new AppError("Submission not found", 404);
+  }
+
+  // Ensure the submission is for the correct quiz
+  if (submission.quiz.toString() !== quizId) {
+      throw new AppError("Submission does not belong to the specified quiz", 400);
+  }
+
+  // Update the isFlagged status
+  submission.isFlagged = isFlagged;
+  await submission.save();
+
+  return submission;
+};
+
+
+
 
 module.exports = {
   createQuiz,
@@ -315,4 +394,6 @@ module.exports = {
   getQuizStudent,
   startQuiz,
   submitQuiz,
+  updateSubmissionMarks,
+  updateSubmissionFlag
 };

@@ -8,11 +8,12 @@ const { vivaSchema } = require("../schemas/vivaSchema");
 const { reviewSchema } = require("../schemas/reviewSchema");
 const { announcementSchema } = require("../schemas/announcementSchema");
 const { quizSchema } = require("../schemas/quizSchema");
+const {updateSubmissionMarksSchema} = require("../schemas/updateSubmissionMarksSchema");
+const {updateSubmissionFlagSchema} = require("../schemas/updateSubmissionFlagSchema");
 
 const AppError = require("../utilities/AppError");
 
 module.exports.validateRegister = (req, res, next) => {
-  console.log(req.body);
   const { error } = registerSchema.validate(req.body);
   if (error) {
     const msg = error.details.map((el) => el.message).join(",");
@@ -152,6 +153,26 @@ module.exports.validateOtp = (req, res, next) => {
 
 module.exports.validateQuiz = (req, res, next) => {
   const { error } = quizSchema.validate(req.body);
+  if (error) {
+    const msg = error.details.map((el) => el.message).join(",");
+    throw new AppError(msg, 400);
+  } else {
+    next();
+  }
+};
+
+module.exports.validateUpdateQuizScore = (req,res,next) =>{
+  const { error } = updateSubmissionMarksSchema.validate(req.body);
+  if (error) {
+    const msg = error.details.map((el) => el.message).join(",");
+    throw new AppError(msg, 400);
+  } else {
+    next();
+  }
+};
+
+module.exports.validateUpdateSubmissionFlag = (req,res,next) =>{
+  const { error } = updateSubmissionFlagSchema.validate(req.body);
   if (error) {
     const msg = error.details.map((el) => el.message).join(",");
     throw new AppError(msg, 400);
