@@ -14,6 +14,8 @@ const annoucementRoutes = require("./routes/annoucementRoutes");
 const authRoutes = require("./routes/authRoutes");
 const proctoringRoutes = require("./routes/proctoringRoutes");
 const quizRoutes = require("./routes/quizRoutes");
+const assignmentRoutes = require("./routes/assignmentRoutes");
+const submissionRoutes = require("./routes/submissionRoutes");
 
 // Load environment variables from .env file
 require('dotenv').config();
@@ -33,6 +35,8 @@ app.use("/api/viva", vivaRoutes);
 app.use("/api/announcement", annoucementRoutes);
 app.use('/api/ai-protoring',proctoringRoutes);
 app.use('/api/quiz', quizRoutes);
+app.use('/api/assignments', assignmentRoutes);
+// app.use('/api/submissions', submissionRoutes);
 
 app.use(notFound);
 app.use(errorHandler);

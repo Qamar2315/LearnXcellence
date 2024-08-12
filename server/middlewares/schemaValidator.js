@@ -10,6 +10,7 @@ const { announcementSchema } = require("../schemas/announcementSchema");
 const { quizSchema } = require("../schemas/quizSchema");
 const {updateSubmissionMarksSchema} = require("../schemas/updateSubmissionMarksSchema");
 const {updateSubmissionFlagSchema} = require("../schemas/updateSubmissionFlagSchema");
+const { assignmentSchema } = require("../schemas/assignmentSchema");
 
 const AppError = require("../utilities/AppError");
 
@@ -173,6 +174,17 @@ module.exports.validateUpdateQuizScore = (req,res,next) =>{
 
 module.exports.validateUpdateSubmissionFlag = (req,res,next) =>{
   const { error } = updateSubmissionFlagSchema.validate(req.body);
+  if (error) {
+    const msg = error.details.map((el) => el.message).join(",");
+    throw new AppError(msg, 400);
+  } else {
+    next();
+  }
+};
+
+
+module.exports.validateAssignment = (req, res, next) => {
+  const { error } = assignmentSchema.validate(req.body);
   if (error) {
     const msg = error.details.map((el) => el.message).join(",");
     throw new AppError(msg, 400);

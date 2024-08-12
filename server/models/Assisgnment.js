@@ -6,7 +6,7 @@ const assignmentSchema = new schema({
   teacher: { type: schema.Types.ObjectId, ref: "Teacher" },
   title: String,
   description: String,
-  document_url: String,
+  document_id: String,
   submissions: [
     {
       type: schema.Types.ObjectId,
