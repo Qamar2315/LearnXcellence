@@ -7,6 +7,7 @@ const assignmentSchema = new schema({
   title: String,
   description: String,
   document_id: String,
+  deadline: Date,
   submissions: [
     {
       type: schema.Types.ObjectId,

@@ -3,7 +3,7 @@ const asyncHandler = require("../utilities/CatchAsync");
 const path = require("path");
 
 const createAssignment = asyncHandler(async (req, res) => {
-  const { title, description } = req.body;
+  const { title, description,deadline } = req.body;
   const { courseId } = req.params;
   const teacherId = req.user._id;
   let document_id;
@@ -15,6 +15,7 @@ const createAssignment = asyncHandler(async (req, res) => {
     teacherId,
     title,
     description,
+    deadline,
     document_id
   );
   res.status(201).json({
@@ -41,7 +42,7 @@ const getAssignment = asyncHandler(async (req, res) => {
 
 const updateAssignment = asyncHandler(async (req, res) => {
   const { courseId, assignmentId } = req.params;
-  const { title, description } = req.body;
+  const { title, description, deadline } = req.body;
   const document_id = req.file ? req.file.filename : null;
 
   const updatedAssignment = await assignmentService.updateAssignment(
@@ -49,6 +50,7 @@ const updateAssignment = asyncHandler(async (req, res) => {
     assignmentId,
     title,
     description,
+    deadline,
     document_id
   );
   res.status(200).json({

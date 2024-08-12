@@ -3,16 +3,18 @@ const courseRepository = require("../repositories/courseRepository");
 const { deleteFileByPath } = require("../utilities/deleteFilesBypath");
 const submissionRepository = require("../repositories/submissionRepository");
 const path = require("path");
+const moment = require('moment-timezone');
 
 const addAssignment = async (
   courseId,
   teacherId,
   title,
   description,
+  deadline,
   document_id
 ) => {
-  if (!title || !description) {
-    throw new Error("Title and description are required");
+  if (!title || !description || !deadline) {
+    throw new Error("Title, description and deadline are required");
   }
   const course = await courseRepository.getCourseById(courseId);
   if (!course) {
@@ -25,11 +27,13 @@ const addAssignment = async (
       "Assignment with the same title already exists in the same course"
     );
   }
+  const formattedDate = moment.tz(deadline, 'DD/MM/YYYY', 'your_time_zone').utc().toDate();
   const assignmentData = {
     course: courseId,
     teacher: teacherId,
     title,
     description,
+    deadline:formattedDate,
     document_id,
   };
   const assignment = await assignmentRepository.createAssignment(
@@ -64,6 +68,7 @@ const updateAssignment = async (
   assignmentId,
   title,
   description,
+  deadline,
   document_id
 ) => {
   const assignment = await getAssignment(courseId, assignmentId);
@@ -88,9 +93,11 @@ const updateAssignment = async (
       )
     );
   }
+  const formattedDate = moment.tz(deadline, 'DD/MM/YYYY', 'your_time_zone').utc().toDate();
   assignment.title = title || assignment.title;
   assignment.description = description || assignment.description;
   assignment.document_id = document_id || assignment.document_id;
+  assignment.deadline=formattedDate;
   assignment.updated_at = Date.now();
 
   return await assignmentRepository.saveAssignment(assignment);

@@ -36,7 +36,7 @@ app.use("/api/announcement", annoucementRoutes);
 app.use('/api/ai-protoring',proctoringRoutes);
 app.use('/api/quiz', quizRoutes);
 app.use('/api/assignments', assignmentRoutes);
-// app.use('/api/submissions', submissionRoutes);
+app.use('/api/submissions', submissionRoutes);
 
 app.use(notFound);
 app.use(errorHandler);

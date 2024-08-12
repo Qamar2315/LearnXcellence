@@ -19,9 +19,24 @@ const deleteSubmissionsByAssignmentId = async (assignmentId) => {
   return await Submission.deleteMany({ assignment: assignmentId });
 };
 
+const saveSubmission = async (submission) => {
+  return await submission.save();
+};
+
+const getSubmissionByAssignmentAndStudent = async (assignmentId, studentId) => {
+  return await Submission.findOne({ assignment: assignmentId, student: studentId });
+};
+
+const deleteSubmissionById = async (submissionId) => {
+  return await Submission.findByIdAndDelete(submissionId);
+}
+
 module.exports = {
   createSubmission,
   getSubmissionsByAssignmentId,
   getSubmissionById,
   deleteSubmissionsByAssignmentId,
+  saveSubmission,
+  getSubmissionByAssignmentAndStudent,
+  deleteSubmissionById,
 };
