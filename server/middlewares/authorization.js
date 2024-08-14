@@ -83,11 +83,40 @@ const isProjectGroupMember = asyncHandler(async (req, res, next) => {
     }
 });
 
+const isCourseCreatorOrCourseStudent = asyncHandler(async (req, res, next) => {
+    const { courseId } = req.params;
+
+    // Find the course by ID
+    const course = await Course.findById(courseId).populate('teacher');
+    if (!course) {
+        throw new AppError("Course Not Found", 404);
+    }
+
+    const userId = req.user._id;
+
+    // Check if the user is the course creator (teacher)
+    if (course.teacher._id.toString() === userId.toString()) {
+        return next();
+    }
+
+    // Check if the user is a student in the course
+    const isStudent = course.students.some(studentId => studentId.toString() === userId.toString());
+
+    if (isStudent) {
+        return next();
+    }
+
+    // If neither, throw an authorization error
+    throw new AppError("Not Authorized: You must be either the course creator or a student of this course", 401);
+});
+
+
 module.exports = {
     isTeacher,
     isStudent,
     isCourseCreator,
     isCourseStudent,
     isProjectCreator,
-    isProjectGroupMember
+    isProjectGroupMember,
+    isCourseCreatorOrCourseStudent
 }

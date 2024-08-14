@@ -6,7 +6,7 @@ const lectureSchema = new schema({
   teacher_id: { type: schema.Types.ObjectId, ref: "Teacher" },
   title: String,
   description: String,
-  video_url: String,
+  video_id: String,
   created_at: { type: Date, default: Date.now },
   updated_at: { type: Date, default: Date.now },
 });

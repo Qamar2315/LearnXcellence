@@ -16,6 +16,7 @@ const proctoringRoutes = require("./routes/proctoringRoutes");
 const quizRoutes = require("./routes/quizRoutes");
 const assignmentRoutes = require("./routes/assignmentRoutes");
 const submissionRoutes = require("./routes/submissionRoutes");
+const lectureRoutes = require("./routes/lectureRoutes");
 
 // Load environment variables from .env file
 require('dotenv').config();
@@ -37,6 +38,7 @@ app.use('/api/ai-protoring',proctoringRoutes);
 app.use('/api/quiz', quizRoutes);
 app.use('/api/assignments', assignmentRoutes);
 app.use('/api/submissions', submissionRoutes);
+app.use('/api/lectures', lectureRoutes);
 
 app.use(notFound);
 app.use(errorHandler);
