@@ -34,7 +34,7 @@ app.use("/api/project", projectRoutes);
 app.use("/api/remarks", remarkRoutes);
 app.use("/api/status", statusRoutes);
 app.use("/api/viva", vivaRoutes);
-app.use("/api/announcement", annoucementRoutes);
+app.use("/api/announcements", annoucementRoutes);
 app.use('/api/ai-protoring',proctoringRoutes);
 app.use('/api/quiz', quizRoutes);
 app.use('/api/assignments', assignmentRoutes);

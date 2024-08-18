@@ -2,12 +2,13 @@ const express = require("express");
 const router = express.Router();
 const { isLogin } = require("../middlewares/isLogin");
 const { validateAnnouncement } = require("../middlewares/schemaValidator");
-const { isTeacher, isCourseCreator } = require("../middlewares/authorization");
+const { isTeacher, isCourseCreator, isCourseCreatorOrCourseStudent } = require("../middlewares/authorization");
 const announcementController = require("../controllers/announcementController");
+const { isEmailVerified } = require("../middlewares/isEmailVerified");
 
 router
-  .route("/:courseId/announcements")
-  .get(isLogin, announcementController.getAllCourseAnnouncements)
+  .route("/:courseId")
+  .get(isLogin,isEmailVerified,isCourseCreatorOrCourseStudent, announcementController.getAllCourseAnnouncements)
   .post(
     isLogin,
     isTeacher,
@@ -17,12 +18,19 @@ router
   );
 
 router
-  .route("/:courseId/:announcementId")
+  .route("/:courseId/announcement/:announcementId")
   .delete(
     isLogin,
     isTeacher,
     isCourseCreator,
     announcementController.deleteAnnouncement
+  )
+  .patch(
+    isLogin,
+    isTeacher,
+    isCourseCreator,
+    validateAnnouncement,
+    announcementController.updateAnnouncement
   );
 
 module.exports = router;
