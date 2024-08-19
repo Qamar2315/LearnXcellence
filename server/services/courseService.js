@@ -1,36 +1,42 @@
 const courseRepository = require("../repositories/courseRepository");
+const authRepository = require("../repositories/authRepository");
+
 const { generateCourseCode } = require("../utilities/GenerateCode");
 const AppError = require("../utilities/AppError");
 
-const createCourse = async (teacherId, courseName) => {
+const createCourse = async (teacherId, data) => {
   const teacher = await courseRepository.findTeacherById(teacherId);
-  const checkCourse = await courseRepository.findCourseByName(courseName);
+  const checkCourse = await courseRepository.findCourseByName(data.courseName);
   if (checkCourse) {
     throw new AppError("Course Already Exists With The Same Name", 400);
   }
   const courses = await courseRepository.findAllCourses();
-  const courseId = generateCourseCode(courses);
+  const courseCode = generateCourseCode(courses);
   const newCourse = await courseRepository.createCourse({
-    courseId,
-    courseName,
+    courseCode,
+    courseName: data.courseName,
     teacher,
+    description: data.description,
+    projectRequirements: data.projectRequirements,
   });
   teacher.courses.push(newCourse);
   await teacher.save();
   return {
     _id: newCourse._id,
-    courseId: newCourse.courseId,
+    courseCode: newCourse.courseCode,
     courseName: newCourse.courseName,
+    description: newCourse.description,
+    projectRequirements: newCourse.projectRequirements,
     teacher: newCourse.teacher,
   };
 };
 
-const joinCourse = async (studentId, courseId) => {
-  if (!courseId) {
+const joinCourse = async (studentId, courseCode) => {
+  if (!courseCode) {
     throw new AppError("Send Course Code To Join", 201);
   }
   const student = await courseRepository.findStudentById(studentId);
-  const getCourse = await courseRepository.findCourseByCourseId(courseId);
+  const getCourse = await courseRepository.findCourseBycourseCode(courseCode);
   if (getCourse) {
     await getCourse.populate("students");
     for (const stu of getCourse.students) {
@@ -44,7 +50,7 @@ const joinCourse = async (studentId, courseId) => {
     await getCourse.save();
     return {
       _id: getCourse._id,
-      courseId: getCourse.courseId,
+      courseCode: getCourse.courseCode,
       courseName: getCourse.courseName,
       students: getCourse.students,
     };
@@ -177,8 +183,10 @@ const sendCourse = async (courseId) => {
   await getCourse.populate("vivas");
   return {
     _id: getCourse._id,
-    courseId: getCourse.courseId,
+    courseCode: getCourse.courseCode,
     courseName: getCourse.courseName,
+    description: getCourse.description,
+    projectRequirements: getCourse.projectRequirements,
     students: getCourse.students,
     projects: getCourse.projects,
     vivas: getCourse.vivas,
@@ -191,6 +199,90 @@ const sendCourse = async (courseId) => {
   };
 };
 
+const updateCourse = async (courseId, body) => {
+  const getCourse = await courseRepository.findCourseById(courseId);
+  if (!getCourse) {
+    throw new AppError("Course Not Found", 400);
+  }
+  for (const key in body) {
+    getCourse[key] = body[key];
+  }
+  await getCourse.save();
+  return getCourse;
+};
+
+const regenerateCourseCode = async (courseId) => {
+  const getCourse = await courseRepository.findCourseById(courseId);
+  if (!getCourse) {
+    throw new AppError("Course Not Found", 400);
+  }
+  const courses = await courseRepository.findAllCourses();
+  const courseCode = generateCourseCode(courses);
+  getCourse.courseCode = courseCode;
+  await getCourse.save();
+  return getCourse;
+};
+
+const addStudentToCourse = async (courseId, studentId) => {
+  const student = await courseRepository.findStudentById(studentId);
+  const getCourse = await courseRepository.findCourseById(courseId);
+  if (!getCourse) {
+    throw new AppError("Course Not Found", 400);
+  }
+  if (!student) {
+    throw new AppError("Student Not Found", 400);
+  }
+  await student.populate("account", "-password -otp");
+  if (student.account.email_verified == false) {
+    throw new AppError("Student Email Not Verified", 400);
+  }
+  await getCourse.populate("students");
+  for (const stu of getCourse.students) {
+    if (stu.id == student.id) {
+      throw new AppError("Student Already Joined", 201);
+    }
+  }
+  student.courses.push(courseId);
+  await student.save();
+  getCourse.students.push(studentId);
+  await getCourse.save();
+  return {
+    _id: getCourse._id,
+    courseCode: getCourse.courseCode,
+    courseName: getCourse.courseName,
+    students: getCourse.students,
+  };
+};
+
+const removeStudentFromCourse = async (courseId, studentId) => {
+  const getCourse = await courseRepository.findCourseById(courseId);
+  if (!getCourse) {
+    throw new AppError("Course Not Found", 400);
+  }
+  const student = await courseRepository.findStudentById(studentId);
+  if (!student) {
+    throw new AppError("Student Not Found", 400);
+  }
+  if (!getCourse.students.includes(studentId)) {
+    throw new AppError("Student Not Found in Course", 400);
+  }
+  await courseRepository.removeStudentFromCourse(courseId, studentId);
+  await courseRepository.removeCourseFromStudent(studentId, courseId);
+};
+
+const searchStudent = async (studentEmail) => {
+  const account = await authRepository.findAccountByEmail(studentEmail);
+  if (!account) {
+    throw new AppError("Student Not Found", 400);
+  }
+  const student = await authRepository.findStudentByAccountId(account._id);
+  if (!student) {
+    throw new AppError("Student Not Found", 400);
+  }
+  await student.populate("account", "-password -otp");
+  return student;
+};
+
 module.exports = {
   createCourse,
   joinCourse,
@@ -201,4 +293,9 @@ module.exports = {
   updateVivaSchedule,
   sendAllCourses,
   sendCourse,
+  updateCourse,
+  regenerateCourseCode,
+  addStudentToCourse,
+  removeStudentFromCourse,
+  searchStudent,
 };

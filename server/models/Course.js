@@ -2,9 +2,10 @@ const mongoose = require("mongoose");
 const schema = mongoose.Schema;
 
 const courseSchema = new schema({
-  courseId: String,
+  courseCode: String,
   courseName: String,
   description: String,
+  projectRequirements: String,
   teacher: {
     type: schema.Types.ObjectId,
     ref: "Teacher",

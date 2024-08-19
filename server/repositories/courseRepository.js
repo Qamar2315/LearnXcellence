@@ -9,8 +9,8 @@ const findStudentById = (id) => Student.findById(id);
 const findCourseByName = (name) => Course.findOne({ courseName: name });
 const findAllCourses = () => Course.find({});
 const createCourse = (courseData) => Course.create(courseData);
-const findCourseByCourseId = (courseId) =>
-  Course.findOne({ courseId: courseId });
+const findCourseBycourseCode = (courseCode) =>
+  Course.findOne({ courseCode });
 const findCourseById = (id) => Course.findById(id);
 const updateCourseName = (courseId, courseName) =>
   Course.findByIdAndUpdate(courseId, { courseName: courseName });
@@ -34,7 +34,7 @@ module.exports = {
   findCourseByName,
   findAllCourses,
   createCourse,
-  findCourseByCourseId,
+  findCourseBycourseCode,
   findCourseById,
   updateCourseName,
   deleteVivaById,

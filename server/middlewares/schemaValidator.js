@@ -12,6 +12,7 @@ const {updateSubmissionMarksSchema} = require("../schemas/updateSubmissionMarksS
 const {updateSubmissionFlagSchema} = require("../schemas/updateSubmissionFlagSchema");
 const { assignmentSchema } = require("../schemas/assignmentSchema");
 const { pollSchema } = require("../schemas/pollSchema");
+const { addRemoveStudentSchema } = require("../schemas/addRemoveStudentSchema");
 
 const AppError = require("../utilities/AppError");
 
@@ -196,6 +197,16 @@ module.exports.validateAssignment = (req, res, next) => {
 
 module.exports.validatePoll = (req, res, next) => {
   const { error } = pollSchema.validate(req.body);
+  if (error) {
+    const msg = error.details.map((el) => el.message).join(",");
+    throw new AppError(msg, 400);
+  } else {
+    next();
+  }
+};
+
+module.exports.validateAddRemoveStudent = (req, res, next) => {
+  const { error } = addRemoveStudentSchema.validate(req.body);
   if (error) {
     const msg = error.details.map((el) => el.message).join(",");
     throw new AppError(msg, 400);
