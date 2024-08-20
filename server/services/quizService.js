@@ -382,9 +382,6 @@ const updateSubmissionFlag = async (courseId, quizId, submissionId, isFlagged) =
   return submission;
 };
 
-
-
-
 module.exports = {
   createQuiz,
   updateQuiz,

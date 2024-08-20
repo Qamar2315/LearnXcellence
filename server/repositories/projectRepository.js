@@ -12,8 +12,8 @@ const findProjectByLeaderAndCourse = (student, courseInstance) => Project.findOn
 });
 const createProject = (projectData) => Project.create(projectData);
 const createStatus = (statusData) => Status.create(statusData);
-const findProjectById = (id) => Project.findById(id);
-const updateProjectById = (id, updateData) => Project.findByIdAndUpdate(id, updateData);
+const findProjectById = (id) => Project.findById(id).populate("members").populate("projectLeader");
+const updateProjectById = (id, updateData) => Project.findByIdAndUpdate(id, updateData, { new: true });
 const findProjectByIdAndCourse = (projectId, courseId) => Project.findOne({
     _id: projectId,
     course: courseId
@@ -28,6 +28,7 @@ const findProjectByMemberAndCourse = (member, courseInstance) => Project.findOne
     members: member._id,
     course: courseInstance
 });
+const deleteProjectById = (id) => Project.findByIdAndDelete(id);
 
 module.exports = {
     findStudentById,
@@ -40,5 +41,6 @@ module.exports = {
     updateProjectById,
     findProjectByIdAndCourse,
     findProjectByNameAndCourse,
-    findProjectByMemberAndCourse
+    findProjectByMemberAndCourse,
+    deleteProjectById
 };

@@ -6,29 +6,46 @@ const {
   isStudent,
   isCourseStudent,
   isProjectCreator,
+  isCourseCreatorOrCourseStudent,
 } = require("../middlewares/authorization");
-
+const { isEmailVerified } = require("../middlewares/isEmailVerified");
 const projectController = require("../controllers/projectController");
 
 router
   .route("/create")
   .post(
     isLogin,
+    isEmailVerified,
     isStudent,
-    validateProject,
     isCourseStudent,
+    validateProject,
     projectController.createProject
   );
 
 router
-  .route("/:projectId")
-  .get(isLogin, projectController.sendProject)
+  .route("/:courseId/:projectId/add-member")
+  .put(isLogin,isEmailVerified,isCourseStudent,isProjectCreator,projectController.addMember)
+
+router
+  .route("/:courseId/:projectId/:memberId/remove-member")
+  .put(isLogin,isEmailVerified,isCourseStudent,isProjectCreator,projectController.removeMember)
+
+router
+  .route("/:courseId/:projectId")
+  .get(
+    isLogin,
+    isEmailVerified,
+    isCourseCreatorOrCourseStudent,
+    projectController.sendProject
+  )
   .put(
     isLogin,
+    isEmailVerified,
     isStudent,
     isProjectCreator,
     validateProject,
     projectController.updateProject
-  );
+  )
+  .delete(isLogin,isEmailVerified,isCourseCreatorOrCourseStudent, projectController.deleteProject);
 
 module.exports = router;
