@@ -2,15 +2,17 @@ const express = require("express");
 const router = express.Router();
 const { isLogin } = require("../middlewares/isLogin");
 const { validateStatus } = require("../middlewares/schemaValidator");
-const { isTeacher, isCourseCreator } = require("../middlewares/authorization");
+const { isTeacher, isCourseCreator, isCourseCreatorOrCourseStudent } = require("../middlewares/authorization");
 
 const statusController = require("../controllers/statusController");
+const { isEmailVerified } = require("../middlewares/isEmailVerified");
 
 router
   .route("/:courseId/:projectId/add")
   .post(
     isLogin,
     isTeacher,
+    isEmailVerified,
     isCourseCreator,
     validateStatus,
     statusController.addStatus
@@ -18,9 +20,10 @@ router
 
 router
   .route("/:courseId/:projectId/:statusId")
-  .get(isLogin, statusController.sendStatus)
+  .get(isLogin,isEmailVerified,isCourseCreatorOrCourseStudent, statusController.sendStatus)
   .put(
     isLogin,
+    isEmailVerified,
     isTeacher,
     isCourseCreator,
     validateStatus,
