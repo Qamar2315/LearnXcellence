@@ -114,6 +114,9 @@ const deletePoll = async (courseId, pollId) => {
   if (!poll) {
     throw new Error("Poll not found");
   }
+  for (const voteId of poll.votes) {
+    await voteRepository.deleteVoteById(voteId);
+  }
 
   await pollRepository.deletePollById(pollId);
 

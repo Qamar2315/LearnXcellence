@@ -8,8 +8,9 @@ const findCourseById = (courseId) => Course.findById(courseId).populate('vivas')
 const createViva = (vivaData) => Viva.create(vivaData);
 const saveProject = (project) => project.save();
 const saveCourse = (getCourse) => getCourse.save();
-const findVivaById = (vivaId) => Viva.findById(vivaId);
+const findVivaById = (vivaId) => Viva.findById(vivaId).populate('remarks');
 const updateViva = (vivaId, updateData) => Viva.findByIdAndUpdate(vivaId, updateData);
+const deleteVivaById = (vivaId) => Viva.findByIdAndDelete(vivaId);
 
 module.exports = {
     findProjectById,
@@ -19,5 +20,6 @@ module.exports = {
     saveProject,
     saveCourse,
     findVivaById,
-    updateViva
+    updateViva,
+    deleteVivaById
 };

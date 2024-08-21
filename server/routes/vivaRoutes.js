@@ -7,16 +7,29 @@ const {
   isStudent,
   isCourseCreator,
   isProjectCreator,
+  isCourseStudent,
 } = require("../middlewares/authorization");
+const { isEmailVerified } = require("../middlewares/isEmailVerified");
 const vivaController = require("../controllers/vivaController");
 
 router
   .route("/:courseId/:projectId/add")
-  .post(isLogin, isStudent, isProjectCreator, vivaController.addViva);
+  .post(
+    isLogin,
+    isEmailVerified,
+    isStudent,
+    isCourseStudent,
+    isProjectCreator,
+    vivaController.addViva
+  );
 
 router
   .route("/:courseId/getTodayVivas")
-  .get(isLogin, vivaController.getTodaysViva);
+  .get(isLogin, isEmailVerified, vivaController.getTodaysViva);
+
+router
+  .route("/:courseId/getAllVivas")
+  .get(isLogin, isEmailVerified,isCourseCreator, vivaController.getAllVivas);
 
 router
   .route("/:courseId/:vivaId")
