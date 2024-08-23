@@ -1,7 +1,10 @@
 const vivaRepository = require("../repositories/vivaRepository");
 const authRepository = require("../repositories/authRepository");
 const notificationService = require("./notificationService");
+const projectRepository = require("../repositories/projectRepository");
 const AppError = require("../utilities/AppError");
+const { GoogleGenerativeAI } = require("@google/generative-ai");
+
 const { generateVivaDate, getTodayVivas } = require("../utilities/vivaHelpers");
 
 const addViva = async (courseId, projectId) => {
@@ -148,10 +151,67 @@ const getAllVivas = async (courseId) => {
   return getCourse.vivas;
 };
 
+const generateVivaQuestions = async (
+  projectId,
+  numberOfQuestions = 5,
+  difficulty = "medium",
+  questionType = "general"
+) => {
+  const genAI = new GoogleGenerativeAI(process.env.GEMENI_API_KEY);
+  const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+
+  // Fetch the project details
+  const project = await projectRepository
+    .findProjectById(projectId)
+    .populate("course");
+  if (!project) {
+    throw new AppError("Project not found", 404);
+  }
+
+  const { name, scope, course } = project;
+  const projectRequirements = course.projectRequirements;
+
+  // Construct the AI prompt using project details and user-provided parameters
+  const prompt = `
+    Generate ${
+      numberOfQuestions || 5
+    } viva questions based on the following project details:
+    Project Name: ${name}
+    Project Scope: ${scope}
+    Project Requirements: ${projectRequirements}
+    Difficulty Level: ${difficulty || "medium"}
+    Question Type: ${questionType || "general"}
+    Output format: Each question should be represented as an object with 'questionText' field. Format: [{questionText: '...'}, ...]. Should be JSON Array only.
+  `;
+
+  try {
+    const result = await model.generateContent(prompt);
+    let response = result.response;
+
+    // Remove ```json and last ```
+    let jsonString = response
+      .text()
+      .replace(/^```json\s+/, "")
+      .replace(/\s+```$/, "");
+
+    // Parse the response into a JSON array
+    const jsonArray = JSON.parse(jsonString);
+
+    return jsonArray;
+  } catch (err) {
+    console.error("Error generating viva questions:", err);
+    throw new AppError(
+      "Failed to generate viva questions. Please try again later.",
+      500
+    );
+  }
+};
+
 module.exports = {
   addViva,
   updateViva,
   sendViva,
   getTodaysViva,
   getAllVivas,
+  generateVivaQuestions,
 };

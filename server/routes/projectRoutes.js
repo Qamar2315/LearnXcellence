@@ -42,7 +42,6 @@ router
     projectController.removeMember
   );
 
-
 router
   .route("/:courseId/generate-project-suggestions")
   .get(
@@ -53,7 +52,6 @@ router
     projectController.generateProjectSuggestions
   );
 
-  
 router
   .route("/:courseId/:projectId")
   .get(
