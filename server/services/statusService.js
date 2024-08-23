@@ -38,14 +38,14 @@ const updateStatus = async (statusId, statusData) => {
     statusId,
     statusData
   );
-    if (!updatedStatus) {
-        throw new AppError("Not Updated due To Some Internal Error", 400);
-    }
-    return {
-        _id: updatedStatus._id,
-        status: updatedStatus.status,
-        description: updatedStatus.description,
-    };
+  if (!updatedStatus) {
+    throw new AppError("Not Updated due To Some Internal Error", 400);
+  }
+  return {
+    _id: updatedStatus._id,
+    status: updatedStatus.status,
+    description: updatedStatus.description,
+  };
 };
 
 const getStatusById = async (statusId) => {

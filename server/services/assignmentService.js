@@ -1,9 +1,11 @@
 const assignmentRepository = require("../repositories/assignmentRepository");
 const courseRepository = require("../repositories/courseRepository");
+const authRepository = require("../repositories/authRepository");
 const { deleteFileByPath } = require("../utilities/deleteFilesBypath");
 const submissionRepository = require("../repositories/submissionRepository");
 const path = require("path");
-const moment = require('moment-timezone');
+const moment = require("moment-timezone");
+const notificationService = require("./notificationService");
 
 const addAssignment = async (
   courseId,
@@ -27,13 +29,16 @@ const addAssignment = async (
       "Assignment with the same title already exists in the same course"
     );
   }
-  const formattedDate = moment.tz(deadline, 'DD/MM/YYYY', 'your_time_zone').utc().toDate();
+  const formattedDate = moment
+    .tz(deadline, "DD/MM/YYYY", "your_time_zone")
+    .utc()
+    .toDate();
   const assignmentData = {
     course: courseId,
     teacher: teacherId,
     title,
     description,
-    deadline:formattedDate,
+    deadline: formattedDate,
     document_id,
   };
   const assignment = await assignmentRepository.createAssignment(
@@ -41,6 +46,22 @@ const addAssignment = async (
   );
   course.assignments.push(assignment._id);
   await course.save();
+  
+  // Notify students
+  for (const student in course.students) {
+    const student_data = await authRepository.findStudentById(student);
+    const student_account = await authRepository.findAccountById(
+      student_data.account
+    );
+    await notificationService.createNotification(
+      {
+        title: "New Assignment",
+        message: `A new assignment has been added to ${course.name}`,
+        read: false,
+      },
+      student_account._id
+    );
+  }
   return assignment;
 };
 
@@ -93,11 +114,14 @@ const updateAssignment = async (
       )
     );
   }
-  const formattedDate = moment.tz(deadline, 'DD/MM/YYYY', 'your_time_zone').utc().toDate();
+  const formattedDate = moment
+    .tz(deadline, "DD/MM/YYYY", "your_time_zone")
+    .utc()
+    .toDate();
   assignment.title = title || assignment.title;
   assignment.description = description || assignment.description;
   assignment.document_id = document_id || assignment.document_id;
-  assignment.deadline=formattedDate;
+  assignment.deadline = formattedDate;
   assignment.updated_at = Date.now();
 
   return await assignmentRepository.saveAssignment(assignment);
@@ -143,6 +167,22 @@ const deleteAssignment = async (courseId, assignmentId) => {
     (id) => id.toString() !== assignmentId.toString()
   );
   await course.save();
+
+  // Notify students
+  for (const student in course.students) {
+    const student_data = await authRepository.findStudentById(student);
+    const student_account = await authRepository.findAccountById(
+      student_data.account
+    );
+    await notificationService.createNotification(
+      {
+        title: "Assignment Deleted",
+        message: `An assignment has been deleted from ${course.name}`,
+        read: false,
+      },
+      student_account._id
+    );
+  }
 };
 
 module.exports = {

@@ -13,7 +13,8 @@ const sendCourseAnnouncement = asyncHandler(async (req, res) => {
 
 const deleteAnnouncement = asyncHandler(async (req, res) => {
     const { announcementId } = req.params;
-    await announcementService.deleteAnnouncement(announcementId);
+    const teacherId = req.user._id;
+    await announcementService.deleteAnnouncement(announcementId, teacherId);
     res.status(200).json({
         success: true,
         message: "Announcement deleted successfully"
@@ -22,7 +23,8 @@ const deleteAnnouncement = asyncHandler(async (req, res) => {
 
 const updateAnnouncement = asyncHandler(async (req, res) => {
     const { announcementId } = req.params;
-    const updatedAnnouncement = await announcementService.updateAnnouncement(announcementId, req.body);
+    const teacherId = req.user._id;
+    const updatedAnnouncement = await announcementService.updateAnnouncement(announcementId, req.body, teacherId);
     res.status(200).json({
         success: true,
         message: "Announcement updated successfully",

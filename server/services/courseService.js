@@ -1,13 +1,13 @@
 const courseRepository = require("../repositories/courseRepository");
 const authRepository = require("../repositories/authRepository");
 const announcementRepository = require("../repositories/announcementRepository");
-const pollRepository = require("../repositories/pollRepository");
 const vivaRepository = require("../repositories/vivaRepository");
 const projectRepository = require("../repositories/projectRepository");
 const lectureRepository = require("../repositories/lectureRepository");
 const quizRepository = require("../repositories/quizRepository");
 const assignmentRepository = require("../repositories/assignmentRepository");
 const pollService = require("../services/pollService");
+const notificationService = require("../services/notificationService");
 
 const { parseDate } = require("../utilities/dateHelper");
 
@@ -82,6 +82,21 @@ const updateCourseName = async (courseId, courseName) => {
     throw new AppError("Course Not Found", 400);
   } else {
     await courseRepository.updateCourseName(courseId, courseName);
+  }
+  // send notification to students
+  for (const studentId of getCourse.students) {
+    const student = await courseRepository.findStudentById(studentId);
+    const studentAccount = await authRepository.findAccountById(
+      student.account
+    );
+    await notificationService.createNotification(
+      {
+        title: "Course Name Updated",
+        message: `Course name has been updated to ${courseName}`,
+        read: false,
+      },
+      studentAccount._id
+    );
   }
 };
 
@@ -170,6 +185,21 @@ const updateProjectSchedule = async (courseId, startDate, endDate) => {
     getCourse.projectStartDate = startDate;
     getCourse.projectEndDate = endDate;
     await getCourse.save();
+    // notify students
+    for (const studentId of getCourse.students) {
+      const student = await courseRepository.findStudentById(studentId);
+      const studentAccount = await authRepository.findAccountById(
+        student.account
+      );
+      await notificationService.createNotification(
+        {
+          title: "Project Schedule Updated",
+          message: `Project Schedule has been updated for ${getCourse.courseName}`,
+          read: false,
+        },
+        studentAccount._id
+      );
+    }
     return {
       _id: getCourse._id,
       courseId: getCourse.courseId,
@@ -210,7 +240,21 @@ const updateVivaSchedule = async (courseId, startDate, endDate) => {
   course.vivaStartDate = startDate_;
   course.vivaEndDate = endDate_;
   await course.save();
-
+  // notify students
+  for (const studentId of course.students) {
+    const student = await courseRepository.findStudentById(studentId);
+    const studentAccount = await authRepository.findAccountById(
+      student.account
+    );
+    await notificationService.createNotification(
+      {
+        title: "Viva Schedule Updated",
+        message: `Viva Schedule has been updated for ${course.courseName}`,
+        read: false,
+      },
+      studentAccount._id
+    );
+  }
   // Return the updated course details
   return {
     _id: course._id,

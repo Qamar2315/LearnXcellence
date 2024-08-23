@@ -64,14 +64,25 @@ const removeMember = asyncHandler(async (req, res) => {
   });
 });
 
-
 const deleteProject = asyncHandler(async (req, res) => {
   const projectId = req.params.projectId;
   const userId = req.user._id; // Assume the user's ID is available in the request
   await projectService.deleteProject(projectId, userId);
   res.status(200).json({
-      success: true,
-      message: "Project deleted successfully"
+    success: true,
+    message: "Project deleted successfully",
+  });
+});
+
+const generateProjectSuggestions = asyncHandler(async (req, res) => {
+  const { courseId } = req.params;
+  const suggestions = await projectService.generateProjectSuggestions(
+    courseId
+  );
+  res.status(200).json({
+    success: true,
+    message: "Project Suggestions Generated",
+    data: suggestions,
   });
 });
 
@@ -81,5 +92,6 @@ module.exports = {
   sendProject,
   addMember,
   removeMember,
-  deleteProject
+  deleteProject,
+  generateProjectSuggestions,
 };

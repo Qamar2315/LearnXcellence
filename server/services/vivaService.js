@@ -1,4 +1,6 @@
 const vivaRepository = require("../repositories/vivaRepository");
+const authRepository = require("../repositories/authRepository");
+const notificationService = require("./notificationService");
 const AppError = require("../utilities/AppError");
 const { generateVivaDate, getTodayVivas } = require("../utilities/vivaHelpers");
 
@@ -44,6 +46,46 @@ const addViva = async (courseId, projectId) => {
   // Add the viva to the course's vivas array
   getCourse.vivas.push(viva);
   await vivaRepository.saveCourse(getCourse);
+
+  // Notify the project members
+  for (const student of project.members) {
+    const studentData = await authRepository.findStudentById(student);
+    const studentAccount = await authRepository.findAccountById(
+      studentData.account
+    );
+    await notificationService.createNotification(
+      {
+        title: "Viva Scheduled",
+        message: `A viva has been scheduled for your project`,
+        read: false,
+      },
+      studentAccount._id
+    );
+  }
+
+  // notify project leader
+  const leader = await authRepository.findStudentById(project.projectLeader);
+  const leaderAccount = await authRepository.findAccountById(leader.account);
+  await notificationService.createNotification(
+    {
+      title: "Viva Scheduled",
+      message: `A viva has been scheduled for your project`,
+      read: false,
+    },
+    leaderAccount._id
+  );
+
+  // Notify the teacher
+  const teacher = await authRepository.findTeacherById(getCourse.teacher);
+  const teacherAccount = await authRepository.findAccountById(teacher.account);
+  await notificationService.createNotification(
+    {
+      title: "Viva Scheduled",
+      message: `A viva has been scheduled for ${project.name} project in your course`,
+      read: false,
+    },
+    teacherAccount._id
+  );
 
   // Return the newly created viva details
   return {

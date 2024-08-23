@@ -1,6 +1,8 @@
 const submissionRepository = require("../repositories/submissionRepository");
 const courseRepository = require("../repositories/courseRepository");
 const assignmentRepository = require("../repositories/assignmentRepository");
+const authRepository = require("../repositories/authRepository");
+const notificationService = require("./notificationService");
 const { deleteFileByPath } = require("../utilities/deleteFilesBypath");
 const path = require("path");
 
@@ -53,8 +55,16 @@ const addSubmission = async (
     submissionData
   );
   assignment.submissions.push(submission._id);
-
   await assignmentRepository.saveAssignment(assignment);
+  const teacher = await authRepository.findTeacherById(assignment.teacher);
+  const account = await authRepository.findAccountById(teacher.account);
+  await notificationService.createNotification(
+    {
+      title: "New Submission",
+      message: `A new submission has been added to ${assignment.title}`,
+    },
+    account._id
+  );
   return submission;
 };
 
@@ -141,7 +151,7 @@ const deleteSubmission = async (assignmentId, submissionId, studentId) => {
   if (submission.assignment.toString() !== assignmentId) {
     throw new Error("Submission not found in this assignment");
   }
-  if(submission.student.toString() !== studentId.toString()){
+  if (submission.student.toString() !== studentId.toString()) {
     throw new Error("Not authorized to delete this submission");
   }
   if (submission.document_id) {
@@ -166,5 +176,5 @@ module.exports = {
   getSubmission,
   updateSubmission,
   deleteSubmission,
-  getSubmissionTeacher
+  getSubmissionTeacher,
 };

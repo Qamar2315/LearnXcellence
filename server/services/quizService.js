@@ -3,6 +3,8 @@ const questionRepository = require("../repositories/questionRepository");
 const courseRepository = require("../repositories/courseRepository");
 const quizSubmissionRepository = require("../repositories/quizSubmissionRepository");
 const proctoringReportRepository = require("../repositories/proctoringReportRepository");
+const authRepository = require("../repositories/authRepository");
+const notificationService = require("./notificationService");
 const { calculateQuizScore } = require("../utilities/calculateQuizScore");
 const _ = require("lodash");
 const AppError = require("../utilities/AppError");
@@ -58,6 +60,22 @@ const createQuiz = async (
   });
   course.quizzes.push(quiz._id);
   await course.save();
+
+  // notify students
+  for (const student of course.students) {
+    const studentData = await authRepository.findStudentById(student);
+    const studentAccount = await authRepository.findAccountById(
+      studentData.account
+    );
+    await notificationService.createNotification(
+      {
+        title: "New Quiz",
+        message: `A new quiz has been added to ${course.name}`,
+        read: false,
+      },
+      studentAccount._id
+    );
+  }
 
   return quiz;
 };
@@ -351,7 +369,17 @@ const updateSubmissionMarks = async (courseId, quizId, submissionId, newScore) =
 
   // Save the updated submission
   await submission.save();
-
+  //notify student
+  const student = await authRepository.findStudentById(submission.student);
+  const studentAccount = await authRepository.findAccountById(student.account);
+  await notificationService.createNotification(
+    {
+      title: "Quiz Score Updated",
+      message: `Your score for the quiz ${quiz.title} has been updated.`,
+      read: false,
+    },
+    studentAccount._id
+  );
   return submission;
 };
 

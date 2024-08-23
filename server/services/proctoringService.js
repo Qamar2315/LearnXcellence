@@ -166,7 +166,6 @@ const generatePdfReport = async (courseId, quizId, studentId) => {
   }
 
   doc.end();
-
   // Wait until the PDF is generated
   return new Promise((resolve, reject) => {
     doc.on("end", () => {

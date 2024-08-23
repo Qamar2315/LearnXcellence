@@ -1,5 +1,6 @@
 const pollRepository = require("../repositories/pollRepository");
 const courseRepository = require("../repositories/courseRepository");
+const authRepository = require("../repositories/authRepository");
 const voteRepository = require("../repositories/voteRepository");
 const AppError = require("../utilities/AppError");
 
@@ -24,7 +25,21 @@ const addPoll = async (courseId, teacherId, title, description, options) => {
   const poll = await pollRepository.createPoll(pollData);
   course.polls.push(poll._id);
   await course.save();
-
+  // notify students
+  for (const student in course.students) {
+    const student_data = await authRepository.findStudentById(student);
+    const student_account = await authRepository.findAccountById(
+      student_data.account
+    );
+    await notificationService.createNotification(
+      {
+        title: "Poll added",
+        message: `A lecture has been added in ${course.name}`,
+        read: false,
+      },
+      student_account
+    );
+  }
   return poll;
 };
 

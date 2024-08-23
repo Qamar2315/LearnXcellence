@@ -8,6 +8,7 @@ const {
   verifyTeacherEmail,
 } = require("../utilities/MailVerification");
 const { deleteFile } = require("../utilities/removeFile");
+const notificationService = require("../services/notificationService");
 const { deleteFileByPath } = require("../utilities/deleteFilesBypath");
 require("dotenv").config();
 
@@ -34,6 +35,14 @@ const registerStudent = async (name, email, pass) => {
     hashedPassword
   );
   const student = await authRepository.createStudent(name, studentAccount._id);
+  await notificationService.createNotification(
+    {
+      title: "Welcome to the Student Portal",
+      content: "You have successfully registered as a student",
+      read: false,
+    },
+    studentAccount._id
+  );
   return {
     _id: student._id,
     name: student.name,
@@ -89,6 +98,14 @@ const registerTeacher = async (name, email, pass) => {
     hashedPassword
   );
   const teacher = await authRepository.createTeacher(name, teacherAccount._id);
+  await notificationService.createNotification(
+    {
+      title: "Welcome to the Faculty Portal",
+      content: "You have successfully registered as a teacher",
+      read: false,
+    },
+    teacherAccount._id
+  );
   return {
     _id: teacher._id,
     name: teacher.name,
@@ -290,7 +307,7 @@ const generateOtp = async (account_id) => {
 
   // Call Flask API to generate a new OTP if necessary
   const response = await axios.post(`${process.env.FLASK_URL}/generate-otp`, {
-    email:account.email,
+    email: account.email,
   });
   if (!response.data.success) {
     throw new Error("Failed to generate OTP from Flask API");
@@ -311,7 +328,7 @@ const generateOtp = async (account_id) => {
 
 const verifyOtp = async (account_id, otp) => {
   const account = await authRepository.findAccountById(account_id);
-  if(account.email_verified){
+  if (account.email_verified) {
     throw new AppError("Email Already Verified", 400);
   }
   if (!account) {
@@ -347,12 +364,14 @@ const registerStudentFace = async (studentId, imagePath) => {
   const student = await authRepository.findStudentById(studentId);
   // console.log(student)
   if (!student) {
-      throw new AppError("Student Not Found", 404);
+    throw new AppError("Student Not Found", 404);
   }
   // Call Flask API to get face encoding
-  const response = await axios.post(`${process.env.FLASK_URL}/register-face`, { image_path: imagePath });
+  const response = await axios.post(`${process.env.FLASK_URL}/register-face`, {
+    image_path: imagePath,
+  });
   if (!response.data.success) {
-      throw new AppError(response.data.error, 400);
+    throw new AppError(response.data.error, 400);
   }
   // Save face encoding to student document
   student.face_biometric_data = response.data.encoding;
@@ -363,28 +382,26 @@ const registerStudentFace = async (studentId, imagePath) => {
 const verifyStudentFace = async (studentId, imagePath, encoding) => {
   const student = await authRepository.findStudentById(studentId);
   if (!student) {
-      throw new AppError("Student Not Found", 404);
+    throw new AppError("Student Not Found", 404);
   }
   // Call Flask API for face verification
   const response = await axios.post(`${process.env.FLASK_URL}/verify-face`, {
-      image_path: imagePath,
-      known_face_encoding:encoding
+    image_path: imagePath,
+    known_face_encoding: encoding,
   });
   deleteFileByPath(imagePath);
   if (!response.data.success) {
-      throw new AppError(response.data.error, 400);
+    throw new AppError(response.data.error, 400);
   }
   // console.log(response.data)
   const { success, match } = response.data;
 
   if (success) {
-      return { success, match};
+    return { success, match };
   } else {
-      throw new AppError("Face not matched", 400);
+    throw new AppError("Face not matched", 400);
   }
-
 };
-
 
 module.exports = {
   registerStudent,

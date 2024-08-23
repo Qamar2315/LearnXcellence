@@ -1,9 +1,17 @@
 const lectureRepository = require("../repositories/lectureRepository");
 const courseRepository = require("../repositories/courseRepository");
+const authRepository = require("../repositories/authRepository");
+const notificationService = require("./notificationService");
 const { deleteFileByPath } = require("../utilities/deleteFilesByPath");
 const path = require("path");
 
-const addLecture = async (courseId, teacherId, title, description, video_id) => {
+const addLecture = async (
+  courseId,
+  teacherId,
+  title,
+  description,
+  video_id
+) => {
   if (!title || !description) {
     throw new Error("Title and description are required");
   }
@@ -33,12 +41,27 @@ const addLecture = async (courseId, teacherId, title, description, video_id) => 
   const lecture = await lectureRepository.createLecture(lectureData);
   course.lectures.push(lecture._id);
   await course.save();
+  // Notify students
+  for (const student in course.students) {
+    const student_data = await authRepository.findStudentById(student);
+    const student_account = await authRepository.findAccountById(
+      student_data.account
+    );
+    await notificationService.createNotification(
+      {
+        title: "New Lecture",
+        message: `A new lecture has been added to ${course.name}`,
+        read: false,
+      },
+      student_account
+    );
+  }
   return lecture;
 };
 
 const getLecturesByCourse = async (courseId) => {
   const course = await courseRepository.getCourseById(courseId);
-  await course.populate('lectures');
+  await course.populate("lectures");
   return course.lectures;
 };
 
@@ -62,8 +85,7 @@ const updateLecture = async (
   lectureId,
   title,
   description,
-  video_id,
-  
+  video_id
 ) => {
   const lecture = await getLecture(courseId, lectureId);
   if (!courseId || !lectureId) {
@@ -121,6 +143,21 @@ const deleteLecture = async (courseId, lectureId) => {
     (id) => id.toString() !== lectureId.toString()
   );
   await course.save();
+  // notify students
+  for (const student in course.students) {
+    const student_data = await authRepository.findStudentById(student);
+    const student_account = await authRepository.findAccountById(
+      student_data.account
+    );
+    await notificationService.createNotification(
+      {
+        title: "Lecture Deleted",
+        message: `A lecture has been deleted from ${course.name}`,
+        read: false,
+      },
+      student_account
+    );
+  }
 };
 
 module.exports = {

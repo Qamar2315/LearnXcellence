@@ -2,9 +2,10 @@ const remarkRepository = require("../repositories/remarksRepository");
 const AppError = require("../utilities/AppError");
 const vivaRepository = require("../repositories/vivaRepository");
 const submissionRepository = require("../repositories/submissionRepository");
+const authRepository = require("../repositories/authRepository");
+const notificationService = require("./notificationService");
 
 const addRemarkToViva = async (classId, projectId, remarkData) => {
-  console.log(remarkData);
   const project = await remarkRepository.findProjectByIdAndCourseId(
     projectId,
     classId
@@ -19,6 +20,7 @@ const addRemarkToViva = async (classId, projectId, remarkData) => {
   } else {
     throw new AppError("Didn't Schedule Viva Yet", 400);
   }
+
   const viva = await vivaRepository.findVivaById(project.viva._id);
   if (viva.remarks) {
     throw new AppError("Remark Already Added", 400);
@@ -34,6 +36,31 @@ const addRemarkToViva = async (classId, projectId, remarkData) => {
   }
   viva.remarks = remark;
   await remarkRepository.saveViva(viva);
+  for (const student of project.members) {
+    const studentData = await authRepository.findStudentById(student);
+    const studentAccount = await authRepository.findAccountById(
+      studentData.account
+    );
+    await notificationService.createNotification(
+      {
+        title: "Remark Updated",
+        message: `Your remark has been updated`,
+        read: false,
+      },
+      studentAccount._id
+    );
+  }
+  // notify project leader
+  const leader = await authRepository.findStudentById(project.projectLeader);
+  const leaderAccount = await authRepository.findAccountById(leader.account);
+  await notificationService.createNotification(
+    {
+      title: "Remark Updated",
+      message: `Your remark has been updated`,
+      read: false,
+    },
+    leaderAccount._id
+  );
   return viva.remarks;
 };
 
@@ -62,9 +89,7 @@ const sendRemark = async (remarkId, projectId, courseId) => {
 
 //for submission
 const addRemarkToSubmission = async (courseId, submissionId, remarkData) => {
-  const submission = await submissionRepository.getSubmissionById(
-    submissionId
-  );
+  const submission = await submissionRepository.getSubmissionById(submissionId);
   if (!submission) {
     throw new AppError("Submission Not Found", 400);
   }
@@ -81,15 +106,23 @@ const addRemarkToSubmission = async (courseId, submissionId, remarkData) => {
 
   submission.remarks = remark;
   await submissionRepository.saveSubmission(submission);
+  const student = await authRepository.findStudentById(submission.student);
+  const studentAccount = await authRepository.findAccountById(student.account);
+  await notificationService.createNotification(
+    {
+      title: "Remark added",
+      message: `Your remark has been added`,
+      read: false,
+    },
+    studentAccount._id
+  );
   return submission.remarks;
 };
 
 const readSubmissionRemark = async (remarkId, submissionId, studentId) => {
-  const submission = await submissionRepository.getSubmissionById(
-    submissionId
-  );
+  const submission = await submissionRepository.getSubmissionById(submissionId);
   if (!submission) throw new AppError("Submission Not Found", 400);
-  if(submission.student.toString() !== studentId.toString()){
+  if (submission.student.toString() !== studentId.toString()) {
     throw new AppError("Not authorized", 400);
   }
   if (submission.remarks._id.toString() !== remarkId) {

@@ -1,8 +1,10 @@
 const projectRepository = require("../repositories/projectRepository");
 const authRepository = require("../repositories/authRepository");
 const statusRepository = require("../repositories/statusRepository");
-
+const notificationService = require("./notificationService");
 const AppError = require("../utilities/AppError");
+const { GoogleGenerativeAI } = require("@google/generative-ai");
+const dotenv = require("dotenv");
 
 const createProject = async (userId, projectData) => {
   const { name, scope, members, courseId } = projectData;
@@ -219,7 +221,14 @@ const addMemberToProject = async (projectId, email, courseId) => {
   // Add the member to the project
   project.members.push(member);
   await project.save();
-
+  await notificationService.createNotification(
+    {
+      title: "You are added to a project",
+      content: `You have been added to project ${project.name}`,
+      read: false,
+    },
+    account._id
+  );
   return {
     _id: project._id,
     name: project.name,
@@ -251,7 +260,15 @@ const removeMemberFromProject = async (projectId, memberId) => {
   // Remove the member from the project
   project.members.splice(memberIndex, 1);
   await project.save();
-
+  // notify student
+  await notificationService.createNotification(
+    {
+      title: "You are removed from a project",
+      content: `You have been removed from  ${project.name}`,
+      read: false,
+    },
+    account._id
+  );
   return {
     _id: project._id,
     name: project.name,
@@ -299,11 +316,54 @@ const deleteProject = async (projectId, userId) => {
   await projectRepository.deleteProjectById(projectId);
 };
 
+const generateProjectSuggestions = async (courseId) => {
+  const genAI = new GoogleGenerativeAI(process.env.GEMENI_API_KEY);
+  const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+
+  // Find the course by ID
+  const course = await projectRepository.findCourseById(courseId);
+  if (!course) {
+    throw new AppError("Course not found", 404);
+  }
+
+  const { projectRequirements, courseName, courseDescription } = course;
+
+  // Construct the prompt using course details
+  const prompt = `Generate 5 project ideas that match the following criteria:
+    Course Name: ${courseName}
+    Course Description: ${courseDescription}
+    Project Requirements: ${projectRequirements}
+    Output format: Each idea should be represented as an object with 'ideaTitle' and 'ideaDescription' fields. Format: [{ideaTitle: '...', ideaDescription: '...'}, ...]. Should be JSON Array only.`;
+
+  try {
+    const result = await model.generateContent(prompt);
+    let response = result.response;
+
+    // Remove ```json and last ```
+    let jsonString = response
+      .text()
+      .replace(/^```json\s+/, "")
+      .replace(/\s+```$/, "");
+
+    // Parse the response into a JSON array
+    const jsonArray = JSON.parse(jsonString);
+
+    return jsonArray;
+  } catch (err) {
+    console.error("Error generating project suggestions:", err);
+    throw new AppError(
+      "Failed to generate project suggestions. Please try again later.",
+      500
+    );
+  }
+};
+
 module.exports = {
   createProject,
   updateProject,
   getProjectById,
   addMemberToProject,
   removeMemberFromProject,
-  deleteProject
+  deleteProject,
+  generateProjectSuggestions,
 };

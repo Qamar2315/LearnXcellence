@@ -1,3 +1,4 @@
+// Initialize Express App
 const express = require("express");
 const app = express();
 const cors = require("cors");
@@ -18,10 +19,12 @@ const assignmentRoutes = require("./routes/assignmentRoutes");
 const submissionRoutes = require("./routes/submissionRoutes");
 const lectureRoutes = require("./routes/lectureRoutes");
 const pollRoutes = require("./routes/pollRoutes");
+const notificationRoutes = require("./routes/notificationRoutes");
 
 // Load environment variables from .env file
-require('dotenv').config();
+require("dotenv").config();
 
+// Middlewares
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -35,16 +38,19 @@ app.use("/api/remarks", remarkRoutes);
 app.use("/api/status", statusRoutes);
 app.use("/api/viva", vivaRoutes);
 app.use("/api/announcements", annoucementRoutes);
-app.use('/api/ai-protoring',proctoringRoutes);
-app.use('/api/quiz', quizRoutes);
-app.use('/api/assignments', assignmentRoutes);
-app.use('/api/submissions', submissionRoutes);
-app.use('/api/lectures', lectureRoutes);
-app.use('/api/polls', pollRoutes);
+app.use("/api/ai-protoring", proctoringRoutes);
+app.use("/api/quiz", quizRoutes);
+app.use("/api/assignments", assignmentRoutes);
+app.use("/api/submissions", submissionRoutes);
+app.use("/api/lectures", lectureRoutes);
+app.use("/api/polls", pollRoutes);
+app.use("/api/notifications", notificationRoutes);
 
+// Error Handlers
 app.use(notFound);
 app.use(errorHandler);
 
+// Database Connection
 main().catch((err) => console.log(err));
 async function main() {
   await mongoose.connect(process.env.MONGODB_URL);

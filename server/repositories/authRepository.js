@@ -12,6 +12,7 @@ const createTeacher = (name, accountId) => Teacher.create({ name, account: accou
 const findStudentById = (studentId) => Student.findById(studentId).populate('account');
 const findTeacherById = (teacherId) => Teacher.findById(teacherId).populate('account');
 const findAccountById = (accountId) => Account.findById(accountId).populate('otp');
+const findAccountByIdForNotifications = (accountId) => Account.findById(accountId).populate('notifications');
 const updateAccountEmailVerification = (id, isVerified) => Account.findByIdAndUpdate(id, { email_verified: isVerified });
 const getExistingOtp = (email) => {
     const thirtyMinutesAgo = new Date(Date.now() - 30 * 60 * 1000);
@@ -35,5 +36,6 @@ module.exports = {
     getExistingOtp,
     createNewOtp,
     deleteOtp,
-    setAccountOtpToNull
+    setAccountOtpToNull,
+    findAccountByIdForNotifications
 };

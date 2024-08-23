@@ -7,6 +7,12 @@ const accountSchema = new schema({
   profile_picture:String,
   password: String,
   email_verified: Boolean,
+  notifications: [
+    {
+      type: schema.Types.ObjectId,
+      ref: "Notification",
+    },
+  ],
   created_at: Date,
   updated_at: Date,
   otp:{
