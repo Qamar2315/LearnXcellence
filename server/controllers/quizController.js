@@ -169,6 +169,59 @@ const generateQuizByTopicOrContent = asyncHandler(async (req, res) => {
   });
 });
 
+// Controller Function to Handle Request
+const generatePDFStudent = asyncHandler(async (req, res) => {
+  try {
+    const { courseId, id, studentId } = req.params;
+    const pdfBuffer = await quizService.generatePDFStudent(
+      courseId,
+      id,
+      studentId
+    );
+
+    // Set Response Headers
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader(
+      "Content-Disposition",
+      `attachment; filename=report_${studentId}.pdf`
+    );
+
+    // Send the PDF Buffer
+    res.send(pdfBuffer);
+  } catch (error) {
+    // Handle Errors Appropriately
+    res.status(error.statusCode || 500).json({
+      success: false,
+      message: error.message || "An error occurred while generating the PDF",
+    });
+  }
+});
+
+
+const generatePDFAllStudents = asyncHandler(async (req, res) => {
+  try {
+    const { courseId, id } = req.params;
+
+    // Use the service function to generate PDFs and create a zip file
+    const zipBuffer = await quizService.generatePDFForAllStudents(courseId, id);
+
+    // Set Response Headers for the zip file
+    res.setHeader("Content-Type", "application/zip");
+    res.setHeader(
+      "Content-Disposition",
+      `attachment; filename=quizes_${id}.zip`
+    );
+
+    // Send the Zip file
+    res.send(zipBuffer);
+  } catch (error) {
+    res.status(error.statusCode || 500).json({
+      success: false,
+      message: error.message || "An error occurred while generating the PDFs",
+    });
+  }
+});
+
 module.exports = {
   createQuiz,
   updateQuiz,
@@ -182,4 +235,6 @@ module.exports = {
   updateSubmissionFlag,
   generateQuizByTopic,
   generateQuizByTopicOrContent,
+  generatePDFStudent,
+  generatePDFAllStudents,
 };

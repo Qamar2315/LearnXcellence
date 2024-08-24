@@ -47,14 +47,14 @@ router
     validateQuizGenerationQuery,
     quizController.generateQuizByTopic
   )
-.post(
-  isLogin,
-  isEmailVerified,
-  isTeacher,
-  isCourseCreator,
-  validateQuizGenerationBody,
-  quizController.generateQuizByTopicOrContent
-);
+  .post(
+    isLogin,
+    isEmailVerified,
+    isTeacher,
+    isCourseCreator,
+    validateQuizGenerationBody,
+    quizController.generateQuizByTopicOrContent
+  );
 
 router
   .route("/course/:courseId")
@@ -78,6 +78,20 @@ router
     isStudent,
     isCourseStudent,
     quizController.startQuiz
+  );
+
+router
+  .route("/:courseId/:id/pdf")
+  .post(isLogin, isEmailVerified, isTeacher, isCourseCreator, quizController.generatePDFAllStudents);
+
+router
+  .route("/:courseId/:id/pdf/:studentId")
+  .post(
+    isLogin,
+    isEmailVerified,
+    isTeacher,
+    isCourseCreator,
+    quizController.generatePDFStudent
   );
 
 router

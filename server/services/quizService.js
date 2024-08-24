@@ -6,13 +6,15 @@ const proctoringReportRepository = require("../repositories/proctoringReportRepo
 const authRepository = require("../repositories/authRepository");
 const notificationService = require("./notificationService");
 const { GoogleGenerativeAI } = require("@google/generative-ai");
-
+const fs = require("fs");
+const PDFDocument = require("pdfkit");
 const genAI = new GoogleGenerativeAI(process.env.GEMENI_API_KEY);
 const model = genAI.getGenerativeModel({ model: "gemini-pro" });
-
 const { calculateQuizScore } = require("../utilities/calculateQuizScore");
+const { extractEnrollment } = require("../utilities/extractEnrollment");
 const _ = require("lodash");
 const AppError = require("../utilities/AppError");
+const AdmZip = require("adm-zip");
 const axios = require("axios");
 require("dotenv").config();
 
@@ -512,6 +514,130 @@ const generateQuestionsByContent = async (
   }
 };
 
+const generatePDFStudent = async (courseId, id, studentId) => {
+  // Fetch Quiz, Student, and Course Information
+  const quiz = await quizRepository.findQuizById(id);
+  if (!quiz) {
+    throw new AppError("Quiz not found", 404);
+  }
+
+  const student = await authRepository.findStudentById(studentId);
+  if (!student) {
+    throw new AppError("Student not found", 404);
+  }
+
+  const account = await authRepository.findAccountById(student.account);
+  if (!account) {
+    throw new AppError("Account not found", 404);
+  }
+
+  const course = await courseRepository.getCourseById(courseId);
+  if (!course) {
+    throw new AppError("Course not found", 404);
+  }
+
+  // Check if student is enrolled in the course
+  if (course.students.indexOf(studentId) === -1) {
+    throw new AppError("Student not enrolled in the course", 400);
+  }
+
+  const enrollment = extractEnrollment(account.email);
+
+  // Generate the PDF document
+  const doc = new PDFDocument();
+  let buffers = [];
+  doc.on("data", buffers.push.bind(buffers));
+  doc.on("end", () => {});
+
+  // Add Quiz and Student Details to the PDF
+  doc.fontSize(18).text(`${quiz.title}`, { align: "center" }).moveDown();
+  doc.fontSize(14).text(`Topic: ${quiz.topic}`).moveDown();
+  doc
+    .fontSize(12)
+    .text(
+      "---------------------------------------------------------------------------------------------------------------------"
+    )
+    .moveDown();
+  doc.text(`Student Name: ${student.name}`).moveDown();
+  doc.text(`Student Enrollment: ${enrollment}`).moveDown();
+  doc
+    .fontSize(12)
+    .text(
+      "---------------------------------------------------------------------------------------------------------------------"
+    )
+    .moveDown();
+
+  // Shuffle and Add Questions to PDF
+  const shuffledQuestions = quiz.questions.sort(() => Math.random() - 0.5);
+  shuffledQuestions.forEach((question, index) => {
+    doc
+      .fontSize(14)
+      .text(`${index + 1}. ${question.content}`)
+      .moveDown(0.5); // Slightly reduce space between questions
+
+    // Add options with circles before them
+    question.options.forEach((option) => {
+      doc.fontSize(12).text(`o    ${option}`, {
+        indent: 20,
+      }); // Indent options
+      doc.moveDown(0.2); // Reduce space between options
+    });
+    doc.moveDown(0.5); // Move down a bit after each question
+  });
+
+  // Finalize the PDF Document
+  doc.end();
+
+  // Wait until the PDF is generated
+  return new Promise((resolve, reject) => {
+    doc.on("end", () => {
+      const pdfData = Buffer.concat(buffers);
+      resolve(pdfData);
+    });
+    doc.on("error", (err) => {
+      reject(err);
+    });
+  });
+};
+
+
+/**
+ * Generates PDFs for all students enrolled in a course and compresses them into a zip file.
+ * @param {string} courseId - The ID of the course.
+ * @param {string} quizId - The ID of the quiz.
+ * @returns {Buffer} - The buffer containing the zip file data.
+ */
+const generatePDFForAllStudents = async (courseId, quizId) => {
+  // Fetch the course to get enrolled students
+  const course = await courseRepository.getCourseById(courseId);
+  if (!course) {
+    throw new AppError("Course not found", 404);
+  }
+
+  // Create a zip file to store individual student PDFs
+  const zip = new AdmZip();
+
+  let count = 0;
+  // Iterate through each student enrolled in the course
+  for (const studentId of course.students) {
+    try {
+      // Generate PDF for the current student
+      const pdfBuffer = await generatePDFStudent(courseId, quizId, studentId);
+
+      // Add the generated PDF to the zip file
+      zip.addFile(`quiz_${count}.pdf`, pdfBuffer);
+      count++;
+    } catch (error) {
+      console.error(`Error generating PDF for student ${studentId}:`, error);
+      // Optionally log error or continue processing other students
+    }
+  }
+
+  // Return the zip file buffer
+  return zip.toBuffer();
+};
+
+
 module.exports = {
   createQuiz,
   updateQuiz,
@@ -525,4 +651,6 @@ module.exports = {
   updateSubmissionFlag,
   generateQuestionsByTopic,
   generateQuestionsByContent,
+  generatePDFStudent,
+  generatePDFForAllStudents,
 };
