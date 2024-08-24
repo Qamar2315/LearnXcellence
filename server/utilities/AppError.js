@@ -1,3 +1,8 @@
+/**
+ * Represents an application error.
+ * @class
+ * @extends Error
+ */
 class AppError extends Error{
     constructor(message,status){
         super()

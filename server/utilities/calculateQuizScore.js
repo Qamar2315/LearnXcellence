@@ -1,3 +1,10 @@
+/**
+ * Calculates the score of a quiz based on the given answers and questions.
+ *
+ * @param {Array} answers - The array of user's answers.
+ * @param {Array} questions - The array of quiz questions.
+ * @returns {number} - The calculated score of the quiz.
+ */
 const calculateQuizScore = ( answers, questions) => {
   let score = 0;
 
@@ -7,7 +14,6 @@ const calculateQuizScore = ( answers, questions) => {
     const question = questions.find(
       (q) => q._id.toString() === answer.question._id.toString()
     );
-    console.log(question)
     if (question && question.correct_option === answer.selectedOption) {
       score += 1;
     }
