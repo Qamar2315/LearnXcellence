@@ -5,10 +5,16 @@ const quizSubmissionRepository = require("../repositories/quizSubmissionReposito
 const proctoringReportRepository = require("../repositories/proctoringReportRepository");
 const authRepository = require("../repositories/authRepository");
 const notificationService = require("./notificationService");
+const { GoogleGenerativeAI } = require("@google/generative-ai");
+
+const genAI = new GoogleGenerativeAI(process.env.GEMENI_API_KEY);
+const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+
 const { calculateQuizScore } = require("../utilities/calculateQuizScore");
 const _ = require("lodash");
 const AppError = require("../utilities/AppError");
 const axios = require("axios");
+require("dotenv").config();
 
 const createQuiz = async (
   courseId,
@@ -323,10 +329,15 @@ const submitQuiz = async (quizId, studentId, answers) => {
   return submission;
 };
 
-const updateSubmissionMarks = async (courseId, quizId, submissionId, newScore) => {
+const updateSubmissionMarks = async (
+  courseId,
+  quizId,
+  submissionId,
+  newScore
+) => {
   // Get the course by its ID
   const course = await courseRepository.getCourseById(courseId);
-  
+
   // Check if the course exists
   if (!course) {
     throw new AppError("Course not found", 404);
@@ -345,8 +356,10 @@ const updateSubmissionMarks = async (courseId, quizId, submissionId, newScore) =
   }
 
   // Find the submission for the given quiz and student
-  const submission = await quizSubmissionRepository.findSubmissionById(submissionId);
-  
+  const submission = await quizSubmissionRepository.findSubmissionById(
+    submissionId
+  );
+
   // Check if the submission exists
   if (!submission) {
     throw new AppError("Submission not found", 404);
@@ -361,8 +374,11 @@ const updateSubmissionMarks = async (courseId, quizId, submissionId, newScore) =
     throw new AppError("Score cannot be negative", 400);
   }
 
-  if(newScore > quiz.number_of_questions){
-    throw new AppError("Score cannot be greater than the number of questions", 400);
+  if (newScore > quiz.number_of_questions) {
+    throw new AppError(
+      "Score cannot be greater than the number of questions",
+      400
+    );
   }
   // Update the submission score
   submission.score = newScore;
@@ -383,24 +399,31 @@ const updateSubmissionMarks = async (courseId, quizId, submissionId, newScore) =
   return submission;
 };
 
-const updateSubmissionFlag = async (courseId, quizId, submissionId, isFlagged) => {
+const updateSubmissionFlag = async (
+  courseId,
+  quizId,
+  submissionId,
+  isFlagged
+) => {
   // Fetch the course to ensure the quiz belongs to it
   const course = await courseRepository.getCourseById(courseId);
 
   // Ensure the quiz belongs to the course
   if (!course.quizzes.includes(quizId)) {
-      throw new AppError("Quiz does not belong to the specified course", 404);
+    throw new AppError("Quiz does not belong to the specified course", 404);
   }
 
   // Fetch the submission
-  const submission = await quizSubmissionRepository.findSubmissionById(submissionId);
+  const submission = await quizSubmissionRepository.findSubmissionById(
+    submissionId
+  );
   if (!submission) {
-      throw new AppError("Submission not found", 404);
+    throw new AppError("Submission not found", 404);
   }
 
   // Ensure the submission is for the correct quiz
   if (submission.quiz.toString() !== quizId) {
-      throw new AppError("Submission does not belong to the specified quiz", 400);
+    throw new AppError("Submission does not belong to the specified quiz", 400);
   }
 
   // Update the isFlagged status
@@ -408,6 +431,85 @@ const updateSubmissionFlag = async (courseId, quizId, submissionId, isFlagged) =
   await submission.save();
 
   return submission;
+};
+
+const generateQuestionsByTopic = async (
+  topic,
+  numberOfQuestions,
+  difficulty
+) => {
+  // const genAI = new GoogleGenerativeAI(process.env.GEMENI_API_KEY);
+  // const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+
+  const prompt = `
+  Generate ${numberOfQuestions} multiple-choice questions about ${topic}
+  with difficulty level: ${difficulty}.
+  Output format: JSON Array. Each question should have the following structure:
+  {
+    "content": "Question text",
+    "options": ["Option 1", "Option 2", "Option 3", "Option 4"],
+    "correct_option": "Correct option (Should be one of the options from the options array)"
+  }
+  `;
+
+  try {
+    const result = await model.generateContent(prompt);
+    let response = result.response;
+
+    let jsonString = response
+      .text()
+      .replace(/^```json\s+/, "")
+      .replace(/\s+```$/, "");
+
+    const jsonArray = JSON.parse(jsonString);
+    return jsonArray;
+  } catch (err) {
+    console.error("Error generating questions:", err);
+    throw new AppError(
+      "Failed to generate quiz questions. Please try again later.",
+      500
+    );
+  }
+};
+
+const generateQuestionsByContent = async (
+  topic,
+  content,
+  numberOfQuestions,
+  difficulty
+) => {
+  const prompt = `
+    Generate ${numberOfQuestions} multiple-choice questions ${
+    topic ? `about the topic: "${topic}"` : ""
+  } 
+    ${content ? `based on the following content: "${content}"` : ""}
+    with a difficulty level of ${difficulty}.
+    Output format: JSON Array. Each question should have the following structure:
+    {
+      "content": "Question text",
+      "options": ["Option 1", "Option 2", "Option 3", "Option 4"],
+      "correct_option": "Correct option (Should be one of the options from the options array)"
+    }
+  `;
+
+  try {
+    const result = await model.generateContent(prompt);
+    let response = result.response;
+
+    let jsonString = response
+      .text()
+      .replace(/^```json\s+/, "")
+      .replace(/\s+```$/, "");
+
+    const jsonArray = JSON.parse(jsonString);
+    return jsonArray;
+  } catch (err) {
+    console.error("Error generating questions:", err);
+    throw new AppError(
+      "Failed to generate quiz questions. Please try again later.",
+      500
+    );
+  }
 };
 
 module.exports = {
@@ -420,5 +522,7 @@ module.exports = {
   startQuiz,
   submitQuiz,
   updateSubmissionMarks,
-  updateSubmissionFlag
+  updateSubmissionFlag,
+  generateQuestionsByTopic,
+  generateQuestionsByContent,
 };

@@ -12,7 +12,9 @@ const { isEmailVerified } = require("../middlewares/isEmailVerified");
 const {
   validateQuiz,
   validateUpdateQuizScore,
-  validateUpdateSubmissionFlag
+  validateUpdateSubmissionFlag,
+  validateQuizGenerationQuery,
+  validateQuizGenerationBody,
 } = require("../middlewares/schemaValidator");
 
 router
@@ -25,6 +27,34 @@ router
     validateQuiz,
     quizController.createQuiz
   );
+
+/**
+ * @route GET /api/quizzes/:courseId/generate
+ * @description Generate quiz questions by topic
+ * @access Private (Teachers, Course Creators)
+ * @param {string} topic (query parameter) - The topic for question generation.
+ * @param {number} [numberOfQuestions] (query parameter) - Number of questions (default: 5).
+ * @param {string} [difficulty] (query parameter) - Difficulty level (easy, medium, hard, default: medium).
+ */
+
+router
+  .route("/:courseId/generate")
+  .get(
+    isLogin,
+    isEmailVerified,
+    isTeacher,
+    isCourseCreator,
+    validateQuizGenerationQuery,
+    quizController.generateQuizByTopic
+  )
+.post(
+  isLogin,
+  isEmailVerified,
+  isTeacher,
+  isCourseCreator,
+  validateQuizGenerationBody,
+  quizController.generateQuizByTopicOrContent
+);
 
 router
   .route("/course/:courseId")

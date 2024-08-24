@@ -1,5 +1,6 @@
 const asyncHandler = require("../utilities/CatchAsync");
 const quizService = require("../services/quizService");
+const AppError = require("../utilities/AppError");
 
 const createQuiz = asyncHandler(async (req, res) => {
   const { title, topic, questions, deadline, duration, number_of_questions } =
@@ -95,8 +96,13 @@ const submitQuiz = asyncHandler(async (req, res) => {
 
 const updateSubmissionMarks = asyncHandler(async (req, res) => {
   const { courseId, quizId, submissionId } = req.params;
-  const {newScore} = req.body;
-  const submission = await quizService.updateSubmissionMarks(courseId, quizId, submissionId, newScore);
+  const { newScore } = req.body;
+  const submission = await quizService.updateSubmissionMarks(
+    courseId,
+    quizId,
+    submissionId,
+    newScore
+  );
   res.status(200).json({
     success: true,
     message: "Quiz submission marks updated successfully",
@@ -110,17 +116,58 @@ const updateSubmissionFlag = asyncHandler(async (req, res) => {
   const { isFlagged } = req.body;
 
   // Call the service to update the flag status
-  const updatedSubmission = await quizService.updateSubmissionFlag(courseId, quizId, submissionId, isFlagged);
+  const updatedSubmission = await quizService.updateSubmissionFlag(
+    courseId,
+    quizId,
+    submissionId,
+    isFlagged
+  );
 
   res.status(200).json({
-      success: true,
-      message: 'Submission flag status updated successfully',
-      data: {
-          submission: updatedSubmission,
-      },
+    success: true,
+    message: "Submission flag status updated successfully",
+    data: {
+      submission: updatedSubmission,
+    },
   });
 });
 
+const generateQuizByTopic = asyncHandler(async (req, res) => {
+  const { topic, numberOfQuestions, difficulty } = req.query; // Get parameters from query string
+
+  if (!topic) {
+    throw new AppError("Topic is required in the query string.", 400);
+  }
+
+  const generatedQuestions = await quizService.generateQuestionsByTopic(
+    topic,
+    numberOfQuestions,
+    difficulty
+  );
+
+  res.status(200).json({
+    success: true,
+    message: "Quiz questions generated successfully",
+    data: generatedQuestions,
+  });
+});
+
+const generateQuizByTopicOrContent = asyncHandler(async (req, res) => {
+  const { topic, numberOfQuestions, difficulty, content } = req.body;
+
+  let generatedQuestions = await quizService.generateQuestionsByContent(
+    topic,
+    content,
+    numberOfQuestions,
+    difficulty
+  );
+
+  res.status(200).json({
+    success: true,
+    message: "Quiz questions generated successfully",
+    data: generatedQuestions,
+  });
+});
 
 module.exports = {
   createQuiz,
@@ -132,5 +179,7 @@ module.exports = {
   startQuiz,
   submitQuiz,
   updateSubmissionMarks,
-  updateSubmissionFlag
+  updateSubmissionFlag,
+  generateQuizByTopic,
+  generateQuizByTopicOrContent,
 };
