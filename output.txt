@@ -3169,36 +3169,56 @@ module.exports = {
 
 const express = require("express");
 const router = express.Router();
-const { isLogin } = require("../middlewares/isLogin");
-const { validateAnnouncement } = require("../middlewares/schemaValidator");
-const { isTeacher, isCourseCreator, isCourseCreatorOrCourseStudent } = require("../middlewares/authorization");
-const announcementController = require("../controllers/announcementController");
-const { isEmailVerified } = require("../middlewares/isEmailVerified");
 
+// Import middleware functions for authentication and authorization.
+const { isLogin } = require("../middlewares/isLogin");
+const { isEmailVerified } = require("../middlewares/isEmailVerified");
+const {
+  isTeacher,
+  isCourseCreator,
+  isCourseCreatorOrCourseStudent,
+} = require("../middlewares/authorization");
+
+// Import middleware for announcement data validation.
+const { validateAnnouncement } = require("../middlewares/schemaValidator");
+
+// Import the announcement controller for handling announcement-related logic.
+const announcementController = require("../controllers/announcementController");
+
+// Route for getting all announcements for a course and creating new announcements.
 router
   .route("/:courseId")
-  .get(isLogin,isEmailVerified,isCourseCreatorOrCourseStudent, announcementController.getAllCourseAnnouncements)
+  .get(
+    isLogin,
+    isEmailVerified,
+    isCourseCreatorOrCourseStudent, // Only logged-in course creators or students can view announcements.
+    announcementController.getAllCourseAnnouncements
+  )
   .post(
     isLogin,
+    isEmailVerified,
     isTeacher,
-    isCourseCreator,
-    validateAnnouncement,
+    isCourseCreator, // Only logged-in teachers who are course creators can create announcements.
+    validateAnnouncement, // Validate announcement data before processing.
     announcementController.sendCourseAnnouncement
   );
 
+// Route for deleting and updating a specific announcement.
 router
   .route("/:courseId/announcement/:announcementId")
   .delete(
     isLogin,
+    isEmailVerified,
     isTeacher,
-    isCourseCreator,
+    isCourseCreator, // Only logged-in teachers who are course creators can delete announcements.
     announcementController.deleteAnnouncement
   )
   .patch(
     isLogin,
+    isEmailVerified,
     isTeacher,
-    isCourseCreator,
-    validateAnnouncement,
+    isCourseCreator, // Only logged-in teachers who are course creators can update announcements.
+    validateAnnouncement, // Validate announcement data before processing.
     announcementController.updateAnnouncement
   );
 
@@ -3206,60 +3226,93 @@ module.exports = router;
 
 const express = require("express");
 const router = express.Router();
+
+// Controller for handling assignment logic
 const assignmentController = require("../controllers/assignmentController");
+
+// Middleware for handling file uploads (using multer)
 const { uploadAssignment } = require("../middlewares/multer/uploadAssignment");
-const { isCourseCreator, isTeacher } = require("../middlewares/authorization");
+
+// Middleware for authentication and authorization
+const { isCourseCreator, isTeacher, isCourseCreatorOrCourseStudent } = require("../middlewares/authorization");
 const { isLogin } = require("../middlewares/isLogin");
-const { validateAssignment } = require("../middlewares/schemaValidator");
 const { isEmailVerified } = require("../middlewares/isEmailVerified");
 
-router
-  .route("/:courseId")
-  .get(
-    isLogin,
-    isEmailVerified,
-    isTeacher,
-    isCourseCreator,
-    assignmentController.getAssignments
-  )
-  .post(
-    isLogin,
-    isEmailVerified,
-    isTeacher,
-    isCourseCreator,
-    uploadAssignment.single("assignment_document"),
-    assignmentController.createAssignment
-  );
+// Middleware for assignment data validation (assuming it exists)
+const { validateAssignment } = require("../middlewares/schemaValidator");
 
-router
-  .route("/:courseId/assignment/:assignmentId/download")
-  .get(isLogin, isEmailVerified, assignmentController.downloadAssignment);
+// Define routes for assignment operations
 
-router
-  .route("/:courseId/assignment/:assignmentId")
-  .get(isLogin, isEmailVerified, assignmentController.getAssignment)
-  .put(
-    isLogin,
-    isEmailVerified,
-    isTeacher,
-    isCourseCreator,
-    uploadAssignment.single("assignment_document"),
-    assignmentController.updateAssignment
-  )
-  .delete(
-    isLogin,
-    isEmailVerified,
-    isTeacher,
-    isCourseCreator,
-    assignmentController.deleteAssignment
-  );
+// Get all assignments for a course (Teacher & Course Creator only)
+router.get(
+  "/:courseId",
+  isLogin,
+  isEmailVerified,
+  isTeacher,
+  isCourseCreator,
+  assignmentController.getAssignments
+);
+
+// Create a new assignment (Teacher & Course Creator only)
+router.post(
+  "/:courseId",
+  isLogin,
+  isEmailVerified,
+  isTeacher,
+  isCourseCreator,
+  uploadAssignment.single("assignment_document"), // Handle file upload
+  validateAssignment, // Validate assignment data
+  assignmentController.createAssignment
+);
+
+// Download an assignment document ( Course students or creator only)
+router.get(
+  "/:courseId/assignment/:assignmentId/download",
+  isLogin,
+  isEmailVerified,
+  isCourseCreatorOrCourseStudent,
+  assignmentController.downloadAssignment
+);
+
+// Get a specific assignment (Logged-in users only)
+router.get(
+  "/:courseId/assignment/:assignmentId",
+  isLogin,
+  isEmailVerified,
+  assignmentController.getAssignment
+);
+
+// Update an existing assignment (Teacher & Course Creator only)
+router.put(
+  "/:courseId/assignment/:assignmentId",
+  isLogin,
+  isEmailVerified,
+  isTeacher,
+  isCourseCreator,
+  uploadAssignment.single("assignment_document"), // Handle file upload for updates
+  validateAssignment, // Validate updated assignment data
+  assignmentController.updateAssignment
+);
+
+// Delete an assignment (Teacher & Course Creator only)
+router.delete(
+  "/:courseId/assignment/:assignmentId",
+  isLogin,
+  isEmailVerified,
+  isTeacher,
+  isCourseCreator,
+  assignmentController.deleteAssignment
+);
 
 module.exports = router;
 
 const express = require("express");
 const router = express.Router();
 
-// body validator middlewares
+// Controllers for handling authentication and user data
+const authController = require("../controllers/authController");
+
+// Middleware for request body validation
 const {
   validateRegister,
   validateLogin,
@@ -3267,130 +3320,153 @@ const {
   validateUpdateName,
   validateOtp,
 } = require("../middlewares/schemaValidator");
-// auth controller
-const authController = require("../controllers/authController");
+
+// Middleware for authentication and authorization
 const { isLogin } = require("../middlewares/isLogin");
 const { isStudent, isTeacher } = require("../middlewares/authorization");
-const { uploadProfile } = require("../middlewares/multer/uploadProfile");
-const { uploadFaceBiometricData } = require("../middlewares/multer/uploadFace");
 const { isEmailVerified } = require("../middlewares/isEmailVerified");
 
-router.route("/generate-otp").post(isLogin, authController.generateOtp);
+// Middleware for handling file uploads (using multer)
+const { uploadProfile } = require("../middlewares/multer/uploadProfile");
+const { uploadFaceBiometricData } = require("../middlewares/multer/uploadFace");
 
-router
-  .route("/verify-otp")
-  .post(isLogin, validateOtp, authController.verifyOtp);
+// --- Public Routes ---
 
-router
-  .route("/register")
-  .post(validateRegister, authController.registerStudent);
+// Register a new student
+router.post("/register", validateRegister, authController.registerStudent);
 
-router.route("/login").post(validateLogin, authController.loginStudent);
+// Login an existing student
+router.post("/login", validateLogin, authController.loginStudent);
 
-router
-  .route("/teacher/register")
-  .post(validateRegister, authController.registerTeacher);
+// Register a new teacher
+router.post(
+  "/teacher/register",
+  validateRegister,
+  authController.registerTeacher
+);
 
-router.route("/teacher/login").post(validateLogin, authController.loginTeacher);
+// Login an existing teacher
+router.post("/teacher/login", validateLogin, authController.loginTeacher);
 
-router
-  .route("/student/update-password")
-  .patch(
-    isLogin,
-    isEmailVerified,
-    isStudent,
-    validateUpdatePassword,
-    authController.updateStudentPassword
-  );
+// --- Protected Routes (require authentication) ---
 
-router
-  .route("/student/update-name")
-  .patch(
-    isLogin,
-    isEmailVerified,
-    isStudent,
-    validateUpdateName,
-    authController.updateStudentName
-  );
+// Generate OTP (One-Time Password)
+router.post("/generate-otp", isLogin, authController.generateOtp);
 
-router
-  .route("/teacher/update-password")
-  .patch(
-    isLogin,
-    isEmailVerified,
-    isTeacher,
-    validateUpdatePassword,
-    authController.updateTeacherPassword
-  );
+// Verify OTP
+router.post("/verify-otp", isLogin, validateOtp, authController.verifyOtp);
 
-router
-  .route("/teacher/update-name")
-  .patch(
-    isLogin,
-    isEmailVerified,
-    isTeacher,
-    validateUpdateName,
-    authController.updateTeacherName
-  );
+// --- Student Specific Routes (require authentication and student role) ---
 
-router
-  .route("/student/upload-image")
-  .post(
-    isLogin,
-    isEmailVerified,
-    isStudent,
-    uploadProfile.single("profileImage"),
-    authController.uploadStudentImage
-  );
+// Update student password
+router.patch(
+  "/student/update-password",
+  isLogin,
+  isEmailVerified,
+  isStudent,
+  validateUpdatePassword,
+  authController.updateStudentPassword
+);
 
-router
-  .route("/teacher/upload-image")
-  .post(
-    isLogin,
-    isEmailVerified,
-    isTeacher,
-    uploadProfile.single("profileImage"),
-    authController.uploadTeacherImage
-  );
+// Update student name
+router.patch(
+  "/student/update-name",
+  isLogin,
+  isEmailVerified,
+  isStudent,
+  validateUpdateName,
+  authController.updateStudentName
+);
 
-router
-  .route("/student/:id")
-  .get(isLogin, isEmailVerified, authController.getStudentInfo);
+// Upload student profile image
+router.post(
+  "/student/upload-image",
+  isLogin,
+  isEmailVerified,
+  isStudent,
+  uploadProfile.single("profileImage"),
+  authController.uploadStudentImage
+);
 
-router
-  .route("/teacher/:id")
-  .get(isLogin, isEmailVerified, authController.getTeacherInfo);
+// Get student information (accessible by anyone)
+router.get(
+  "/student/:id",
+  isLogin,
+  isEmailVerified,
+  authController.getStudentInfo
+);
 
-router
-  .route("/student/register-face")
-  .post(
-    isLogin,
-    isEmailVerified,
-    isStudent,
-    uploadFaceBiometricData.single("face_image"),
-    authController.registerStudentFace
-  );
+// Register student's face for facial recognition
+router.post(
+  "/student/register-face",
+  isLogin,
+  isEmailVerified,
+  isStudent,
+  uploadFaceBiometricData.single("face_image"),
+  authController.registerStudentFace
+);
 
-router
-  .route("/student/verify-face")
-  .post(
-    uploadFaceBiometricData.single("face_image"),
-    isLogin,
-    isStudent,
-    isEmailVerified,
-    authController.verifyStudentFace
-  );
+// Verify student's face using facial recognition
+router.post(
+  "/student/verify-face",
+  uploadFaceBiometricData.single("face_image"), // Handle face image upload
+  isLogin,
+  isEmailVerified,
+  isStudent,
+  authController.verifyStudentFace
+);
+
+// --- Teacher Specific Routes (require authentication and teacher role) ---
+
+// Update teacher password
+router.patch(
+  "/teacher/update-password",
+  isLogin,
+  isEmailVerified,
+  isTeacher,
+  validateUpdatePassword,
+  authController.updateTeacherPassword
+);
+
+// Update teacher name
+router.patch(
+  "/teacher/update-name",
+  isLogin,
+  isEmailVerified,
+  isTeacher,
+  validateUpdateName,
+  authController.updateTeacherName
+);
+
+// Upload teacher profile image
+router.post(
+  "/teacher/upload-image",
+  isLogin,
+  isEmailVerified,
+  isTeacher,
+  uploadProfile.single("profileImage"),
+  authController.uploadTeacherImage
+);
+
+// Get teacher information (accessible by anyone)
+router.get(
+  "/teacher/:id",
+  isLogin,
+  isEmailVerified,
+  authController.getTeacherInfo
+);
 
 module.exports = router;
 
 const express = require("express");
 const router = express.Router();
+
+// Controller for handling course-related logic
+const courseController = require("../controllers/courseController");
+
+// Middleware for authentication and authorization
 const { isLogin } = require("../middlewares/isLogin");
-const {
-  validateCourse,
-  validateDate,
-  validateAddRemoveStudent,
-} = require("../middlewares/schemaValidator");
+const { isEmailVerified } = require("../middlewares/isEmailVerified");
 const {
   isTeacher,
   isStudent,
@@ -3398,127 +3474,160 @@ const {
   isCourseStudent,
   isCourseCreatorOrCourseStudent,
 } = require("../middlewares/authorization");
-const courseController = require("../controllers/courseController");
-const { isEmailVerified } = require("../middlewares/isEmailVerified");
 
-router
-  .route("/create")
-  .post(
-    isLogin,
-    isEmailVerified,
-    isTeacher,
-    validateCourse,
-    courseController.createCourse
-  );
+// Middleware for data validation
+const {
+  validateCourse,
+  validateDate,
+  validateAddRemoveStudent,
+} = require("../middlewares/schemaValidator");
 
-router
-  .route("/getAll")
-  .get(isLogin, isEmailVerified, courseController.sendAllCourses);
+// --- Public Routes ---
 
-router
-  .route("/updateViva/:courseId")
-  .put(
-    isLogin,
-    isEmailVerified,
-    isTeacher,
-    isCourseCreator,
-    validateDate,
-    courseController.updateVivaSchedule
-  );
+// Get all courses (accessible by anyone)
+router.get(
+  "/getAll",
+  isLogin,
+  isEmailVerified,
+  courseController.sendAllCourses
+);
 
-router
-  .route("/updateProject/:courseId")
-  .put(
-    isLogin,
-    isEmailVerified,
-    isTeacher,
-    isCourseCreator,
-    validateDate,
-    courseController.updateProjectSchedule
-  );
+// --- Protected Routes (require authentication) ---
 
-  
-router
-  .route("/search-student")
-  .get(isLogin, isEmailVerified, isTeacher, courseController.searchStudent);
+// Create a new course (Teacher only)
+router.post(
+  "/create",
+  isLogin,
+  isEmailVerified,
+  isTeacher,
+  validateCourse, // Validate course data
+  courseController.createCourse
+);
 
-router
-  .route("/:courseId")
-  .get(
-    isLogin,
-    isEmailVerified,
-    isCourseCreatorOrCourseStudent,
-    courseController.sendCourse
-  )
-  .put(
-    isLogin,
-    isEmailVerified,
-    isTeacher,
-    isCourseCreator,
-    courseController.updateCourseName
-  )
-  .patch(
-    isLogin,
-    isEmailVerified,
-    isTeacher,
-    isCourseCreator,
-    validateCourse,
-    courseController.updateCourse
-  )
-  .delete(
-    isLogin,
-    isEmailVerified,
-    isTeacher,
-    isCourseCreator,
-    courseController.deleteCourse
-  );
+// Search for a student (Teacher only)
+router.get(
+  "/search-student",
+  isLogin,
+  isEmailVerified,
+  isTeacher,
+  courseController.searchStudent
+);
 
-router
-  .route("/:courseId/leave")
-  .put(
-    isLogin,
-    isEmailVerified,
-    isStudent,
-    isCourseStudent,
-    courseController.leaveCourse
-  );
+// Join a course using a course code (Student only)
+router.post(
+  "/join",
+  isLogin,
+  isEmailVerified,
+  isStudent,
+  courseController.joinCourse
+);
 
-router
-  .route("/:courseId/regenerate-course-code")
-  .put(
-    isLogin,
-    isEmailVerified,
-    isTeacher,
-    isCourseCreator,
-    courseController.regenerateCourseCode
-  );
+// --- Course Specific Routes (require authentication) ---
 
-//to do add and leave student
-router
-  .route("/:courseId/add")
-  .put(
-    isLogin,
-    isEmailVerified,
-    isTeacher,
-    isCourseCreator,
-    validateAddRemoveStudent,
-    courseController.addStudentToCourse
-  );
+// Get a specific course
+// (Accessible by Course Creator, Course Teacher and Course Student)
+router.get(
+  "/:courseId",
+  isLogin,
+  isEmailVerified,
+  isCourseCreatorOrCourseStudent,
+  courseController.sendCourse
+);
 
-router
-  .route("/:courseId/remove")
-  .put(
-    isLogin,
-    isEmailVerified,
-    isTeacher,
-    isCourseCreator,
-    validateAddRemoveStudent,
-    courseController.removeStudentFromCourse
-  );
+// Update a course's name (Course Creator only)
+router.put(
+  "/:courseId",
+  isLogin,
+  isEmailVerified,
+  isTeacher,
+  isCourseCreator,
+  courseController.updateCourseName
+);
 
-router
-  .route("/join")
-  .post(isLogin, isEmailVerified, isStudent, courseController.joinCourse);
+// Update a course's details (Course Creator only)
+router.patch(
+  "/:courseId",
+  isLogin,
+  isEmailVerified,
+  isTeacher,
+  isCourseCreator,
+  validateCourse, // Validate course data
+  courseController.updateCourse
+);
+
+// Delete a course (Course Creator only)
+router.delete(
+  "/:courseId",
+  isLogin,
+  isEmailVerified,
+  isTeacher,
+  isCourseCreator,
+  courseController.deleteCourse
+);
+
+// Leave a course (Student only)
+router.put(
+  "/:courseId/leave",
+  isLogin,
+  isEmailVerified,
+  isStudent,
+  isCourseStudent, // Ensure the student is enrolled in the course
+  courseController.leaveCourse
+);
+
+// Regenerate the course code (Course Creator only)
+router.put(
+  "/:courseId/regenerate-course-code",
+  isLogin,
+  isEmailVerified,
+  isTeacher,
+  isCourseCreator,
+  courseController.regenerateCourseCode
+);
+
+// Add a student to a course (Course Creator only)
+router.put(
+  "/:courseId/add",
+  isLogin,
+  isEmailVerified,
+  isTeacher,
+  isCourseCreator,
+  validateAddRemoveStudent, // Validate student data
+  courseController.addStudentToCourse
+);
+
+// Remove a student from a course (Course Creator only)
+router.put(
+  "/:courseId/remove",
+  isLogin,
+  isEmailVerified,
+  isTeacher,
+  isCourseCreator,
+  validateAddRemoveStudent, // Validate student data
+  courseController.removeStudentFromCourse
+);
+
+// Update viva schedule for a course (Course Creator only)
+router.put(
+  "/updateViva/:courseId",
+  isLogin,
+  isEmailVerified,
+  isTeacher,
+  isCourseCreator,
+  validateDate,
+  courseController.updateVivaSchedule
+);
+
+// Update project schedule for a course (Course Creator only)
+router.put(
+  "/updateProject/:courseId",
+  isLogin,
+  isEmailVerified,
+  isTeacher,
+  isCourseCreator,
+  validateDate,
+  courseController.updateProjectSchedule
+);
 
 module.exports = router;
 
@@ -3559,7 +3668,12 @@ router.use('/notifications', notificationRoutes);
 
 module.exports = router; 
 const express = require("express");
+const router = express.Router();
+
+// Controller for handling lecture-related logic
 const lectureController = require("../controllers/lectureController");
+
+// Middleware for authentication and authorization
 const { isLogin } = require("../middlewares/isLogin");
 const { isEmailVerified } = require("../middlewares/isEmailVerified");
 const {
@@ -3567,67 +3681,99 @@ const {
   isCourseCreator,
   isCourseCreatorOrCourseStudent,
 } = require("../middlewares/authorization");
+
+// Middleware for handling lecture video uploads (using multer)
 const { uploadLecture } = require("../middlewares/multer/uploadLecture");
 
-const router = express.Router();
+// --- Lecture Routes ---
 
-router
-  .route("/:courseId")
-  .get(isLogin, isEmailVerified, lectureController.getLectures)
-  .post(
-    isLogin,
-    isEmailVerified,
-    isTeacher,
-    isCourseCreator,
-    uploadLecture.single("lecture_video"),
-    lectureController.createLecture
-  );
+// Get all lectures for a course
+// (Accessible by Course Creator, Course Teacher and Course Student)
+router.get(
+  "/:courseId",
+  isLogin,
+  isEmailVerified,
+  isCourseCreatorOrCourseStudent,
+  lectureController.getLectures
+);
 
-router
-  .route("/:courseId/lecture/:lectureId")
-  .get(
-    isLogin,
-    isEmailVerified,
-    isCourseCreatorOrCourseStudent,
-    lectureController.getLecture
-  )
-  .put(
-    isLogin,
-    isEmailVerified,
-    isTeacher,
-    isCourseCreator,
-    uploadLecture.single("lecture_video"),
-    lectureController.updateLecture
-  )
-  .delete(
-    isLogin,
-    isEmailVerified,
-    isTeacher,
-    isCourseCreator,
-    lectureController.deleteLecture
-  );
+// Create a new lecture for a course (Teacher and Course Creator only)
+router.post(
+  "/:courseId",
+  isLogin,
+  isEmailVerified,
+  isTeacher,
+  isCourseCreator,
+  uploadLecture.single("lecture_video"), // Handle lecture video upload
+  lectureController.createLecture
+);
 
-router
-  .route("/:courseId/lecture/:lectureId/download")
-  .get(isLogin, isEmailVerified,isCourseCreatorOrCourseStudent, lectureController.downloadLecture);
+// Get a specific lecture
+// (Accessible by Course Creator, Course Teacher and Course Student)
+router.get(
+  "/:courseId/lecture/:lectureId",
+  isLogin,
+  isEmailVerified,
+  isCourseCreatorOrCourseStudent,
+  lectureController.getLecture
+);
+
+// Update a specific lecture (Teacher and Course Creator only)
+router.put(
+  "/:courseId/lecture/:lectureId",
+  isLogin,
+  isEmailVerified,
+  isTeacher,
+  isCourseCreator,
+  uploadLecture.single("lecture_video"), // Handle lecture video upload for updates
+  lectureController.updateLecture
+);
+
+// Delete a specific lecture (Teacher and Course Creator only)
+router.delete(
+  "/:courseId/lecture/:lectureId",
+  isLogin,
+  isEmailVerified,
+  isTeacher,
+  isCourseCreator,
+  lectureController.deleteLecture
+);
+
+// Download a lecture video
+// (Accessible by Course Creator, Course Teacher and Course Student)
+router.get(
+  "/:courseId/lecture/:lectureId/download",
+  isLogin,
+  isEmailVerified,
+  isCourseCreatorOrCourseStudent,
+  lectureController.downloadLecture
+);
 
 module.exports = router;
 
 const express = require("express");
 const router = express.Router();
-const { isLogin } = require("../middlewares/isLogin");
+
+// Controller for handling notification-related logic
 const notificationController = require("../controllers/notificationController");
 
-// Route to mark a notification as read
-router.route("/mark-as-read/:notificationId").put(
-  isLogin,
-  notificationController.markNotificationAsRead
+// Middleware for user authentication
+const { isLogin } = require("../middlewares/isLogin");
+
+// --- Notification Routes ---
+
+// Mark a notification as read (requires authentication)
+router.put(
+  "/mark-as-read/:notificationId", // Route parameter for the notification ID
+  isLogin,                          // Ensure the user is logged in
+  notificationController.markNotificationAsRead // Controller function to handle marking as read
 );
 
-// Route to get all notifications for a user
-router.route("/get-notifications").get(
-  isLogin,
-  notificationController.getAllNotifications
+// Get all notifications for the logged-in user
+router.get(
+  "/get-notifications",      
+  isLogin,                          // Ensure the user is logged in
+  notificationController.getAllNotifications // Controller function to retrieve notifications
 );
 
 module.exports = router;
@@ -4186,6 +4332,7 @@ module.exports.assignmentSchema = Joi.object(
     {
         title: Joi.string().required(),
         description: Joi.string().required(),
+        deadline: Joi.date().required(),
     }
 );
 const Joi = require("joi");
@@ -4370,12 +4517,29 @@ const sendCourseAnnouncement = async (
   course.announcements.push(announcement._id);
   await course.save();
   // TODO: Notify students of the new announcement
+  for (const student of course.students) {
+    const student_data = await authRepository.findStudentById(student);
+    const student_account = await authRepository.findAccountById(
+      student_data.account
+    );
+    await notificationService.createNotification(
+      {
+        title: "New Announcement",
+        content: `A new announcement has been made for ${course.courseName
+}`,
+        read: false,
+      },
+      student_account._id
+    );
+  }
+  // Notify teacher
   const teacher = await authRepository.findTeacherById(teacherId);
   const teacherAccount = await authRepository.findAccountById(teacher.account);
   await notificationService.createNotification(
     {
       title: "New Announcement",
-      message: `A new announcement has been made for ${course.name}`,
+      content: `You made a new announcement has been made for ${course.courseName
+}`,
       read: false,
     },
     teacherAccount._id
@@ -4395,12 +4559,31 @@ const deleteAnnouncement = async (announcementId, teacherId) => {
     throw new AppError("Announcement not found", 404);
   }
   await announcementRepository.deleteAnnouncementById(announcementId);
+
+  // Notify student
+  const course = await announcementRepository.findCourseById(announcement.course);
+  for (const student of course.students) {
+    const student_data = await authRepository.findStudentById(student);
+    const student_account = await authRepository.findAccountById(
+      student_data.account
+    );
+    await notificationService.createNotification(
+      {
+        title: "Announcement Deleted",
+        content: `An announcement has been deleted from ${course.courseName}`,
+        read: false,
+      },
+      student_account._id
+    );
+  }
+
+  // Notify teacher
   const teacher = await authRepository.findTeacherById(teacherId);
   const teacherAccount = await authRepository.findAccountById(teacher.account);
   await notificationService.createNotification(
     {
       title: "Announcement Deleted",
-      message: `You deleted an announement`,
+      content: `You deleted an announement`,
       read: false,
     },
     teacherAccount._id
@@ -4419,12 +4602,31 @@ const updateAnnouncement = async (announcementId, updateData, teacherId) => {
     announcementId,
     updateData
   );
+
+  // Notify student
+  const course = await announcementRepository.findCourseById(announcement.course);
+  for (const student of course.students) {
+    const student_data = await authRepository.findStudentById(student);
+    const student_account = await authRepository.findAccountById(
+      student_data.account
+    );
+    await notificationService.createNotification(
+      {
+        title: "Announcement Updated",
+        content: `An announcement has been updated in ${course.courseName}`,
+        read: false,
+      },
+      student_account._id
+    );
+  }
+
+  // Notify teacher
   const teacher = await authRepository.findTeacherById(teacherId);
   const teacherAccount = await authRepository.findAccountById(teacher.account);
   await notificationService.createNotification(
     {
       title: "Announcement Updated",
-      message: `You updated an announcement`,
+      content: `You updated an announcement`,
       read: false,
     },
     teacherAccount._id
@@ -4499,7 +4701,7 @@ const addAssignment = async (
   await course.save();
   
   // Notify students
-  for (const student in course.students) {
+  for (const student of course.students) {
     const student_data = await authRepository.findStudentById(student);
     const student_account = await authRepository.findAccountById(
       student_data.account
@@ -4507,7 +4709,7 @@ const addAssignment = async (
     await notificationService.createNotification(
       {
         title: "New Assignment",
-        message: `A new assignment has been added to ${course.name}`,
+        content: `A new assignment has been added to ${course.courseName}`,
         read: false,
       },
       student_account._id
@@ -4620,7 +4822,7 @@ const deleteAssignment = async (courseId, assignmentId) => {
   await course.save();
 
   // Notify students
-  for (const student in course.students) {
+  for (const student of course.students) {
     const student_data = await authRepository.findStudentById(student);
     const student_account = await authRepository.findAccountById(
       student_data.account
@@ -4628,7 +4830,7 @@ const deleteAssignment = async (courseId, assignmentId) => {
     await notificationService.createNotification(
       {
         title: "Assignment Deleted",
-        message: `An assignment has been deleted from ${course.name}`,
+        content: `An assignment has been deleted from ${course.courseName}`,
         read: false,
       },
       student_account._id
@@ -5264,7 +5466,7 @@ const updateProjectSchedule = async (courseId, startDate, endDate) => {
       await notificationService.createNotification(
         {
           title: "Project Schedule Updated",
-          message: `Project Schedule has been updated for ${getCourse.courseName}`,
+          content: `Project Schedule has been updated for ${getCourse.courseName}`,
           read: false,
         },
         studentAccount._id
@@ -5319,7 +5521,7 @@ const updateVivaSchedule = async (courseId, startDate, endDate) => {
     await notificationService.createNotification(
       {
         title: "Viva Schedule Updated",
-        message: `Viva Schedule has been updated for ${course.courseName}`,
+        content: `Viva Schedule has been updated for ${course.courseName}`,
         read: false,
       },
       studentAccount._id
@@ -5529,7 +5731,7 @@ const addLecture = async (
   course.lectures.push(lecture._id);
   await course.save();
   // Notify students
-  for (const student in course.students) {
+  for (const student of course.students) {
     const student_data = await authRepository.findStudentById(student);
     const student_account = await authRepository.findAccountById(
       student_data.account
@@ -5537,7 +5739,7 @@ const addLecture = async (
     await notificationService.createNotification(
       {
         title: "New Lecture",
-        message: `A new lecture has been added to ${course.name}`,
+        content: `A new lecture has been added to ${course.courseName}`,
         read: false,
       },
       student_account
@@ -5631,7 +5833,7 @@ const deleteLecture = async (courseId, lectureId) => {
   );
   await course.save();
   // notify students
-  for (const student in course.students) {
+  for (const student of course.students) {
     const student_data = await authRepository.findStudentById(student);
     const student_account = await authRepository.findAccountById(
       student_data.account
@@ -5639,7 +5841,7 @@ const deleteLecture = async (courseId, lectureId) => {
     await notificationService.createNotification(
       {
         title: "Lecture Deleted",
-        message: `A lecture has been deleted from ${course.name}`,
+        message: `A lecture has been deleted from ${course.courseName}`,
         read: false,
       },
       student_account
@@ -8090,89 +8292,102 @@ from face_detector import FaceMeshDetector
 from utils import get_eye_center, detect_pupil
 import os
 
-def analyze_image(image_path, model, output_dir):
-    # Load the image
-    img = cv2.imread(image_path)
-    image_name = os.path.basename(image_path)
-    results = model(image_path)
-    detected_objects = results[0].boxes.data.numpy()
-    object_names = model.names
 
-    # Initialize counts
+def analyze_image(image_path, model, output_dir):
+    """
+    Analyze an image to detect mobile phones, people, and face features.
+    
+    Args:
+        image_path (str): Path to the image file.
+        model: Object detection model.
+        output_dir (str): Directory where output images and results will be saved.
+    
+    Returns:
+        dict: JSON-compatible dictionary with analysis results.
+    """
+    
+    # Load the image from the given path
+    img = cv2.imread(image_path)
+    image_name = os.path.basename(image_path)  # Extract the image file name
+    
+    # Use the model to detect objects in the image
+    results = model(image_path)
+    detected_objects = results[0].boxes.data.numpy()  # Detected object details
+    object_names = model.names  # Mapping of class IDs to object names
+
+    # Initialize counts for detected phones and persons
     phone_count = 0
     person_count = 0
 
-    # Iterate through detected objects
+    # Iterate through detected objects and count relevant ones
     for obj in detected_objects:
-        class_id = int(obj[5])
+        class_id = int(obj[5])  # Class ID of the detected object
+        x1, y1, x2, y2 = map(int, obj[:4])  # Bounding box coordinates
+
         if object_names[class_id] == 'cell phone':
             phone_count += 1
-            # Draw bounding box for phone
-            x1, y1, x2, y2 = map(int, obj[:4])
-            cv2.rectangle(img, (x1, y1), (x2, y2), (0, 255, 0), 1)  # Green box for phone
+            # Draw bounding box and label for detected phone
+            cv2.rectangle(img, (x1, y1), (x2, y2), (0, 255, 0), 1)
             cv2.putText(img, 'phone', (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
+        
         elif object_names[class_id] == 'person':
             person_count += 1
-            # Draw bounding box for person
-            x1, y1, x2, y2 = map(int, obj[:4])
-            cv2.rectangle(img, (x1, y1), (x2, y2), (255, 0, 0), 1)  # Blue box for person
+            # Draw bounding box and label for detected person
+            cv2.rectangle(img, (x1, y1), (x2, y2), (255, 0, 0), 1)
             cv2.putText(img, 'person', (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 0), 2)
 
-    # Determine conditions
-    extra_person = person_count > 1
-    no_person = person_count == 0
+    # Conditions based on detected people
+    extra_person = person_count > 1  # More than one person
+    no_person = person_count == 0  # No person detected
 
-    # Face mesh detection
+    # Initialize face mesh detector
     face_detector = FaceMeshDetector()
     img, faces = face_detector.findFaceMesh(img)
-    json_result = {"mobile_phone": phone_count > 0, "extra_person": extra_person, "no_person": no_person, "mouth_open": False, "eye_gaze": "center"}
+    
+    # Initialize result dictionary
+    json_result = {
+        "mobile_phone": phone_count > 0,
+        "extra_person": extra_person,
+        "no_person": no_person,
+        "mouth_open": False,
+        "eye_gaze": "center"
+    }
 
-    if len(faces) != 0:
-        x1, y1 = faces[0][159]  # Left eye upper
-        x2, y2 = faces[0][145]  # Left eye lower
-        x3, y3 = faces[0][386]  # Right eye upper
-        x4, y4 = faces[0][374]  # Right eye lower
-        x5, y5 = faces[0][13]  # Mouth upper
-        x6, y6 = faces[0][14]  # Mouth lower
-        nose_tip = faces[0][1]  # Nose tip
+    # If faces are detected, proceed with further analysis
+    if faces:
+        face = faces[0]  # Assume first detected face for analysis
+        nose_tip = face[1]  # Coordinates of the nose tip
 
-        left_eye_points = [faces[0][33], faces[0][133], faces[0][160], faces[0][159], faces[0][158], faces[0][144], faces[0][145], faces[0][153]]
-        right_eye_points = [faces[0][362], faces[0][385], faces[0][387], faces[0][386], faces[0][374], faces[0][373], faces[0][390], faces[0][249]]
+        # Define key face points for eyes and mouth
+        left_eye_points = [face[i] for i in [33, 133, 160, 159, 158, 144, 145, 153]]
+        right_eye_points = [face[i] for i in [362, 385, 387, 386, 374, 373, 390, 249]]
+        mouth_upper = face[13]
+        mouth_lower = face[14]
 
-        left_eye_center = get_eye_center(left_eye_points)
-        right_eye_center = get_eye_center(right_eye_points)
+        # Calculate center of eyes
+        # left_eye_center = get_eye_center(left_eye_points)
+        # right_eye_center = get_eye_center(right_eye_points)
 
-        # Extract eye images for pupil detection
-        left_eye_bbox = [min([p[0] for p in left_eye_points]), min([p[1] for p in left_eye_points]),
-                         max([p[0] for p in left_eye_points]), max([p[1] for p in left_eye_points])]
-        right_eye_bbox = [min([p[0] for p in right_eye_points]), min([p[1] for p in right_eye_points]),
-                          max([p[0] for p in right_eye_points]), max([p[1] for p in right_eye_points])]
-
-        left_eye_img = img[left_eye_bbox[1]:left_eye_bbox[3], left_eye_bbox[0]:left_eye_bbox[2]]
-        right_eye_img = img[right_eye_bbox[1]:right_eye_bbox[3], right_eye_bbox[0]:right_eye_bbox[2]]
+        # Detect pupils in eye images
+        left_eye_img = img[min([p[1] for p in left_eye_points]):max([p[1] for p in left_eye_points]),
+                           min([p[0] for p in left_eye_points]):max([p[0] for p in left_eye_points])]
+        right_eye_img = img[min([p[1] for p in right_eye_points]):max([p[1] for p in right_eye_points]),
+                            min([p[0] for p in right_eye_points]):max([p[0] for p in right_eye_points])]
 
         left_pupil = detect_pupil(left_eye_img)
         right_pupil = detect_pupil(right_eye_img)
 
+        # Mark detected pupils on the image
         if left_pupil:
             cv2.circle(left_eye_img, left_pupil, 3, (0, 0, 255), -1)
         if right_pupil:
             cv2.circle(right_eye_img, right_pupil, 3, (0, 0, 255), -1)
 
-        # Calculate length of mouth
-        lenOfMouth = math.hypot(x6 - x5, y6 - y5)
+        # Calculate mouth length to determine if it is open
+        mouth_length = math.hypot(mouth_lower[0] - mouth_upper[0], mouth_lower[1] - mouth_upper[1])
+        json_result["mouth_open"] = mouth_length > 5
 
-        # Mouth bounding box
-        min_x_mouth = min(x5, x6)
-        max_x_mouth = max(x5, x6)
-        min_y_mouth = min(y5, y6)
-        max_y_mouth = max(y5, y6)
-
-        # Eye bounding boxes for visualization
-        left_eye_bbox = [(left_eye_bbox[0], left_eye_bbox[1]), (left_eye_bbox[2], left_eye_bbox[3])]
-        right_eye_bbox = [(right_eye_bbox[0], right_eye_bbox[1]), (right_eye_bbox[2], right_eye_bbox[3])]
-
-        # Gaze direction
+        # Determine gaze direction based on pupil position
         gaze_direction = "center"
         if left_pupil and right_pupil:
             if left_pupil[0] < left_eye_img.shape[1] // 2 and right_pupil[0] < right_eye_img.shape[1] // 2:
@@ -8182,25 +8397,24 @@ def analyze_image(image_path, model, output_dir):
 
         json_result["eye_gaze"] = gaze_direction
 
-        # Determine mouth status
-        json_result["mouth_open"] = lenOfMouth > 5
+        # Draw annotations for mouth, eyes, and nose
+        cv2.rectangle(img, (min(mouth_upper[0], mouth_lower[0]), min(mouth_upper[1], mouth_lower[1]) - 10),
+                      (max(mouth_upper[0], mouth_lower[0]), max(mouth_upper[1], mouth_lower[1]) + 10), (0, 255, 0), 1)
+        cv2.putText(img, f"MOUTH {'OPEN' if json_result['mouth_open'] else 'CLOSED'}",
+                    (mouth_upper[0], mouth_upper[1] - 20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
 
-        # Draw bounding boxes and annotations
-        cv2.rectangle(img, (min_x_mouth, min_y_mouth - 10), (max_x_mouth, max_y_mouth + 10), (0, 255, 0), 1)
-        cv2.putText(img, "MOUTH " + ("OPEN" if json_result["mouth_open"] else "CLOSED"), (min_x_mouth, min_y_mouth - 20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
-
-        cv2.rectangle(img, left_eye_bbox[0], left_eye_bbox[1], (255, 0, 0), 2)
-        cv2.putText(img, f"EYE GAZE {gaze_direction.upper()}", (left_eye_bbox[0][0], left_eye_bbox[0][1] - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 0), 1)
-
-        cv2.rectangle(img, right_eye_bbox[0], right_eye_bbox[1], (255, 0, 0), 2)
+        cv2.putText(img, f"EYE GAZE {gaze_direction.upper()}",
+                    (left_eye_points[0][0], left_eye_points[0][1] - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 0), 1)
 
         # Draw nose tip
         cv2.circle(img, (nose_tip[0], nose_tip[1]), 2, (0, 255, 255), -1)
         cv2.putText(img, "NOSE", (nose_tip[0] + 10, nose_tip[1] - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 255), 2)
 
-    cv2.imwrite(output_dir+"result_"+image_name, img)
+    # Save the annotated image to the output directory
+    cv2.imwrite(os.path.join(output_dir, f"result_{image_name}"), img)
 
     return json_result
+
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from dotenv import load_dotenv
@@ -8413,6 +8627,15 @@ import mediapipe as mp
 
 class FaceMeshDetector:
     def __init__(self, staticMode=False, maxFaces=2, refineLandmarks=True, minDetectionCon=0.5, minTrackingCon=0.5):
+        """
+        Initializes the FaceMeshDetector with parameters for face mesh detection.
+
+        :param staticMode: If true, detection is done on every frame.
+        :param maxFaces: Maximum number of faces to detect.
+        :param refineLandmarks: Refine landmarks for accurate detection.
+        :param minDetectionCon: Minimum confidence value for detection.
+        :param minTrackingCon: Minimum confidence value for tracking.
+        """
         self.staticMode = staticMode
         self.maxFaces = maxFaces
         self.refineLandmarks = refineLandmarks
@@ -8421,9 +8644,22 @@ class FaceMeshDetector:
 
         self.mpDraw = mp.solutions.drawing_utils
         self.mpFaceMesh = mp.solutions.face_mesh
-        self.faceMesh = self.mpFaceMesh.FaceMesh(self.staticMode, self.maxFaces, self.refineLandmarks, self.minDetectionCon, self.minTrackingCon)
+        self.faceMesh = self.mpFaceMesh.FaceMesh(
+            self.staticMode,
+            self.maxFaces,
+            self.refineLandmarks,
+            self.minDetectionCon,
+            self.minTrackingCon
+        )
+        self.drawSpec = self.mpDraw.DrawingSpec(thickness=1, circle_radius=1, color=(0, 255, 0))
 
     def findFaceMesh(self, img):
+        """
+        Finds the face mesh landmarks in the given image.
+
+        :param img: The image in which to find face mesh.
+        :return: The image with drawn face mesh and the list of detected face landmarks.
+        """
         imgRGB = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
         results = self.faceMesh.process(imgRGB)
         faces = []
@@ -8435,13 +8671,18 @@ class FaceMeshDetector:
                     x, y = int(lm.x * iw), int(lm.y * ih)
                     face.append([x, y])
                 faces.append(face)
+                # Draw the face mesh on the image
+                self.mpDraw.draw_landmarks(img, facelandmarks, self.mpFaceMesh.FACEMESH_CONTOURS, self.drawSpec, self.drawSpec)
         return img, faces
+
 import random
 import smtplib
 from email.mime.text import MIMEText
 from dotenv import load_dotenv
 import os
 import ssl
+import logging
+import re
 
 # Load environment variables from .env file
 load_dotenv()
@@ -8454,14 +8695,27 @@ SMTP_PORT = os.getenv('SMTP_PORT')
 if not all([EMAIL, PASSWORD, SMTP_SERVER, SMTP_PORT]):
     raise RuntimeError("Some environment variables are missing. Please check your .env file.")
 
+# Set up logging
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logger = logging.getLogger(__name__)
+
 def generate_otp(length=6):
     """Generate a random OTP of given length."""
     digits = "0123456789"
     otp = ''.join(random.choice(digits) for _ in range(length))
     return otp
 
+def is_valid_email(email):
+    """Check if the email format is valid."""
+    pattern = r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
+    return re.match(pattern, email) is not None
+
 def send_otp(email, otp):
     """Send the OTP to the given email address using SMTP."""
+    if not is_valid_email(email):
+        logger.error(f"Invalid email format: {email}")
+        raise ValueError("Invalid email address format.")
+
     subject = "Your OTP Code for Your Email Verification"
     body = f"""
     Dear User,
@@ -8476,7 +8730,6 @@ def send_otp(email, otp):
 
     Best regards,
     Team LearnXcellence
-
     """
     
     msg = MIMEText(body)
@@ -8491,24 +8744,25 @@ def send_otp(email, otp):
             server.starttls(context=context)
             server.login(EMAIL, PASSWORD)
             server.sendmail(EMAIL, email, msg.as_string())
+            logger.info(f"OTP sent successfully to {email}")
             return otp
     except smtplib.SMTPAuthenticationError as e:
-        print(f"Authentication error: {e}")
+        logger.error(f"Authentication error: {e}")
         raise RuntimeError("Authentication failed. Please check your email and password.")
     except smtplib.SMTPConnectError as e:
-        print(f"Connection error: {e}")
+        logger.error(f"Connection error: {e}")
         raise RuntimeError("Failed to connect to the SMTP server. Please check your server and port.")
     except smtplib.SMTPRecipientsRefused as e:
-        print(f"Recipient error: {e}")
+        logger.error(f"Recipient error: {e}")
         raise RuntimeError("The email recipient was refused. Please check the recipient email address.")
     except smtplib.SMTPSenderRefused as e:
-        print(f"Sender error: {e}")
+        logger.error(f"Sender error: {e}")
         raise RuntimeError("The sender address was refused. Please check the sender email address.")
     except smtplib.SMTPDataError as e:
-        print(f"Data error: {e}")
+        logger.error(f"Data error: {e}")
         raise RuntimeError("The SMTP server responded with an unexpected error.")
     except smtplib.SMTPException as e:
-        print(f"SMTP error: {e}")
+        logger.error(f"SMTP error: {e}")
         raise RuntimeError(f"An error occurred: {str(e)}")
 
 import math
@@ -8541,25 +8795,44 @@ def is_real_image(image_path, model, threshold=0.6):
     return False
 
 import cv2
+import numpy as np
 
 def get_eye_center(eye_points):
     x_coords = [p[0] for p in eye_points]
     y_coords = [p[1] for p in eye_points]
     center_x = sum(x_coords) / len(x_coords)
     center_y = sum(y_coords) / len(y_coords)
-    return (center_x, center_y)
-
+    return (int(center_x), int(center_y))
 
 def detect_pupil(eye_img):
     gray_eye = cv2.cvtColor(eye_img, cv2.COLOR_BGR2GRAY)
-    _, threshold_eye = cv2.threshold(gray_eye, 30, 255, cv2.THRESH_BINARY_INV)
+    
+    # Apply Gaussian Blur to reduce noise
+    blurred_eye = cv2.GaussianBlur(gray_eye, (7, 7), 0)
+    
+    # Apply adaptive thresholding
+    threshold_eye = cv2.adaptiveThreshold(
+        blurred_eye, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, 
+        cv2.THRESH_BINARY_INV, 11, 3
+    )
+    
+    # Find contours
     contours, _ = cv2.findContours(threshold_eye, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
     contours = sorted(contours, key=lambda x: cv2.contourArea(x), reverse=True)
-    if contours:
-        (x, y, w, h) = cv2.boundingRect(contours[0])
-        pupil_center = (x + w // 2, y + h // 2)
-        return pupil_center
+    
+    for contour in contours:
+        (x, y, w, h) = cv2.boundingRect(contour)
+        
+        # Validate contour: it should be roughly circular and within a reasonable size
+        aspect_ratio = w / float(h)
+        area = cv2.contourArea(contour)
+        
+        if 0.8 < aspect_ratio < 1.2 and 50 < area < 200:
+            pupil_center = (x + w // 2, y + h // 2)
+            return pupil_center
+    
     return None
+
 import face_recognition
 import cv2
 import os
