@@ -48,7 +48,7 @@ const addAssignment = async (
   await course.save();
   
   // Notify students
-  for (const student in course.students) {
+  for (const student of course.students) {
     const student_data = await authRepository.findStudentById(student);
     const student_account = await authRepository.findAccountById(
       student_data.account
@@ -56,7 +56,7 @@ const addAssignment = async (
     await notificationService.createNotification(
       {
         title: "New Assignment",
-        message: `A new assignment has been added to ${course.name}`,
+        content: `A new assignment has been added to ${course.courseName}`,
         read: false,
       },
       student_account._id
@@ -169,7 +169,7 @@ const deleteAssignment = async (courseId, assignmentId) => {
   await course.save();
 
   // Notify students
-  for (const student in course.students) {
+  for (const student of course.students) {
     const student_data = await authRepository.findStudentById(student);
     const student_account = await authRepository.findAccountById(
       student_data.account
@@ -177,7 +177,7 @@ const deleteAssignment = async (courseId, assignmentId) => {
     await notificationService.createNotification(
       {
         title: "Assignment Deleted",
-        message: `An assignment has been deleted from ${course.name}`,
+        content: `An assignment has been deleted from ${course.courseName}`,
         read: false,
       },
       student_account._id

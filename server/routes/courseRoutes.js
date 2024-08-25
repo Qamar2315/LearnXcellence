@@ -1,11 +1,12 @@
 const express = require("express");
 const router = express.Router();
+
+// Controller for handling course-related logic
+const courseController = require("../controllers/courseController");
+
+// Middleware for authentication and authorization
 const { isLogin } = require("../middlewares/isLogin");
-const {
-  validateCourse,
-  validateDate,
-  validateAddRemoveStudent,
-} = require("../middlewares/schemaValidator");
+const { isEmailVerified } = require("../middlewares/isEmailVerified");
 const {
   isTeacher,
   isStudent,
@@ -13,126 +14,159 @@ const {
   isCourseStudent,
   isCourseCreatorOrCourseStudent,
 } = require("../middlewares/authorization");
-const courseController = require("../controllers/courseController");
-const { isEmailVerified } = require("../middlewares/isEmailVerified");
 
-router
-  .route("/create")
-  .post(
-    isLogin,
-    isEmailVerified,
-    isTeacher,
-    validateCourse,
-    courseController.createCourse
-  );
+// Middleware for data validation
+const {
+  validateCourse,
+  validateDate,
+  validateAddRemoveStudent,
+} = require("../middlewares/schemaValidator");
 
-router
-  .route("/getAll")
-  .get(isLogin, isEmailVerified, courseController.sendAllCourses);
+// --- Public Routes ---
 
-router
-  .route("/updateViva/:courseId")
-  .put(
-    isLogin,
-    isEmailVerified,
-    isTeacher,
-    isCourseCreator,
-    validateDate,
-    courseController.updateVivaSchedule
-  );
+// Get all courses (accessible by anyone)
+router.get(
+  "/getAll",
+  isLogin,
+  isEmailVerified,
+  courseController.sendAllCourses
+);
 
-router
-  .route("/updateProject/:courseId")
-  .put(
-    isLogin,
-    isEmailVerified,
-    isTeacher,
-    isCourseCreator,
-    validateDate,
-    courseController.updateProjectSchedule
-  );
+// --- Protected Routes (require authentication) ---
 
-  
-router
-  .route("/search-student")
-  .get(isLogin, isEmailVerified, isTeacher, courseController.searchStudent);
+// Create a new course (Teacher only)
+router.post(
+  "/create",
+  isLogin,
+  isEmailVerified,
+  isTeacher,
+  validateCourse, // Validate course data
+  courseController.createCourse
+);
 
-router
-  .route("/:courseId")
-  .get(
-    isLogin,
-    isEmailVerified,
-    isCourseCreatorOrCourseStudent,
-    courseController.sendCourse
-  )
-  .put(
-    isLogin,
-    isEmailVerified,
-    isTeacher,
-    isCourseCreator,
-    courseController.updateCourseName
-  )
-  .patch(
-    isLogin,
-    isEmailVerified,
-    isTeacher,
-    isCourseCreator,
-    validateCourse,
-    courseController.updateCourse
-  )
-  .delete(
-    isLogin,
-    isEmailVerified,
-    isTeacher,
-    isCourseCreator,
-    courseController.deleteCourse
-  );
+// Search for a student (Teacher only)
+router.get(
+  "/search-student",
+  isLogin,
+  isEmailVerified,
+  isTeacher,
+  courseController.searchStudent
+);
 
-router
-  .route("/:courseId/leave")
-  .put(
-    isLogin,
-    isEmailVerified,
-    isStudent,
-    isCourseStudent,
-    courseController.leaveCourse
-  );
+// Join a course using a course code (Student only)
+router.post(
+  "/join",
+  isLogin,
+  isEmailVerified,
+  isStudent,
+  courseController.joinCourse
+);
 
-router
-  .route("/:courseId/regenerate-course-code")
-  .put(
-    isLogin,
-    isEmailVerified,
-    isTeacher,
-    isCourseCreator,
-    courseController.regenerateCourseCode
-  );
+// --- Course Specific Routes (require authentication) ---
 
-//to do add and leave student
-router
-  .route("/:courseId/add")
-  .put(
-    isLogin,
-    isEmailVerified,
-    isTeacher,
-    isCourseCreator,
-    validateAddRemoveStudent,
-    courseController.addStudentToCourse
-  );
+// Get a specific course
+// (Accessible by Course Creator, Course Teacher and Course Student)
+router.get(
+  "/:courseId",
+  isLogin,
+  isEmailVerified,
+  isCourseCreatorOrCourseStudent,
+  courseController.sendCourse
+);
 
-router
-  .route("/:courseId/remove")
-  .put(
-    isLogin,
-    isEmailVerified,
-    isTeacher,
-    isCourseCreator,
-    validateAddRemoveStudent,
-    courseController.removeStudentFromCourse
-  );
+// Update a course's name (Course Creator only)
+router.put(
+  "/:courseId",
+  isLogin,
+  isEmailVerified,
+  isTeacher,
+  isCourseCreator,
+  courseController.updateCourseName
+);
 
-router
-  .route("/join")
-  .post(isLogin, isEmailVerified, isStudent, courseController.joinCourse);
+// Update a course's details (Course Creator only)
+router.patch(
+  "/:courseId",
+  isLogin,
+  isEmailVerified,
+  isTeacher,
+  isCourseCreator,
+  validateCourse, // Validate course data
+  courseController.updateCourse
+);
+
+// Delete a course (Course Creator only)
+router.delete(
+  "/:courseId",
+  isLogin,
+  isEmailVerified,
+  isTeacher,
+  isCourseCreator,
+  courseController.deleteCourse
+);
+
+// Leave a course (Student only)
+router.put(
+  "/:courseId/leave",
+  isLogin,
+  isEmailVerified,
+  isStudent,
+  isCourseStudent, // Ensure the student is enrolled in the course
+  courseController.leaveCourse
+);
+
+// Regenerate the course code (Course Creator only)
+router.put(
+  "/:courseId/regenerate-course-code",
+  isLogin,
+  isEmailVerified,
+  isTeacher,
+  isCourseCreator,
+  courseController.regenerateCourseCode
+);
+
+// Add a student to a course (Course Creator only)
+router.put(
+  "/:courseId/add",
+  isLogin,
+  isEmailVerified,
+  isTeacher,
+  isCourseCreator,
+  validateAddRemoveStudent, // Validate student data
+  courseController.addStudentToCourse
+);
+
+// Remove a student from a course (Course Creator only)
+router.put(
+  "/:courseId/remove",
+  isLogin,
+  isEmailVerified,
+  isTeacher,
+  isCourseCreator,
+  validateAddRemoveStudent, // Validate student data
+  courseController.removeStudentFromCourse
+);
+
+// Update viva schedule for a course (Course Creator only)
+router.put(
+  "/updateViva/:courseId",
+  isLogin,
+  isEmailVerified,
+  isTeacher,
+  isCourseCreator,
+  validateDate,
+  courseController.updateVivaSchedule
+);
+
+// Update project schedule for a course (Course Creator only)
+router.put(
+  "/updateProject/:courseId",
+  isLogin,
+  isEmailVerified,
+  isTeacher,
+  isCourseCreator,
+  validateDate,
+  courseController.updateProjectSchedule
+);
 
 module.exports = router;

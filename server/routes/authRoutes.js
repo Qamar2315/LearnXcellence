@@ -1,7 +1,10 @@
 const express = require("express");
 const router = express.Router();
 
-// body validator middlewares
+// Controllers for handling authentication and user data
+const authController = require("../controllers/authController");
+
+// Middleware for request body validation
 const {
   validateRegister,
   validateLogin,
@@ -9,118 +12,140 @@ const {
   validateUpdateName,
   validateOtp,
 } = require("../middlewares/schemaValidator");
-// auth controller
-const authController = require("../controllers/authController");
+
+// Middleware for authentication and authorization
 const { isLogin } = require("../middlewares/isLogin");
 const { isStudent, isTeacher } = require("../middlewares/authorization");
-const { uploadProfile } = require("../middlewares/multer/uploadProfile");
-const { uploadFaceBiometricData } = require("../middlewares/multer/uploadFace");
 const { isEmailVerified } = require("../middlewares/isEmailVerified");
 
-router.route("/generate-otp").post(isLogin, authController.generateOtp);
+// Middleware for handling file uploads (using multer)
+const { uploadProfile } = require("../middlewares/multer/uploadProfile");
+const { uploadFaceBiometricData } = require("../middlewares/multer/uploadFace");
 
-router
-  .route("/verify-otp")
-  .post(isLogin, validateOtp, authController.verifyOtp);
+// --- Public Routes ---
 
-router
-  .route("/register")
-  .post(validateRegister, authController.registerStudent);
+// Register a new student
+router.post("/register", validateRegister, authController.registerStudent);
 
-router.route("/login").post(validateLogin, authController.loginStudent);
+// Login an existing student
+router.post("/login", validateLogin, authController.loginStudent);
 
-router
-  .route("/teacher/register")
-  .post(validateRegister, authController.registerTeacher);
+// Register a new teacher
+router.post(
+  "/teacher/register",
+  validateRegister,
+  authController.registerTeacher
+);
 
-router.route("/teacher/login").post(validateLogin, authController.loginTeacher);
+// Login an existing teacher
+router.post("/teacher/login", validateLogin, authController.loginTeacher);
 
-router
-  .route("/student/update-password")
-  .patch(
-    isLogin,
-    isEmailVerified,
-    isStudent,
-    validateUpdatePassword,
-    authController.updateStudentPassword
-  );
+// --- Protected Routes (require authentication) ---
 
-router
-  .route("/student/update-name")
-  .patch(
-    isLogin,
-    isEmailVerified,
-    isStudent,
-    validateUpdateName,
-    authController.updateStudentName
-  );
+// Generate OTP (One-Time Password)
+router.post("/generate-otp", isLogin, authController.generateOtp);
 
-router
-  .route("/teacher/update-password")
-  .patch(
-    isLogin,
-    isEmailVerified,
-    isTeacher,
-    validateUpdatePassword,
-    authController.updateTeacherPassword
-  );
+// Verify OTP
+router.post("/verify-otp", isLogin, validateOtp, authController.verifyOtp);
 
-router
-  .route("/teacher/update-name")
-  .patch(
-    isLogin,
-    isEmailVerified,
-    isTeacher,
-    validateUpdateName,
-    authController.updateTeacherName
-  );
+// --- Student Specific Routes (require authentication and student role) ---
 
-router
-  .route("/student/upload-image")
-  .post(
-    isLogin,
-    isEmailVerified,
-    isStudent,
-    uploadProfile.single("profileImage"),
-    authController.uploadStudentImage
-  );
+// Update student password
+router.patch(
+  "/student/update-password",
+  isLogin,
+  isEmailVerified,
+  isStudent,
+  validateUpdatePassword,
+  authController.updateStudentPassword
+);
 
-router
-  .route("/teacher/upload-image")
-  .post(
-    isLogin,
-    isEmailVerified,
-    isTeacher,
-    uploadProfile.single("profileImage"),
-    authController.uploadTeacherImage
-  );
+// Update student name
+router.patch(
+  "/student/update-name",
+  isLogin,
+  isEmailVerified,
+  isStudent,
+  validateUpdateName,
+  authController.updateStudentName
+);
 
-router
-  .route("/student/:id")
-  .get(isLogin, isEmailVerified, authController.getStudentInfo);
+// Upload student profile image
+router.post(
+  "/student/upload-image",
+  isLogin,
+  isEmailVerified,
+  isStudent,
+  uploadProfile.single("profileImage"),
+  authController.uploadStudentImage
+);
 
-router
-  .route("/teacher/:id")
-  .get(isLogin, isEmailVerified, authController.getTeacherInfo);
+// Get student information (accessible by anyone)
+router.get(
+  "/student/:id",
+  isLogin,
+  isEmailVerified,
+  authController.getStudentInfo
+);
 
-router
-  .route("/student/register-face")
-  .post(
-    isLogin,
-    isEmailVerified,
-    isStudent,
-    uploadFaceBiometricData.single("face_image"),
-    authController.registerStudentFace
-  );
+// Register student's face for facial recognition
+router.post(
+  "/student/register-face",
+  isLogin,
+  isEmailVerified,
+  isStudent,
+  uploadFaceBiometricData.single("face_image"),
+  authController.registerStudentFace
+);
 
-router
-  .route("/student/verify-face")
-  .post(
-    uploadFaceBiometricData.single("face_image"),
-    isLogin,
-    isStudent,
-    isEmailVerified,
-    authController.verifyStudentFace
-  );
+// Verify student's face using facial recognition
+router.post(
+  "/student/verify-face",
+  uploadFaceBiometricData.single("face_image"), // Handle face image upload
+  isLogin,
+  isEmailVerified,
+  isStudent,
+  authController.verifyStudentFace
+);
+
+// --- Teacher Specific Routes (require authentication and teacher role) ---
+
+// Update teacher password
+router.patch(
+  "/teacher/update-password",
+  isLogin,
+  isEmailVerified,
+  isTeacher,
+  validateUpdatePassword,
+  authController.updateTeacherPassword
+);
+
+// Update teacher name
+router.patch(
+  "/teacher/update-name",
+  isLogin,
+  isEmailVerified,
+  isTeacher,
+  validateUpdateName,
+  authController.updateTeacherName
+);
+
+// Upload teacher profile image
+router.post(
+  "/teacher/upload-image",
+  isLogin,
+  isEmailVerified,
+  isTeacher,
+  uploadProfile.single("profileImage"),
+  authController.uploadTeacherImage
+);
+
+// Get teacher information (accessible by anyone)
+router.get(
+  "/teacher/:id",
+  isLogin,
+  isEmailVerified,
+  authController.getTeacherInfo
+);
 
 module.exports = router;

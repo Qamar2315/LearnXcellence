@@ -42,7 +42,7 @@ const addLecture = async (
   course.lectures.push(lecture._id);
   await course.save();
   // Notify students
-  for (const student in course.students) {
+  for (const student of course.students) {
     const student_data = await authRepository.findStudentById(student);
     const student_account = await authRepository.findAccountById(
       student_data.account
@@ -50,7 +50,7 @@ const addLecture = async (
     await notificationService.createNotification(
       {
         title: "New Lecture",
-        message: `A new lecture has been added to ${course.name}`,
+        content: `A new lecture has been added to ${course.courseName}`,
         read: false,
       },
       student_account
@@ -144,7 +144,7 @@ const deleteLecture = async (courseId, lectureId) => {
   );
   await course.save();
   // notify students
-  for (const student in course.students) {
+  for (const student of course.students) {
     const student_data = await authRepository.findStudentById(student);
     const student_account = await authRepository.findAccountById(
       student_data.account
@@ -152,7 +152,7 @@ const deleteLecture = async (courseId, lectureId) => {
     await notificationService.createNotification(
       {
         title: "Lecture Deleted",
-        message: `A lecture has been deleted from ${course.name}`,
+        message: `A lecture has been deleted from ${course.courseName}`,
         read: false,
       },
       student_account

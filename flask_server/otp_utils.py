@@ -4,6 +4,8 @@ from email.mime.text import MIMEText
 from dotenv import load_dotenv
 import os
 import ssl
+import logging
+import re
 
 # Load environment variables from .env file
 load_dotenv()
@@ -16,14 +18,27 @@ SMTP_PORT = os.getenv('SMTP_PORT')
 if not all([EMAIL, PASSWORD, SMTP_SERVER, SMTP_PORT]):
     raise RuntimeError("Some environment variables are missing. Please check your .env file.")
 
+# Set up logging
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logger = logging.getLogger(__name__)
+
 def generate_otp(length=6):
     """Generate a random OTP of given length."""
     digits = "0123456789"
     otp = ''.join(random.choice(digits) for _ in range(length))
     return otp
 
+def is_valid_email(email):
+    """Check if the email format is valid."""
+    pattern = r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
+    return re.match(pattern, email) is not None
+
 def send_otp(email, otp):
     """Send the OTP to the given email address using SMTP."""
+    if not is_valid_email(email):
+        logger.error(f"Invalid email format: {email}")
+        raise ValueError("Invalid email address format.")
+
     subject = "Your OTP Code for Your Email Verification"
     body = f"""
     Dear User,
@@ -38,7 +53,6 @@ def send_otp(email, otp):
 
     Best regards,
     Team LearnXcellence
-
     """
     
     msg = MIMEText(body)
@@ -53,22 +67,23 @@ def send_otp(email, otp):
             server.starttls(context=context)
             server.login(EMAIL, PASSWORD)
             server.sendmail(EMAIL, email, msg.as_string())
+            logger.info(f"OTP sent successfully to {email}")
             return otp
     except smtplib.SMTPAuthenticationError as e:
-        print(f"Authentication error: {e}")
+        logger.error(f"Authentication error: {e}")
         raise RuntimeError("Authentication failed. Please check your email and password.")
     except smtplib.SMTPConnectError as e:
-        print(f"Connection error: {e}")
+        logger.error(f"Connection error: {e}")
         raise RuntimeError("Failed to connect to the SMTP server. Please check your server and port.")
     except smtplib.SMTPRecipientsRefused as e:
-        print(f"Recipient error: {e}")
+        logger.error(f"Recipient error: {e}")
         raise RuntimeError("The email recipient was refused. Please check the recipient email address.")
     except smtplib.SMTPSenderRefused as e:
-        print(f"Sender error: {e}")
+        logger.error(f"Sender error: {e}")
         raise RuntimeError("The sender address was refused. Please check the sender email address.")
     except smtplib.SMTPDataError as e:
-        print(f"Data error: {e}")
+        logger.error(f"Data error: {e}")
         raise RuntimeError("The SMTP server responded with an unexpected error.")
     except smtplib.SMTPException as e:
-        print(f"SMTP error: {e}")
+        logger.error(f"SMTP error: {e}")
         raise RuntimeError(f"An error occurred: {str(e)}")

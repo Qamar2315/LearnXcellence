@@ -1,18 +1,26 @@
 const express = require("express");
 const router = express.Router();
-const { isLogin } = require("../middlewares/isLogin");
+
+// Controller for handling notification-related logic
 const notificationController = require("../controllers/notificationController");
 
-// Route to mark a notification as read
-router.route("/mark-as-read/:notificationId").put(
-  isLogin,
-  notificationController.markNotificationAsRead
+// Middleware for user authentication
+const { isLogin } = require("../middlewares/isLogin");
+
+// --- Notification Routes ---
+
+// Mark a notification as read (requires authentication)
+router.put(
+  "/mark-as-read/:notificationId", // Route parameter for the notification ID
+  isLogin,                          // Ensure the user is logged in
+  notificationController.markNotificationAsRead // Controller function to handle marking as read
 );
 
-// Route to get all notifications for a user
-router.route("/get-notifications").get(
-  isLogin,
-  notificationController.getAllNotifications
+// Get all notifications for the logged-in user
+router.get(
+  "/get-notifications",      
+  isLogin,                          // Ensure the user is logged in
+  notificationController.getAllNotifications // Controller function to retrieve notifications
 );
 
 module.exports = router;

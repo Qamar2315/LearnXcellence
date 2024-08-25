@@ -194,7 +194,7 @@ const updateProjectSchedule = async (courseId, startDate, endDate) => {
       await notificationService.createNotification(
         {
           title: "Project Schedule Updated",
-          message: `Project Schedule has been updated for ${getCourse.courseName}`,
+          content: `Project Schedule has been updated for ${getCourse.courseName}`,
           read: false,
         },
         studentAccount._id
@@ -249,7 +249,7 @@ const updateVivaSchedule = async (courseId, startDate, endDate) => {
     await notificationService.createNotification(
       {
         title: "Viva Schedule Updated",
-        message: `Viva Schedule has been updated for ${course.courseName}`,
+        content: `Viva Schedule has been updated for ${course.courseName}`,
         read: false,
       },
       studentAccount._id

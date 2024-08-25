@@ -134,3 +134,4 @@ dist
 /flask_server/models/
 
 /server/uploads/
+/server/public/
