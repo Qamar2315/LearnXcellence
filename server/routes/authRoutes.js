@@ -24,33 +24,57 @@ const { uploadFaceBiometricData } = require("../middlewares/multer/uploadFace");
 
 // --- Public Routes ---
 
-// Register a new student
+/**
+ * @route POST /api/auth/register
+ * @description Register a new student
+ * @access Public
+ */
 router.post("/register", validateRegister, authController.registerStudent);
 
-// Login an existing student
+/**
+ * @route POST /api/auth/login
+ * @description Login an existing student
+ * @access Public
+ */
 router.post("/login", validateLogin, authController.loginStudent);
 
-// Register a new teacher
-router.post(
-  "/teacher/register",
-  validateRegister,
-  authController.registerTeacher
-);
+/**
+ * @route POST /api/auth/teacher/register
+ * @description Register a new teacher
+ * @access Public
+ */
+router.post("/teacher/register", validateRegister, authController.registerTeacher);
 
-// Login an existing teacher
+/**
+ * @route POST /api/auth/teacher/login
+ * @description Login an existing teacher
+ * @access Public
+ */
 router.post("/teacher/login", validateLogin, authController.loginTeacher);
 
 // --- Protected Routes (require authentication) ---
 
-// Generate OTP (One-Time Password)
+/**
+ * @route POST /api/auth/generate-otp
+ * @description Generate OTP (One-Time Password) for authenticated users
+ * @access Private
+ */
 router.post("/generate-otp", isLogin, authController.generateOtp);
 
-// Verify OTP
+/**
+ * @route POST /api/auth/verify-otp
+ * @description Verify OTP for authenticated users
+ * @access Private
+ */
 router.post("/verify-otp", isLogin, validateOtp, authController.verifyOtp);
 
 // --- Student Specific Routes (require authentication and student role) ---
 
-// Update student password
+/**
+ * @route PATCH /api/auth/student/update-password
+ * @description Update the password for a student
+ * @access Private (Student)
+ */
 router.patch(
   "/student/update-password",
   isLogin,
@@ -60,7 +84,11 @@ router.patch(
   authController.updateStudentPassword
 );
 
-// Update student name
+/**
+ * @route PATCH /api/auth/student/update-name
+ * @description Update the name for a student
+ * @access Private (Student)
+ */
 router.patch(
   "/student/update-name",
   isLogin,
@@ -70,7 +98,11 @@ router.patch(
   authController.updateStudentName
 );
 
-// Upload student profile image
+/**
+ * @route POST /api/auth/student/upload-image
+ * @description Upload a profile image for a student
+ * @access Private (Student)
+ */
 router.post(
   "/student/upload-image",
   isLogin,
@@ -80,7 +112,11 @@ router.post(
   authController.uploadStudentImage
 );
 
-// Get student information (accessible by anyone)
+/**
+ * @route GET /api/auth/student/:id
+ * @description Get information about a specific student
+ * @access Private (Logged-in users only)
+ */
 router.get(
   "/student/:id",
   isLogin,
@@ -88,7 +124,11 @@ router.get(
   authController.getStudentInfo
 );
 
-// Register student's face for facial recognition
+/**
+ * @route POST /api/auth/student/register-face
+ * @description Register a student's face for facial recognition
+ * @access Private (Student)
+ */
 router.post(
   "/student/register-face",
   isLogin,
@@ -98,7 +138,11 @@ router.post(
   authController.registerStudentFace
 );
 
-// Verify student's face using facial recognition
+/**
+ * @route POST /api/auth/student/verify-face
+ * @description Verify a student's face using facial recognition
+ * @access Private (Student)
+ */
 router.post(
   "/student/verify-face",
   uploadFaceBiometricData.single("face_image"), // Handle face image upload
@@ -110,7 +154,11 @@ router.post(
 
 // --- Teacher Specific Routes (require authentication and teacher role) ---
 
-// Update teacher password
+/**
+ * @route PATCH /api/auth/teacher/update-password
+ * @description Update the password for a teacher
+ * @access Private (Teacher)
+ */
 router.patch(
   "/teacher/update-password",
   isLogin,
@@ -120,7 +168,11 @@ router.patch(
   authController.updateTeacherPassword
 );
 
-// Update teacher name
+/**
+ * @route PATCH /api/auth/teacher/update-name
+ * @description Update the name for a teacher
+ * @access Private (Teacher)
+ */
 router.patch(
   "/teacher/update-name",
   isLogin,
@@ -130,7 +182,11 @@ router.patch(
   authController.updateTeacherName
 );
 
-// Upload teacher profile image
+/**
+ * @route POST /api/auth/teacher/upload-image
+ * @description Upload a profile image for a teacher
+ * @access Private (Teacher)
+ */
 router.post(
   "/teacher/upload-image",
   isLogin,
@@ -140,7 +196,11 @@ router.post(
   authController.uploadTeacherImage
 );
 
-// Get teacher information (accessible by anyone)
+/**
+ * @route GET /api/auth/teacher/:id
+ * @description Get information about a specific teacher
+ * @access Private (Logged-in users only)
+ */
 router.get(
   "/teacher/:id",
   isLogin,
