@@ -8,74 +8,100 @@ const assignmentController = require("../controllers/assignmentController");
 const { uploadAssignment } = require("../middlewares/multer/uploadAssignment");
 
 // Middleware for authentication and authorization
-const { isCourseCreator, isTeacher, isCourseCreatorOrCourseStudent } = require("../middlewares/authorization");
+const {
+  isCourseCreator,
+  isTeacher,
+  isCourseCreatorOrCourseStudent,
+} = require("../middlewares/authorization");
 const { isLogin } = require("../middlewares/isLogin");
 const { isEmailVerified } = require("../middlewares/isEmailVerified");
 
-// Middleware for assignment data validation (assuming it exists)
+// Middleware for assignment data validation
 const { validateAssignment } = require("../middlewares/schemaValidator");
 
-// Define routes for assignment operations
-
-// Get all assignments for a course (Teacher & Course Creator only)
+/**
+ * @route GET /api/:courseId
+ * @description Get all assignments for a specific course
+ * @access Private (Teacher, Course Creator)
+ */
 router.get(
   "/:courseId",
-  isLogin,
-  isEmailVerified,
-  isTeacher,
-  isCourseCreator,
-  assignmentController.getAssignments
+  isLogin,                 // Ensure the user is logged in
+  isEmailVerified,         // Ensure the user's email is verified
+  isTeacher,               // Ensure the user is a teacher
+  isCourseCreator,         // Ensure the user is the course creator
+  assignmentController.getAssignments // Controller function to get all assignments
 );
 
-// Create a new assignment (Teacher & Course Creator only)
+/**
+ * @route POST /api/:courseId
+ * @description Create a new assignment for a specific course
+ * @access Private (Teacher, Course Creator)
+ */
 router.post(
   "/:courseId",
-  isLogin,
-  isEmailVerified,
-  isTeacher,
-  isCourseCreator,
-  uploadAssignment.single("assignment_document"), // Handle file upload
-  validateAssignment, // Validate assignment data
-  assignmentController.createAssignment
+  isLogin,                     // Ensure the user is logged in
+  isEmailVerified,             // Ensure the user's email is verified
+  isTeacher,                   // Ensure the user is a teacher
+  isCourseCreator,             // Ensure the user is the course creator
+  uploadAssignment.single("assignment_document"), // Middleware to handle file upload
+  validateAssignment,          // Middleware to validate assignment data
+  assignmentController.createAssignment // Controller function to create a new assignment
 );
 
-// Download an assignment document ( Course students or creator only)
+/**
+ * @route GET /api/:courseId/assignment/:assignmentId/download
+ * @description Download a specific assignment document
+ * @access Private (Course Creator or Course Student)
+ */
 router.get(
   "/:courseId/assignment/:assignmentId/download",
-  isLogin,
-  isEmailVerified,
-  isCourseCreatorOrCourseStudent,
-  assignmentController.downloadAssignment
+  isLogin,                                // Ensure the user is logged in
+  isEmailVerified,                        // Ensure the user's email is verified
+  isCourseCreatorOrCourseStudent,         // Allow access to course creators or students
+  assignmentController.downloadAssignment // Controller function to download assignment
 );
 
-// Get a specific assignment (Logged-in users only)
+/**
+ * @route GET /api/:courseId/assignment/:assignmentId
+ * @description Get a specific assignment's details
+ * @access Private (Logged-in users only)
+ */
 router.get(
   "/:courseId/assignment/:assignmentId",
-  isLogin,
-  isEmailVerified,
-  assignmentController.getAssignment
+  isLogin,                 // Ensure the user is logged in
+  isEmailVerified,         // Ensure the user's email is verified
+  assignmentController.getAssignment // Controller function to get assignment details
 );
 
-// Update an existing assignment (Teacher & Course Creator only)
+/**
+ * @route PUT /api/:courseId/assignment/:assignmentId
+ * @description Update an existing assignment
+ * @access Private (Teacher, Course Creator)
+ */
 router.put(
   "/:courseId/assignment/:assignmentId",
-  isLogin,
-  isEmailVerified,
-  isTeacher,
-  isCourseCreator,
-  uploadAssignment.single("assignment_document"), // Handle file upload for updates
-  validateAssignment, // Validate updated assignment data
-  assignmentController.updateAssignment
+  isLogin,                     // Ensure the user is logged in
+  isEmailVerified,             // Ensure the user's email is verified
+  isTeacher,                   // Ensure the user is a teacher
+  isCourseCreator,             // Ensure the user is the course creator
+  uploadAssignment.single("assignment_document"), // Middleware to handle file upload for updates
+  validateAssignment,          // Middleware to validate updated assignment data
+  assignmentController.updateAssignment // Controller function to update assignment
 );
 
-// Delete an assignment (Teacher & Course Creator only)
+/**
+ * @route DELETE /api/:courseId/assignment/:assignmentId
+ * @description Delete an existing assignment
+ * @access Private (Teacher, Course Creator)
+ */
 router.delete(
   "/:courseId/assignment/:assignmentId",
-  isLogin,
-  isEmailVerified,
-  isTeacher,
-  isCourseCreator,
-  assignmentController.deleteAssignment
+  isLogin,                     // Ensure the user is logged in
+  isEmailVerified,             // Ensure the user's email is verified
+  isTeacher,                   // Ensure the user is a teacher
+  isCourseCreator,             // Ensure the user is the course creator
+  assignmentController.deleteAssignment // Controller function to delete assignment
 );
 
 module.exports = router;
