@@ -1,41 +1,50 @@
 const express = require("express");
 const router = express.Router();
 
-// Middleware for user authentication and verification
+// Middleware
 const { isLogin } = require("../middlewares/isLogin");
 const { isEmailVerified } = require("../middlewares/isEmailVerified");
+const {
+  isStudent,
+  isTeacher,
+  isCourseCreator,
+} = require("../middlewares/authorization");
+const {
+  uploadProctoringImage,
+} = require("../middlewares/multer/uploadProctoringImage");
 
-// Middleware for role-based authorization
-const { isStudent, isTeacher, isCourseCreator } = require("../middlewares/authorization");
-
-// Middleware for handling file uploads (specifically for proctoring images)
-const { uploadProctoringImage } = require("../middlewares/multer/uploadProctoringImage");
-
-// Controller for handling proctoring-related logic
+// Controller
 const proctoringController = require("../controllers/proctoringController");
 
 // --- Proctoring Routes ---
 
-// Route for analyzing proctoring images during a quiz
-router
-  .route("/:courseId/:quizId/analyze-image")
-  .post(
-    isLogin,                              // Ensure the user is logged in
-    isEmailVerified,                      // Ensure the user's email is verified
-    isStudent,                            // Ensure the user is a student
-    uploadProctoringImage.single("proctor_image"), // Middleware to handle single image upload
-    proctoringController.analyzeImage     // Controller function to analyze the uploaded image
-  );
+/**
+ * @route  POST /api/proctoring/:courseId/:quizId/analyze-image
+ * @desc   Analyze a proctoring image during a quiz
+ * @access Private (Student Only)
+ */
+router.post(
+  "/:courseId/:quizId/analyze-image",
+  isLogin,
+  isEmailVerified,
+  isStudent,
+  uploadProctoringImage.single("proctor_image"),
+  proctoringController.analyzeImage
+);
 
-// Route for generating a proctoring report for a specific student in a quiz
+/**
+ * @route  GET /api/proctoring/:courseId/:quizId/generate-report/:studentId
+ * @desc   Generate a proctoring report for a student
+ * @access Private (Teacher and Course Creator only)
+ */
 router
   .route("/:courseId/:quizId/generate-report/:studentId")
   .get(
-    isLogin,                              // Ensure the user is logged in
-    isEmailVerified,                      // Ensure the user's email is verified
-    isTeacher,                            // Ensure the user is a teacher
-    isCourseCreator,                      // Ensure the user is a course creator
-    proctoringController.generateReport   // Controller function to generate a proctoring report
+    isLogin,
+    isEmailVerified,
+    isTeacher,
+    isCourseCreator,
+    proctoringController.generateReport
   );
 
 module.exports = router;
