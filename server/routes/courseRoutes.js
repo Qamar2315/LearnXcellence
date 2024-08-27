@@ -1,10 +1,10 @@
 const express = require("express");
 const router = express.Router();
 
-// Controller for handling course-related logic
+// Controller
 const courseController = require("../controllers/courseController");
 
-// Middleware for authentication and authorization
+// Middleware
 const { isLogin } = require("../middlewares/isLogin");
 const { isEmailVerified } = require("../middlewares/isEmailVerified");
 const {
@@ -14,8 +14,6 @@ const {
   isCourseStudent,
   isCourseCreatorOrCourseStudent,
 } = require("../middlewares/authorization");
-
-// Middleware for data validation
 const {
   validateCourse,
   validateDate,
@@ -24,7 +22,11 @@ const {
 
 // --- Public Routes ---
 
-// Get all courses (accessible by anyone)
+/**
+ * @route  GET /api/courses/getAll
+ * @desc   Get all courses
+ * @access Public (Login and Email Verification Required)
+ */
 router.get(
   "/getAll",
   isLogin,
@@ -32,19 +34,27 @@ router.get(
   courseController.sendAllCourses
 );
 
-// --- Protected Routes (require authentication) ---
+// --- Protected Routes (Authentication Required) ---
 
-// Create a new course (Teacher only)
+/**
+ * @route  POST /api/courses/create
+ * @desc   Create a new course
+ * @access Private (Teacher only)
+ */
 router.post(
   "/create",
   isLogin,
   isEmailVerified,
   isTeacher,
-  validateCourse, // Validate course data
+  validateCourse,
   courseController.createCourse
 );
 
-// Search for a student (Teacher only)
+/**
+ * @route  GET /api/courses/search-student
+ * @desc   Search for a student (by email)
+ * @access Private (Teacher only)
+ */
 router.get(
   "/search-student",
   isLogin,
@@ -53,7 +63,11 @@ router.get(
   courseController.searchStudent
 );
 
-// Join a course using a course code (Student only)
+/**
+ * @route  POST /api/courses/join
+ * @desc   Join a course using a course code
+ * @access Private (Student only)
+ */
 router.post(
   "/join",
   isLogin,
@@ -62,10 +76,13 @@ router.post(
   courseController.joinCourse
 );
 
-// --- Course Specific Routes (require authentication) ---
+// --- Course Specific Routes (Authentication Required) ---
 
-// Get a specific course
-// (Accessible by Course Creator, Course Teacher and Course Student)
+/**
+ * @route  GET /api/courses/:courseId
+ * @desc   Get details of a specific course
+ * @access Private (Course Creator, Course Teacher, or Course Student)
+ */
 router.get(
   "/:courseId",
   isLogin,
@@ -74,7 +91,11 @@ router.get(
   courseController.sendCourse
 );
 
-// Update a course's name (Course Creator only)
+/**
+ * @route  PUT /api/courses/:courseId
+ * @desc   Update a course's name
+ * @access Private (Course Creator only)
+ */
 router.put(
   "/:courseId",
   isLogin,
@@ -84,18 +105,26 @@ router.put(
   courseController.updateCourseName
 );
 
-// Update a course's details (Course Creator only)
+/**
+ * @route  PATCH /api/courses/:courseId
+ * @desc   Update a course's details
+ * @access Private (Course Creator only)
+ */
 router.patch(
   "/:courseId",
   isLogin,
   isEmailVerified,
   isTeacher,
   isCourseCreator,
-  validateCourse, // Validate course data
+  validateCourse,
   courseController.updateCourse
 );
 
-// Delete a course (Course Creator only)
+/**
+ * @route  DELETE /api/courses/:courseId
+ * @desc   Delete a course
+ * @access Private (Course Creator only)
+ */
 router.delete(
   "/:courseId",
   isLogin,
@@ -105,17 +134,25 @@ router.delete(
   courseController.deleteCourse
 );
 
-// Leave a course (Student only)
+/**
+ * @route  PUT /api/courses/:courseId/leave
+ * @desc   Leave a course
+ * @access Private (Student enrolled in the course only)
+ */
 router.put(
   "/:courseId/leave",
   isLogin,
   isEmailVerified,
   isStudent,
-  isCourseStudent, // Ensure the student is enrolled in the course
+  isCourseStudent,
   courseController.leaveCourse
 );
 
-// Regenerate the course code (Course Creator only)
+/**
+ * @route  PUT /api/courses/:courseId/regenerate-course-code
+ * @desc   Regenerate the course code for a course
+ * @access Private (Course Creator only)
+ */
 router.put(
   "/:courseId/regenerate-course-code",
   isLogin,
@@ -125,29 +162,41 @@ router.put(
   courseController.regenerateCourseCode
 );
 
-// Add a student to a course (Course Creator only)
+/**
+ * @route  PUT /api/courses/:courseId/add
+ * @desc   Add a student to a course
+ * @access Private (Course Creator only)
+ */
 router.put(
   "/:courseId/add",
   isLogin,
   isEmailVerified,
   isTeacher,
   isCourseCreator,
-  validateAddRemoveStudent, // Validate student data
+  validateAddRemoveStudent,
   courseController.addStudentToCourse
 );
 
-// Remove a student from a course (Course Creator only)
+/**
+ * @route  PUT /api/courses/:courseId/remove
+ * @desc   Remove a student from a course
+ * @access Private (Course Creator only)
+ */
 router.put(
   "/:courseId/remove",
   isLogin,
   isEmailVerified,
   isTeacher,
   isCourseCreator,
-  validateAddRemoveStudent, // Validate student data
+  validateAddRemoveStudent,
   courseController.removeStudentFromCourse
 );
 
-// Update viva schedule for a course (Course Creator only)
+/**
+ * @route  PUT /api/courses/updateViva/:courseId
+ * @desc   Update viva schedule for a course
+ * @access Private (Course Creator only)
+ */
 router.put(
   "/updateViva/:courseId",
   isLogin,
@@ -158,7 +207,11 @@ router.put(
   courseController.updateVivaSchedule
 );
 
-// Update project schedule for a course (Course Creator only)
+/**
+ * @route  PUT /api/courses/updateProject/:courseId
+ * @desc   Update project schedule for a course
+ * @access Private (Course Creator only)
+ */
 router.put(
   "/updateProject/:courseId",
   isLogin,
