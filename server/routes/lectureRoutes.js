@@ -1,10 +1,10 @@
 const express = require("express");
 const router = express.Router();
 
-// Controller for handling lecture-related logic
+// Controller
 const lectureController = require("../controllers/lectureController");
 
-// Middleware for authentication and authorization
+// Middleware
 const { isLogin } = require("../middlewares/isLogin");
 const { isEmailVerified } = require("../middlewares/isEmailVerified");
 const {
@@ -12,14 +12,15 @@ const {
   isCourseCreator,
   isCourseCreatorOrCourseStudent,
 } = require("../middlewares/authorization");
-
-// Middleware for handling lecture video uploads (using multer)
 const { uploadLecture } = require("../middlewares/multer/uploadLecture");
 
 // --- Lecture Routes ---
 
-// Get all lectures for a course
-// (Accessible by Course Creator, Course Teacher and Course Student)
+/**
+ * @route  GET /api/lectures/:courseId
+ * @desc   Get all lectures for a course
+ * @access Private (Course Creator, Course Teacher, and Course Student)
+ */
 router.get(
   "/:courseId",
   isLogin,
@@ -28,19 +29,26 @@ router.get(
   lectureController.getLectures
 );
 
-// Create a new lecture for a course (Teacher and Course Creator only)
+/**
+ * @route  POST /api/lectures/:courseId
+ * @desc   Create a new lecture for a course
+ * @access Private (Teacher and Course Creator only)
+ */
 router.post(
   "/:courseId",
   isLogin,
   isEmailVerified,
   isTeacher,
   isCourseCreator,
-  uploadLecture.single("lecture_video"), // Handle lecture video upload
+  uploadLecture.single("lecture_video"),
   lectureController.createLecture
 );
 
-// Get a specific lecture
-// (Accessible by Course Creator, Course Teacher and Course Student)
+/**
+ * @route  GET /api/lectures/:courseId/lecture/:lectureId
+ * @desc   Get a specific lecture
+ * @access Private (Course Creator, Course Teacher, and Course Student)
+ */
 router.get(
   "/:courseId/lecture/:lectureId",
   isLogin,
@@ -49,18 +57,26 @@ router.get(
   lectureController.getLecture
 );
 
-// Update a specific lecture (Teacher and Course Creator only)
+/**
+ * @route  PUT /api/lectures/:courseId/lecture/:lectureId
+ * @desc   Update a specific lecture
+ * @access Private (Teacher and Course Creator only)
+ */
 router.put(
   "/:courseId/lecture/:lectureId",
   isLogin,
   isEmailVerified,
   isTeacher,
   isCourseCreator,
-  uploadLecture.single("lecture_video"), // Handle lecture video upload for updates
+  uploadLecture.single("lecture_video"),
   lectureController.updateLecture
 );
 
-// Delete a specific lecture (Teacher and Course Creator only)
+/**
+ * @route  DELETE /api/lectures/:courseId/lecture/:lectureId
+ * @desc   Delete a specific lecture
+ * @access Private (Teacher and Course Creator only)
+ */
 router.delete(
   "/:courseId/lecture/:lectureId",
   isLogin,
@@ -70,8 +86,11 @@ router.delete(
   lectureController.deleteLecture
 );
 
-// Download a lecture video
-// (Accessible by Course Creator, Course Teacher and Course Student)
+/**
+ * @route  GET /api/lectures/:courseId/lecture/:lectureId/download
+ * @desc   Download a lecture video
+ * @access Private (Course Creator, Course Teacher, and Course Student)
+ */
 router.get(
   "/:courseId/lecture/:lectureId/download",
   isLogin,
