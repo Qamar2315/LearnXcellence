@@ -1,75 +1,87 @@
 const express = require("express");
 const router = express.Router();
 
-// Controller for handling poll-related logic
+// Controller
 const pollController = require("../controllers/pollController");
 
-// Middleware for user authentication and verification
+// Middleware
 const { isLogin } = require("../middlewares/isLogin");
 const { isEmailVerified } = require("../middlewares/isEmailVerified");
-
-// Middleware for role-based authorization
-const {
-  isTeacher,
-  isCourseCreator,
-  isStudent,
-  isCourseStudent,
+const { 
+  isTeacher, 
+  isCourseCreator, 
+  isStudent, 
+  isCourseStudent, 
   isCourseCreatorOrCourseStudent
 } = require("../middlewares/authorization");
-
-// Middleware for validating poll data
 const { validatePoll } = require("../middlewares/schemaValidator");
+
 
 // --- Poll Routes ---
 
-// Routes for managing polls within a specific course
-router
-  .route("/:courseId")
-  // Get all polls for a course (accessible to course creators or students)
+/**
+ * @route  GET /api/polls/:courseId
+ * @desc   Get all polls for a course 
+ * @access Private (Course Creator or Course Student)
+ */
+/**
+ * @route  POST /api/polls/:courseId 
+ * @desc   Create a new poll for a course 
+ * @access Private (Teacher and Course Creator only)
+ */
+router.route("/:courseId")
   .get(
-    isLogin,                      // Ensure the user is logged in
-    isEmailVerified,              // Ensure the user's email is verified
-    isCourseCreatorOrCourseStudent, // Ensure the user is a course creator or student
-    pollController.getPolls       // Controller function to retrieve polls
+    isLogin, 
+    isEmailVerified, 
+    isCourseCreatorOrCourseStudent, 
+    pollController.getPolls
   )
-  // Create a new poll for a course (restricted to teachers and course creators)
   .post(
-    isLogin,                      // Ensure the user is logged in
-    isEmailVerified,              // Ensure the user's email is verified
-    isTeacher,                    // Ensure the user is a teacher
-    isCourseCreator,              // Ensure the user is a course creator
-    validatePoll,                 // Validate the poll data
-    pollController.createPoll     // Controller function to create a poll
+    isLogin, 
+    isEmailVerified, 
+    isTeacher, 
+    isCourseCreator, 
+    validatePoll, 
+    pollController.createPoll
   );
 
-// Routes for managing a specific poll within a course
-router
-  .route("/:courseId/poll/:pollId")
-  // Get details of a specific poll (accessible to course creators or students)
+/**
+ * @route  GET /api/polls/:courseId/poll/:pollId
+ * @desc   Get details of a specific poll 
+ * @access Private (Course Creator or Course Student)
+ */
+/**
+ * @route  DELETE /api/polls/:courseId/poll/:pollId 
+ * @desc   Delete a specific poll
+ * @access Private (Teacher and Course Creator only) 
+ */
+router.route("/:courseId/poll/:pollId")
   .get(
-    isLogin,                      // Ensure the user is logged in
-    isEmailVerified,              // Ensure the user's email is verified
-    isCourseCreatorOrCourseStudent, // Ensure the user is a course creator or student
-    pollController.getPoll        // Controller function to retrieve poll details
+    isLogin, 
+    isEmailVerified, 
+    isCourseCreatorOrCourseStudent, 
+    pollController.getPoll
   )
-  // Delete a specific poll (restricted to teachers and course creators)
   .delete(
-    isLogin,                      // Ensure the user is logged in
-    isEmailVerified,              // Ensure the user's email is verified
-    isTeacher,                    // Ensure the user is a teacher
-    isCourseCreator,              // Ensure the user is a course creator
-    pollController.deletePoll     // Controller function to delete a poll
+    isLogin, 
+    isEmailVerified, 
+    isTeacher, 
+    isCourseCreator, 
+    pollController.deletePoll
   );
 
-// Route for voting on a specific poll within a course
-router
-  .route("/:courseId/poll/:pollId/vote")
+/**
+ * @route  POST /api/polls/:courseId/poll/:pollId/vote
+ * @desc   Vote on a specific poll
+ * @access Private (Student in the course only)
+ */
+router.route("/:courseId/poll/:pollId/vote")
   .post(
-    isLogin,                      // Ensure the user is logged in
-    isEmailVerified,              // Ensure the user's email is verified
-    isStudent,                    // Ensure the user is a student
-    isCourseStudent,              // Ensure the user is a student in the course
-    pollController.votePoll       // Controller function to vote on a poll
+    isLogin, 
+    isEmailVerified, 
+    isStudent, 
+    isCourseStudent, 
+    pollController.votePoll
   );
 
 module.exports = router;
