@@ -1,179 +1,168 @@
 const express = require("express");
 const router = express.Router();
 
-// Controller for handling quiz-related logic
+// Controller
 const quizController = require("../controllers/quizController");
 
-// Middleware for user authentication and verification
+// Middleware
 const { isLogin } = require("../middlewares/isLogin");
 const { isEmailVerified } = require("../middlewares/isEmailVerified");
-
-// Middleware for role-based authorization
-const {
-  isTeacher,
-  isCourseCreator,
-  isCourseStudent,
-  isStudent,
-} = require("../middlewares/authorization");
-
-// Middleware for request validation
-const {
-  validateQuiz,
-  validateUpdateQuizScore,
+const { isTeacher, isCourseCreator, isCourseStudent, isStudent } = require("../middlewares/authorization");
+const { 
+  validateQuiz, 
+  validateUpdateQuizScore, 
   validateUpdateSubmissionFlag,
   validateQuizGenerationQuery,
-  validateQuizGenerationBody,
+  validateQuizGenerationBody
 } = require("../middlewares/schemaValidator");
 
 // --- Quiz Routes ---
 
-// Route to create a new quiz for a course
-router
-  .route("/:courseId/create")
+/**
+ * @route  POST /api/quizzes/:courseId/create
+ * @desc   Create a new quiz for a course 
+ * @access Private (Teacher and Course Creator only)
+ */
+router.post("/:courseId/create", 
+  isLogin, 
+  isEmailVerified, 
+  isTeacher, 
+  isCourseCreator, 
+  validateQuiz, 
+  quizController.createQuiz
+);
+
+/**
+ * @route  GET /api/quizzes/:courseId/generate
+ * @desc   Generate quiz questions by topic 
+ * @access Private (Teacher and Course Creator only)
+ */
+/**
+ * @route  POST /api/quizzes/:courseId/generate
+ * @desc   Generate quiz questions by topic or content
+ * @access Private (Teacher and Course Creator only)
+ */
+router.route("/:courseId/generate")
+  .get(
+    isLogin,
+    isEmailVerified,
+    isTeacher,
+    isCourseCreator,
+    validateQuizGenerationQuery, 
+    quizController.generateQuizByTopic 
+  )
   .post(
-    isLogin,                // Ensure the user is logged in
-    isEmailVerified,        // Ensure the user's email is verified
-    isTeacher,              // Ensure the user is a teacher
-    isCourseCreator,        // Ensure the user is the course creator
-    validateQuiz,           // Validate the quiz data
-    quizController.createQuiz // Controller function to create a quiz
+    isLogin,
+    isEmailVerified,
+    isTeacher,
+    isCourseCreator,
+    validateQuizGenerationBody,
+    quizController.generateQuizByTopicOrContent
   );
 
 /**
- * @route GET /api/quizzes/:courseId/generate
- * @description Generate quiz questions by topic
- * @access Private (Teachers, Course Creators)
- * @param {string} topic (query parameter) - The topic for question generation.
- * @param {number} [numberOfQuestions] (query parameter) - Number of questions (default: 5).
- * @param {string} [difficulty] (query parameter) - Difficulty level (easy, medium, hard, default: medium).
+ * @route  GET /api/quizzes/course/:courseId
+ * @desc   Get quizzes by course
+ * @access Private (Authenticated users, adjust middleware as needed) 
  */
-router
-  .route("/:courseId/generate")
-  .get(
-    isLogin,                // Ensure the user is logged in
-    isEmailVerified,        // Ensure the user's email is verified
-    isTeacher,              // Ensure the user is a teacher
-    isCourseCreator,        // Ensure the user is the course creator
-    validateQuizGenerationQuery, // Validate query parameters for quiz generation
-    quizController.generateQuizByTopic // Controller function to generate quiz by topic
-  )
-  .post(
-    isLogin,                // Ensure the user is logged in
-    isEmailVerified,        // Ensure the user's email is verified
-    isTeacher,              // Ensure the user is a teacher
-    isCourseCreator,        // Ensure the user is the course creator
-    validateQuizGenerationBody, // Validate body for quiz generation
-    quizController.generateQuizByTopicOrContent // Controller function to generate quiz by topic or content
-  );
+router.get("/course/:courseId", isLogin, isEmailVerified, quizController.getQuizzesByCourse);
 
-// Route to get quizzes by course
-router
-  .route("/course/:courseId")
-  .get(
-    isLogin,                // Ensure the user is logged in
-    isEmailVerified,        // Ensure the user's email is verified
-    quizController.getQuizzesByCourse // Controller function to get quizzes by course
-  );
+/**
+ * @route  GET /api/quizzes/:courseId/:id/get 
+ * @desc   Get a specific quiz for a student
+ * @access Private (Student enrolled in the course only)
+ */
+router.get("/:courseId/:id/get", isLogin, isEmailVerified, isCourseStudent, quizController.getQuizStudent);
 
-// Route to get a specific quiz for a student
-router
-  .route("/:courseId/:id/get")
-  .get(
-    isLogin,                // Ensure the user is logged in
-    isEmailVerified,        // Ensure the user's email is verified
-    isCourseStudent,        // Ensure the user is a student in the course
-    quizController.getQuizStudent // Controller function to get quiz details for a student
-  );
+/**
+ * @route  POST /api/quizzes/:courseId/:id/start 
+ * @desc   Start a quiz for a student 
+ * @access Private (Student enrolled in the course only)
+ */
+router.post("/:courseId/:id/start", isLogin, isEmailVerified, isStudent, isCourseStudent, quizController.startQuiz);
 
-// Route for students to start a quiz
-router
-  .route("/:courseId/:id/start")
-  .post(
-    isLogin,                // Ensure the user is logged in
-    isEmailVerified,        // Ensure the user's email is verified
-    isStudent,              // Ensure the user is a student
-    isCourseStudent,        // Ensure the student is enrolled in the course
-    quizController.startQuiz // Controller function to start a quiz
-  );
+/**
+ * @route  POST /api/quizzes/:courseId/:id/pdf 
+ * @desc   Generate a PDF report of all students' quiz submissions
+ * @access Private (Teacher and Course Creator only) 
+ */
+router.post("/:courseId/:id/pdf", 
+  isLogin, 
+  isEmailVerified, 
+  isTeacher, 
+  isCourseCreator, 
+  quizController.generatePDFAllStudents
+);
 
-// Route to generate a PDF report of all students' quiz submissions
-router
-  .route("/:courseId/:id/pdf")
-  .post(
-    isLogin,                // Ensure the user is logged in
-    isEmailVerified,        // Ensure the user's email is verified
-    isTeacher,              // Ensure the user is a teacher
-    isCourseCreator,        // Ensure the user is the course creator
-    quizController.generatePDFAllStudents // Controller function to generate a PDF for all students
-  );
+/**
+ * @route  POST /api/quizzes/:courseId/:id/pdf/:studentId
+ * @desc   Generate a PDF report for a specific student's quiz submission
+ * @access Private (Teacher and Course Creator only) 
+ */
+router.post("/:courseId/:id/pdf/:studentId", 
+  isLogin, 
+  isEmailVerified, 
+  isTeacher, 
+  isCourseCreator, 
+  quizController.generatePDFStudent
+);
 
-// Route to generate a PDF report for a specific student's quiz submission
-router
-  .route("/:courseId/:id/pdf/:studentId")
-  .post(
-    isLogin,                // Ensure the user is logged in
-    isEmailVerified,        // Ensure the user's email is verified
-    isTeacher,              // Ensure the user is a teacher
-    isCourseCreator,        // Ensure the user is the course creator
-    quizController.generatePDFStudent // Controller function to generate a PDF for a specific student
-  );
+/**
+ * @route  POST /api/quizzes/:courseId/:id/submit
+ * @desc   Submit a quiz 
+ * @access Private (Student only)
+ */
+router.post("/:courseId/:id/submit", isLogin, isEmailVerified, isStudent, quizController.submitQuiz);
 
-// Route for students to submit a quiz
-router
-  .route("/:courseId/:id/submit")
-  .post(
-    isLogin,                // Ensure the user is logged in
-    isEmailVerified,        // Ensure the user's email is verified
-    isStudent,              // Ensure the user is a student
-    quizController.submitQuiz // Controller function to submit a quiz
-  );
+/**
+ * @route  PUT /api/quizzes/:courseId/:quizId/update-marks/:submissionId
+ * @desc   Update quiz marks for a submission 
+ * @access Private (Teacher only)
+ */
+router.put("/:courseId/:quizId/update-marks/:submissionId", 
+  isLogin, 
+  isEmailVerified, 
+  isTeacher, 
+  validateUpdateQuizScore, 
+  quizController.updateSubmissionMarks
+);
 
-// Route to update quiz marks for a submission
-router
-  .route("/:courseId/:quizId/update-marks/:submissionId")
-  .put(
-    isLogin,                // Ensure the user is logged in
-    isEmailVerified,        // Ensure the user's email is verified
-    isTeacher,              // Ensure the user is a teacher
-    validateUpdateQuizScore, // Validate the update of quiz score
-    quizController.updateSubmissionMarks // Controller function to update marks
-  );
+/**
+ * @route  PUT /api/quizzes/:courseId/:quizId/update-flag/:submissionId
+ * @desc   Update a flag on a quiz submission
+ * @access Private (Teacher only)
+ */
+router.put("/:courseId/:quizId/update-flag/:submissionId", 
+  isLogin, 
+  isEmailVerified, 
+  isTeacher, 
+  validateUpdateSubmissionFlag, 
+  quizController.updateSubmissionFlag 
+);
 
-// Route to update a flag on a quiz submission
-router
-  .route("/:courseId/:quizId/update-flag/:submissionId")
-  .put(
-    isLogin,                // Ensure the user is logged in
-    isEmailVerified,        // Ensure the user's email is verified
-    isTeacher,              // Ensure the user is a teacher
-    validateUpdateSubmissionFlag, // Validate the update of submission flag
-    quizController.updateSubmissionFlag // Controller function to update a flag on a submission
-  );
-
-// Routes to manage a specific quiz
-router
-  .route("/:courseId/:id")
-  .get(
-    isLogin,                // Ensure the user is logged in
-    isEmailVerified,        // Ensure the user's email is verified
-    isTeacher,              // Ensure the user is a teacher
-    isCourseCreator,        // Ensure the user is the course creator
-    quizController.getQuiz // Controller function to get quiz details
-  )
+/**
+ * @route  GET /api/quizzes/:courseId/:id 
+ * @desc   Get details of a specific quiz 
+ * @access Private (Teacher and Course Creator only)
+ * 
+ * @route  PATCH /api/quizzes/:courseId/:id
+ * @desc   Update a specific quiz
+ * @access Private (Teacher and Course Creator only)
+ * 
+ * @route  DELETE /api/quizzes/:courseId/:id 
+ * @desc   Delete a specific quiz 
+ * @access Private (Teacher and Course Creator only)
+ */
+router.route("/:courseId/:id")
+  .get(isLogin, isEmailVerified, isTeacher, isCourseCreator, quizController.getQuiz)
   .patch(
-    isLogin,                // Ensure the user is logged in
-    isEmailVerified,        // Ensure the user's email is verified
-    isTeacher,              // Ensure the user is a teacher
-    isCourseCreator,        // Ensure the user is the course creator
-    validateQuiz,           // Validate the quiz data before updating
-    quizController.updateQuiz // Controller function to update the quiz
+    isLogin, 
+    isEmailVerified, 
+    isTeacher, 
+    isCourseCreator, 
+    validateQuiz, 
+    quizController.updateQuiz
   )
-  .delete(
-    isLogin,                // Ensure the user is logged in
-    isEmailVerified,        // Ensure the user's email is verified
-    isTeacher,              // Ensure the user is a teacher
-    isCourseCreator,        // Ensure the user is the course creator
-    quizController.deleteQuiz // Controller function to delete the quiz
-  );
+  .delete(isLogin, isEmailVerified, isTeacher, isCourseCreator, quizController.deleteQuiz);
 
 module.exports = router;
