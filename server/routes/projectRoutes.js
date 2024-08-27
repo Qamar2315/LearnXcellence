@@ -1,93 +1,108 @@
 const express = require("express");
 const router = express.Router();
 
-// Middleware for user authentication and verification
+// Middleware
 const { isLogin } = require("../middlewares/isLogin");
 const { isEmailVerified } = require("../middlewares/isEmailVerified");
-
-// Middleware for role-based authorization
-const {
-  isStudent,
-  isCourseStudent,
+const { 
+  isStudent, 
+  isCourseStudent, 
   isProjectCreator,
-  isCourseCreatorOrCourseStudent,
+  isCourseCreatorOrCourseStudent 
 } = require("../middlewares/authorization");
-
-// Middleware for request validation
 const { validateProject } = require("../middlewares/schemaValidator");
 
-// Controller for handling project-related logic
+// Controller
 const projectController = require("../controllers/projectController");
 
 // --- Project Routes ---
 
-// Route for creating a new project
-router
-  .route("/create")
-  .post(
-    isLogin,                // Ensure the user is logged in
-    isEmailVerified,        // Ensure the user's email is verified
-    isStudent,              // Ensure the user is a student
-    isCourseStudent,        // Ensure the student is enrolled in the course
-    validateProject,        // Validate the project data
-    projectController.createProject // Controller function to create a project
-  );
+/**
+ * @route  POST /api/projects/create
+ * @desc   Create a new project for a course 
+ * @access Private (Student enrolled in the course only) 
+ */
+router.post("/create", 
+  isLogin, 
+  isEmailVerified, 
+  isStudent, 
+  isCourseStudent, 
+  validateProject, 
+  projectController.createProject
+);
 
-// Route for adding a member to a specific project
-router
-  .route("/:courseId/:projectId/add-member")
-  .put(
-    isLogin,                // Ensure the user is logged in
-    isEmailVerified,        // Ensure the user's email is verified
-    isCourseStudent,        // Ensure the user is a student in the course
-    isProjectCreator,       // Ensure the user is the project creator
-    projectController.addMember // Controller function to add a member to the project
-  );
+/**
+ * @route  PUT /api/projects/:courseId/:projectId/add-member
+ * @desc   Add a member to a project
+ * @access Private (Project Creator (and enrolled in the course) only)
+ */
+router.put("/:courseId/:projectId/add-member",
+  isLogin,
+  isEmailVerified,
+  isCourseStudent, 
+  isProjectCreator, 
+  projectController.addMember
+);
 
-// Route for removing a member from a specific project
-router
-  .route("/:courseId/:projectId/:memberId/remove-member")
-  .put(
-    isLogin,                // Ensure the user is logged in
-    isEmailVerified,        // Ensure the user's email is verified
-    isCourseStudent,        // Ensure the user is a student in the course
-    isProjectCreator,       // Ensure the user is the project creator
-    projectController.removeMember // Controller function to remove a member from the project
-  );
+/**
+ * @route  PUT /api/projects/:courseId/:projectId/:memberId/remove-member
+ * @desc   Remove a member from a project 
+ * @access Private (Project Creator (and enrolled in the course) only)
+ */
+router.put("/:courseId/:projectId/:memberId/remove-member",
+  isLogin,
+  isEmailVerified,
+  isCourseStudent, 
+  isProjectCreator, 
+  projectController.removeMember
+);
 
-// Route for generating project suggestions for a course
-router
-  .route("/:courseId/generate-project-suggestions")
+/**
+ * @route  GET /api/projects/:courseId/generate-project-suggestions
+ * @desc   Generate project suggestions for a course
+ * @access Private (Student enrolled in the course only)
+ */
+router.get("/:courseId/generate-project-suggestions",
+  isLogin,
+  isEmailVerified,
+  isStudent,
+  isCourseStudent, 
+  projectController.generateProjectSuggestions
+);
+
+/**
+ * @route  GET /api/projects/:courseId/:projectId
+ * @desc   Get details of a specific project
+ * @access Private (Course Creator or Student enrolled in the course)
+ * 
+ * @route  PUT /api/projects/:courseId/:projectId
+ * @desc   Update a specific project 
+ * @access Private (Project Creator (and enrolled in the course) only)
+ *
+ * @route  DELETE /api/projects/:courseId/:projectId
+ * @desc   Delete a specific project 
+ * @access Private (Course Creator or Student enrolled in the course)
+ */
+router.route("/:courseId/:projectId")
   .get(
-    isLogin,                // Ensure the user is logged in
-    isEmailVerified,        // Ensure the user's email is verified
-    isStudent,              // Ensure the user is a student
-    isCourseStudent,        // Ensure the student is enrolled in the course
-    projectController.generateProjectSuggestions // Controller function to generate project suggestions
-  );
-
-// Routes for managing a specific project
-router
-  .route("/:courseId/:projectId")
-  .get(
-    isLogin,                // Ensure the user is logged in
-    isEmailVerified,        // Ensure the user's email is verified
-    isCourseCreatorOrCourseStudent, // Ensure the user is either a course creator or a student in the course
-    projectController.sendProject // Controller function to send project details
+    isLogin, 
+    isEmailVerified, 
+    isCourseCreatorOrCourseStudent, 
+    projectController.sendProject 
   )
   .put(
-    isLogin,                // Ensure the user is logged in
-    isEmailVerified,        // Ensure the user's email is verified
-    isStudent,              // Ensure the user is a student
-    isProjectCreator,       // Ensure the user is the project creator
-    validateProject,        // Validate the project data before updating
-    projectController.updateProject // Controller function to update the project
+    isLogin, 
+    isEmailVerified, 
+    isStudent, // Assuming only the project creator (who is a student) can update
+    isProjectCreator, 
+    validateProject, 
+    projectController.updateProject
   )
   .delete(
-    isLogin,                // Ensure the user is logged in
-    isEmailVerified,        // Ensure the user's email is verified
-    isCourseCreatorOrCourseStudent, // Ensure the user is either a course creator or a student in the course
-    projectController.deleteProject // Controller function to delete the project
+    isLogin, 
+    isEmailVerified, 
+    isCourseCreatorOrCourseStudent, 
+    projectController.deleteProject
   );
 
 module.exports = router;
