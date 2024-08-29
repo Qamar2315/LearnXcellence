@@ -135,3 +135,5 @@ dist
 
 /server/uploads/
 /server/public/
+
+/server/docs
