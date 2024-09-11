@@ -10,6 +10,7 @@ from ultralytics import YOLO
 from ai_protoring import analyze_image
 import joblib
 from cheating_detection import predict_cheating_probability
+from send_verification_email import send_verification_email
 
 # Load environment variables from .env file
 load_dotenv()
@@ -97,6 +98,26 @@ def generate_otp_api():
     except Exception as e:
         return jsonify(error=str(e)), 500
 
+@app.route('/send-verification-email', methods=['POST'])
+def send_verification_mail():
+    try:
+        data = request.json
+        name = data.get('name')
+        email = data.get('email')
+        
+        if not email:
+            return jsonify(error="Email not provided"), 400
+        if not name:
+            return jsonify(error="Name not provided"), 400
+        # Send success email
+        try:
+            send_verification_email(name, email)
+            return jsonify(success=True,message="Verification email sent successfully")
+        except Exception as e:
+            return jsonify(succes=False, error=f"Failed to send OTP: {str(e)}"), 500
+    except Exception as e:
+        return jsonify(error=str(e)), 500
+
 @app.route('/analyze-image', methods=['POST'])
 def analyze_image_api():
     try:
@@ -131,6 +152,7 @@ def predict_cheating_api():
             return jsonify(success=False, error=f"Failed to predict cheating: {str(e)}"), 500
     except Exception as e:
         return jsonify(error=str(e)), 500
+
     
 if __name__ == '__main__':
     app.run(debug=True)
