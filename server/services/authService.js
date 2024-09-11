@@ -48,6 +48,8 @@ const registerStudent = async (name, email, pass) => {
     name: student.name,
     email: studentAccount.email,
     password: studentAccount.password,
+    is_email_verified: studentAccount.email_verified,
+    profile_picture: studentAccount.profile_picture,
     token: generateToken(student._id),
   };
 };
@@ -71,6 +73,8 @@ const loginStudent = async (email, pass) => {
     _id: student._id,
     name: student.name,
     email: studentAccount.email,
+    is_email_verified: studentAccount.email_verified,
+    profile_picture: studentAccount.profile_picture,
     token: generateToken(student._id),
   };
 };
@@ -111,6 +115,8 @@ const registerTeacher = async (name, email, pass) => {
     name: teacher.name,
     email: teacherAccount.email,
     password: teacherAccount.password,
+    is_email_verified: teacherAccount.email_verified,
+    profile_picture: teacherAccount.profile_picture,
     token: generateToken(teacher._id),
   };
 };
@@ -134,6 +140,8 @@ const loginTeacher = async (email, pass) => {
     _id: teacher._id,
     name: teacher.name,
     email: teacherAccount.email,
+    is_email_verified: teacherAccount.email_verified,
+    profile_picture: teacherAccount.profile_picture,
     token: generateToken(teacher._id),
   };
 };
@@ -356,7 +364,13 @@ const verifyOtp = async (account_id, otp) => {
   await authRepository.updateAccountEmailVerification(account_id, true);
   await authRepository.deleteOtp(existingOtp._id);
   await authRepository.setAccountOtpToNull(account._id);
-
+  const teacher = await authRepository.findTeacherByAccountId(account_id);
+  const student = await authRepository.findStudentByAccountId(account_id);
+  const name = teacher ? teacher.name : student.name;
+  const response = await axios.post(`${process.env.FLASK_URL}/send-verification-email`, {
+    name,
+    email: account.email,
+  });
   return { success: true, message: "Email verified successfully" };
 };
 

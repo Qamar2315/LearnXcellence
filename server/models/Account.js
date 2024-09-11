@@ -6,7 +6,10 @@ const accountSchema = new schema({
   username: String,
   profile_picture:String,
   password: String,
-  email_verified: Boolean,
+  email_verified: {
+    type: Boolean,
+    default: false,
+  },
   notifications: [
     {
       type: schema.Types.ObjectId,
