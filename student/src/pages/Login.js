@@ -1,10 +1,9 @@
-import React from "react";
+import React, { useContext, useState } from "react";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import { useNavigate, Link } from "react-router-dom";
 import Success from "../components/Success";
 import { FlashContext } from "../helpers/FlashContext";
-import { useContext, useState, useEffect } from "react";
 import { AuthContext } from "../helpers/AuthContext";
 import Alert from "../components/Alert";
 import axios from "axios";
@@ -13,49 +12,16 @@ function Login() {
   const { flashMessage, setFlashMessage } = useContext(FlashContext);
   const { authState, setAuthState } = useContext(AuthContext);
   const navigate = useNavigate();
+
   const initialValues = {
     email: "",
     pass: "",
   };
+
   const validationSchema = Yup.object().shape({
     email: Yup.string().required("Enter your email"),
     pass: Yup.string().required("Enter your password"),
   });
-  //   const onSubmit = (data) => {
-  //     console.log(process.env.REACT_APP_API_URL);
-  //     axios
-  //       .post(`${process.env.REACT_APP_API_URL}/auth/login`, data)
-  //       .then((res) => {
-  //         if (res.data.message) {
-  //           setFlashMessage({
-  //             status: true,
-  //             message: res.data.message,
-  //             heading: "Something Went Wrong",
-  //             type: "error",
-  //           });
-  //         } else {
-  //           sessionStorage.setItem("name", res.data.name);
-  //           sessionStorage.setItem("id", res.data._id);
-  //           sessionStorage.setItem("token", res.data.token);
-  //           sessionStorage.setItem("isTeacher", false);
-  //           sessionStorage.setItem("status", true);
-  //           setAuthState({
-  //             name: res.data.name,
-  //             id: res.data._id,
-  //             token: res.data.token,
-  //             status: true,
-  //             isTeacher: false,
-  //           });
-  //           setFlashMessage({
-  //             status: true,
-  //             message: `You Are Logged In ${res.data.name}`,
-  //             heading: "Logged In Successfully",
-  //             type: "success",
-  //           });
-  //           navigate("/studentDashboard");
-  //         }
-  //       });
-  //   };
 
   const onSubmit = async (data) => {
     try {
@@ -92,7 +58,13 @@ function Login() {
           heading: "Logged In Successfully",
           type: "success",
         });
-        navigate("/studentDashboard");
+
+        // Check if the user's email is verified
+        if (res.data.is_email_verified) {
+          navigate("/studentDashboard");
+        } else {
+          navigate("/emailVerification");
+        }
       }
     } catch (error) {
       setFlashMessage({
@@ -114,11 +86,7 @@ function Login() {
       type: "",
     });
   };
-  // useEffect(() => {
-  //     if(flashMessage.status){
-  //         setMessage(flashMessage);
-  //     }
-  // }, [])
+
   return (
     <>
       <section className="flex">
@@ -153,13 +121,13 @@ function Login() {
             <Form className="w-9/12">
               <div>
                 <div className="mb-10">
-                  {flashMessage.status && flashMessage.type == "error" && (
+                  {flashMessage.status && flashMessage.type === "error" && (
                     <Alert
                       message={flashMessage.message}
                       heading={flashMessage.heading}
                     />
                   )}
-                  {flashMessage.status && flashMessage.type == "success" && (
+                  {flashMessage.status && flashMessage.type === "success" && (
                     <Success
                       message={flashMessage.message}
                       heading={flashMessage.heading}
@@ -170,7 +138,7 @@ function Login() {
 
                 <div className="mt-2">
                   <label className="block text-xl font-medium text-gray-700">
-                    Email{" "}
+                    Email
                   </label>
                   <ErrorMessage
                     className="text-xs text-red-700"
@@ -186,7 +154,7 @@ function Login() {
                 </div>
                 <div className="mt-2">
                   <label className="block text-xl font-medium text-gray-700">
-                    Password{" "}
+                    Password
                   </label>
                   <ErrorMessage
                     className="text-xs text-red-700"

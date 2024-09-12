@@ -13,6 +13,7 @@ import ViewClass from "./pages/ViewClass";
 import AddProject from "./pages/AddProject";
 import ViewProject from "./pages/ViewProject";
 import EmailVerification from "./pages/EmailVerification";
+import ProfilleSettings from "./pages/ProfilleSettings";
 
 function App() {
   const [authState, setAuthState] = useState({
@@ -58,6 +59,11 @@ function App() {
                 element={<StudentDashboard />}
               />
               <Route path="joinClass" exact element={<JoinClass />} />
+              <Route
+                path="profileSettings"
+                exact
+                element={<ProfilleSettings />}
+              />
               <Route path="viewclass/:classId" exact element={<ViewClass />} />
               <Route
                 path="viewclass/:classId/addProject"
