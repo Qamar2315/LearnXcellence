@@ -22,3 +22,7 @@ module.exports.updateNameSchema = Joi.object({
 module.exports.otpSchema = Joi.object({
   otp: Joi.string().required(),
 });
+
+module.exports.resetPasswordSchema = Joi.object({
+  newPassword: Joi.string().required()
+});

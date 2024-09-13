@@ -132,18 +132,43 @@ const registerStudentFace = asyncHandler(async (req, res) => {
 });
 
 const verifyStudentFace = asyncHandler(async (req, res) => {
-  if(!req.file){
-    throw new AppError("Please provide an image")
+  if (!req.file) {
+    throw new AppError("Please provide an image");
   }
   const studentId = req.user._id; // Assuming `req.user` is set by authentication middleware
   const imagePath = req.file.path; // Path of the uploaded image
-  const encoding = req.user.face_biometric_data
+  const encoding = req.user.face_biometric_data;
   const result = await authService.verifyStudentFace(
     studentId,
     imagePath,
     encoding
   );
   res.status(200).json(result);
+});
+
+const forgetPassword = asyncHandler(async (req, res) => {
+  const { email } = req.body;
+  if (!email) {
+    throw new AppError("Email not found", 404);
+  }
+  await authService.forgetPassword(email);
+  res.status(200).json({ message: "Password reset link sent to your email" });
+});
+
+const resetPassword = asyncHandler(async (req, res) => {
+  const { newPassword } = req.body; // Get token and newPassword from the request body
+  let token;
+  if (
+    req.headers.authorization &&
+    req.headers.authorization.startsWith("Bearer")
+  ) {
+    token = req.headers.authorization.split(" ")[1];
+  } else {
+    throw new AppError("Not Authorized, No Token", 401);
+  }
+  const updatedAccount = await authService.resetPassword(token, newPassword); // Call the service to update the password
+
+  res.status(200).json({ message: "Password updated successfully" });
 });
 
 module.exports = {
@@ -163,4 +188,6 @@ module.exports = {
   verifyOtp,
   registerStudentFace,
   verifyStudentFace,
+  forgetPassword,
+  resetPassword,
 };

@@ -5,6 +5,7 @@ const {
   updatePasswordSchema,
   otpSchema,
   emailSchema,
+  resetPasswordSchema,
 } = require("../schemas/authSchema");
 const { courseSchema } = require("../schemas/courseSchema");
 const { dateSchema } = require("../schemas/dateSchema");
@@ -242,6 +243,16 @@ module.exports.validateQuizGenerationBody = (req, res, next) => {
 // Middleware for validating query parameters
 module.exports.validateQuizGenerationQuery = (req, res, next) => {
   const { error } = quizGenerationQuerySchema.validate(req.query);
+  if (error) {
+    const msg = error.details.map((el) => el.message).join(",");
+    throw new AppError(msg, 400);
+  } else {
+    next();
+  }
+};
+
+module.exports.validateResetPassword = (req, res, next) => {
+  const { error } = resetPasswordSchema.validate(req.body);
   if (error) {
     const msg = error.details.map((el) => el.message).join(",");
     throw new AppError(msg, 400);

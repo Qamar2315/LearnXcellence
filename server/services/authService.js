@@ -10,6 +10,7 @@ const {
 const { deleteFile } = require("../utilities/removeFile");
 const notificationService = require("../services/notificationService");
 const { deleteFileByPath } = require("../utilities/deleteFilesBypath");
+const jwt = require("jsonwebtoken");
 require("dotenv").config();
 
 const registerStudent = async (name, email, pass) => {
@@ -367,10 +368,22 @@ const verifyOtp = async (account_id, otp) => {
   const teacher = await authRepository.findTeacherByAccountId(account_id);
   const student = await authRepository.findStudentByAccountId(account_id);
   const name = teacher ? teacher.name : student.name;
-  const response = await axios.post(`${process.env.FLASK_URL}/send-verification-email`, {
-    name,
-    email: account.email,
-  });
+  const response = await axios.post(
+    `${process.env.FLASK_URL}/send-verification-email`,
+    {
+      name,
+      email: account.email,
+    }
+  );
+  await notificationService.createNotification(
+    {
+      title: "Email Verified",
+      content: "Your email has been verified successfully",
+      read: false,
+    },
+    account._id
+  );
+
   return { success: true, message: "Email verified successfully" };
 };
 
@@ -391,6 +404,14 @@ const registerStudentFace = async (studentId, imagePath) => {
   student.face_biometric_data = response.data.encoding;
   await student.save();
   deleteFileByPath(imagePath);
+  await notificationService.createNotification(
+    {
+      title: "Face Registered",
+      content: "Your face has been registered successfully",
+      read: false,
+    },
+    student.account._id
+  );
 };
 
 const verifyStudentFace = async (studentId, imagePath, encoding) => {
@@ -417,6 +438,76 @@ const verifyStudentFace = async (studentId, imagePath, encoding) => {
   }
 };
 
+const forgetPassword = async (email) => {
+  // Find the account by email
+  const account = await authRepository.findAccountByEmail(email);
+  if (!account) {
+    throw new AppError("Account Not Found", 404);
+  }
+
+  if (!account.email_verified) {
+    throw new AppError("Email not verified", 400);
+  }
+
+  let user;
+  const teacher = await authRepository.findTeacherByAccountId(account._id);
+  const student = await authRepository.findStudentByAccountId(account._id);
+
+  user = teacher || student;
+
+  if (!user) {
+    throw new AppError("User not found", 404);
+  }
+
+  // Generate JWT token with an expiration (e.g., 1 hour)
+  const token = jwt.sign(
+    { user_id: user._id, email: account.email },
+    process.env.JWT_SECRET_KEY,
+    { expiresIn: "1h" } // Token expires in 1 hour
+  );
+
+  // Send request to Flask API to send reset email
+  await axios.post(`${process.env.FLASK_URL}/send-password-reset-email`, {
+    email: account.email,
+    user_id: user._id, // Send user ID
+    name: user.name, // Send username
+    token: token, // Send the reset token
+  });
+
+  return { message: "Password reset link sent successfully" };
+};
+
+const resetPassword = async (token, newPassword) => {
+  if (!token || !newPassword) {
+    throw new AppError("Token not provided", 400);
+  }
+  const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY); // Decode the JWT to get the user_id
+  const email = decoded.email; // Extract email from the decoded token
+
+  // Find the user by userId (e.g., could be a student, teacher, or general account)
+  const account = await authRepository.findAccountByEmail(email);
+  if (!account) {
+    throw new AppError("Account not found", 404);
+  }
+
+  // Hash the new password
+  const salt = await bcrypt.genSalt(10);
+  const hashedNewPassword = await bcrypt.hash(newPassword, salt);
+
+  // Update the password in the account
+  account.password = hashedNewPassword;
+  await account.save();
+  await notificationService.createNotification(
+    {
+      title: "Password Reset",
+      content: "Your password has been reset successfully",
+      read: false,
+    },
+    account._id
+  );
+  return { message: "Password updated successfully" };
+};
+
 module.exports = {
   registerStudent,
   loginStudent,
@@ -434,4 +525,6 @@ module.exports = {
   verifyOtp,
   registerStudentFace,
   verifyStudentFace,
+  forgetPassword,
+  resetPassword,
 };

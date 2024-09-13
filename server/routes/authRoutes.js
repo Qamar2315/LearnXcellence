@@ -11,6 +11,7 @@ const {
   validateUpdatePassword,
   validateUpdateName,
   validateOtp,
+  validateResetPassword,
 } = require("../middlewares/schemaValidator");
 
 // Middleware for authentication and authorization
@@ -207,5 +208,24 @@ router.get(
   isEmailVerified,
   authController.getTeacherInfo
 );
+
+/**
+ * @route POST /api/auth/forget-password
+ * @description Forget password
+ * @access Public
+ */
+router.post("/forget-password", authController.forgetPassword);
+
+/**
+ * @route POST /api/auth/reset-password
+ * @description Reset the password using a token
+ * @access Public
+ */
+router.post(
+  "/reset-password",
+  validateResetPassword, // A middleware to validate the request body
+  authController.resetPassword
+);
+
 
 module.exports = router;
