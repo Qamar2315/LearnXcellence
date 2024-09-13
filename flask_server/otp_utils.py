@@ -7,6 +7,7 @@ import ssl
 import logging
 import re
 
+
 # Load environment variables from .env file
 load_dotenv()
 

@@ -4,13 +4,15 @@ from dotenv import load_dotenv
 import os
 from extract_face_encodings import extract_face_encodings
 from verify_face import verify_face
-from otp_utils import generate_otp, send_otp
 import numpy as np
 from ultralytics import YOLO
 from ai_protoring import analyze_image
 import joblib
 from cheating_detection import predict_cheating_probability
-from send_verification_email import send_verification_email
+from otp_utils import generate_otp, send_otp
+from send_email import send_verification_email, send_password_reset_mail
+
+# from send_verification_email import send_verification_email
 
 # Load environment variables from .env file
 load_dotenv()
@@ -114,7 +116,7 @@ def send_verification_mail():
             send_verification_email(name, email)
             return jsonify(success=True,message="Verification email sent successfully")
         except Exception as e:
-            return jsonify(succes=False, error=f"Failed to send OTP: {str(e)}"), 500
+            return jsonify(succes=False, error=f"Failed to send Verification email {str(e)}"), 500
     except Exception as e:
         return jsonify(error=str(e)), 500
 
@@ -153,6 +155,32 @@ def predict_cheating_api():
     except Exception as e:
         return jsonify(error=str(e)), 500
 
-    
+@app.route('/send-password-reset-email', methods=['POST'])
+def send_password_reset_email():
+    try:
+        data = request.json
+        user_id = data.get('user_id')
+        name = data.get('name')
+        email = data.get('email')
+        token = data.get('token')
+
+        if not user_id:
+            return jsonify(error="User ID not provided"), 400
+        if not email:
+            return jsonify(error="Email not provided"), 400
+        if not token:
+            return jsonify(error="Token not provided"), 400
+
+        reset_link = f"http://localhost:3000/reset-password/{user_id}/{token}"
+        
+        try:
+            send_password_reset_mail(name ,email, reset_link)
+            return jsonify(success=True, message="Password reset email sent successfully")
+        except Exception as e:
+            return jsonify(success=False, error=f"Failed to send password reset email: {str(e)}"), 500
+    except Exception as e:
+        return jsonify(error=str(e)), 500
+
+
 if __name__ == '__main__':
     app.run(debug=True)

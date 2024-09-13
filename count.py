@@ -20,6 +20,6 @@ def collect_code(folder_path, output_file="output.txt"):
                         outfile.write(infile.read() + "\n")  # Add newline after each file
 
 if __name__ == "__main__":
-    project_folder = "C:\\Users\\Dell\\OneDrive\\Desktop\\qamar\\Projects\\LearnXcellence\\server"  # Replace with your project folder path
+    project_folder = "server"  # Replace with your project folder path
     collect_code(project_folder)
     print("All JavaScript code collected and saved to 'output.txt'")
