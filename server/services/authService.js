@@ -255,6 +255,7 @@ const getTeacherInfo = async (teacherId) => {
     _id: teacher._id,
     name: teacher.name,
     email: teacher.account.email,
+    profile_picture: teacher.account.profile_picture,
   };
 };
 
