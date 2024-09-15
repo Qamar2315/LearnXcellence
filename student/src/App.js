@@ -14,6 +14,9 @@ import AddProject from "./pages/AddProject";
 import ViewProject from "./pages/ViewProject";
 import EmailVerification from "./pages/EmailVerification";
 import ProfilleSettings from "./pages/ProfilleSettings";
+import ForgetPassword from "./pages/ForgetPassword";
+import ResetPassword from "./pages/ResetPassword";
+import UserProfile from "./pages/UserProfile";
 
 function App() {
   const [authState, setAuthState] = useState({
@@ -64,6 +67,16 @@ function App() {
                 exact
                 element={<ProfilleSettings />}
               />
+              <Route
+                path="forget-password"
+                exact
+                element={<ForgetPassword />}
+              />
+              <Route
+                path="reset-password/:id/:token"
+                exact
+                element={<ResetPassword />}
+              />
               <Route path="viewclass/:classId" exact element={<ViewClass />} />
               <Route
                 path="viewclass/:classId/addProject"
@@ -75,6 +88,7 @@ function App() {
                 exact
                 element={<ViewProject />}
               />
+              <Route path="userprofile" exact element={<UserProfile />} />
 
               <Route
                 path="*"

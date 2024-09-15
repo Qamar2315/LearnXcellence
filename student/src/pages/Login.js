@@ -175,6 +175,14 @@ function Login() {
               >
                 SIGN IN
               </button>
+              <div className="mt-4">
+                <Link
+                  to="/forget-password"
+                  className="text-blue-500 hover:underline"
+                >
+                  Forgot your password?
+                </Link>
+              </div>
             </Form>
           </Formik>
         </div>

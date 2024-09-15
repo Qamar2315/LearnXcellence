@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useContext } from "react";
+import React, { useEffect, useState, useContext, useCallback } from "react";
 import axios from "axios";
 import Navbar from "../components/Navbar";
 import { AuthContext } from "../helpers/AuthContext";
@@ -7,14 +7,24 @@ import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import Success from "../components/Success";
 import Alert from "../components/Alert";
+import Webcam from "react-webcam"; // Importing Webcam
 
 function ProfileSettings() {
   const { authState } = useContext(AuthContext);
   const { flashMessage, setFlashMessage } = useContext(FlashContext);
   const [studentInfo, setStudentInfo] = useState(null);
-  const [profileImage, setProfileImage] = useState(null);
   const [loading, setLoading] = useState(true);
   const [showPasswordForm, setShowPasswordForm] = useState(false); // To control password form visibility
+  const [showWebcam, setShowWebcam] = useState(false); // To control webcam visibility
+  const [webcamAction, setWebcamAction] = useState(""); // To track whether registering or verifying
+  const webcamRef = React.useRef(null); // Webcam reference
+
+  // Webcam settings
+  const videoConstraints = {
+    width: 1280,
+    height: 720,
+    facingMode: "user",
+  };
 
   // Fetch student info
   useEffect(() => {
@@ -141,6 +151,66 @@ function ProfileSettings() {
       });
   };
 
+  // Capture image and send to the appropriate API (register or verify face)
+  const capture = useCallback(() => {
+    const imageSrc = webcamRef.current.getScreenshot(); // Capture the image as base64
+    const blob = dataURLToBlob(imageSrc); // Convert base64 to blob for uploading
+
+    const formData = new FormData();
+    formData.append("face_image", blob, "face_image.jpg");
+
+    const url =
+      webcamAction === "register"
+        ? `${process.env.REACT_APP_API_URL}/auth/student/register-face`
+        : `${process.env.REACT_APP_API_URL}/auth/student/verify-face`;
+
+    axios
+      .post(url, formData, {
+        headers: {
+          Authorization: `Bearer ${authState.token}`,
+          "Content-Type": "multipart/form-data",
+        },
+      })
+      .then((res) => {
+        setFlashMessage({
+          status: true,
+          message: res.data.message || "Face action completed",
+          heading: "Success",
+          type: "success",
+        });
+        setShowWebcam(false); // Hide webcam after action
+      })
+      .catch((error) => {
+        setFlashMessage({
+          status: true,
+          message:
+            error.response?.data?.message ||
+            (webcamAction === "register"
+              ? "Failed to register face"
+              : "Failed to verify face"),
+          heading: "Error",
+          type: "error",
+        });
+        setShowWebcam(false); // Hide webcam after action
+      });
+  }, [authState, webcamAction, setFlashMessage]);
+
+  const dataURLToBlob = (dataURL) => {
+    const byteString = atob(dataURL.split(",")[1]);
+    const mimeString = dataURL.split(",")[0].split(":")[1].split(";")[0];
+    const ab = new ArrayBuffer(byteString.length);
+    const ia = new Uint8Array(ab);
+    for (let i = 0; i < byteString.length; i++) {
+      ia[i] = byteString.charCodeAt(i);
+    }
+    return new Blob([ab], { type: mimeString });
+  };
+
+  const handleOpenWebcam = (action) => {
+    setWebcamAction(action);
+    setShowWebcam(true);
+  };
+
   if (loading) {
     return <div>Loading...</div>;
   }
@@ -182,7 +252,7 @@ function ProfileSettings() {
             })}
             onSubmit={handleNameUpdate}
           >
-            {({ setFieldValue }) => (
+            {() => (
               <Form>
                 <div className="mb-4">
                   <label className="block text-gray-700 text-sm font-bold mb-2">
@@ -218,82 +288,110 @@ function ProfileSettings() {
               type="file"
               accept="image/*"
               onChange={handleImageChange}
-              className="w-full"
+              className="w-full py-2"
             />
           </div>
 
-          {/* Reset Password Button */}
           <div className="mt-6">
             <button
               onClick={() => setShowPasswordForm(!showPasswordForm)}
-              className="w-full bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+              className="w-full bg-orange-500 hover:bg-orange-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
             >
-              {showPasswordForm ? "Cancel Reset Password" : "Reset Password"}
+              {showPasswordForm ? "Cancel Password Reset" : "Reset Password"}
             </button>
           </div>
 
-          {/* Password Reset Form */}
           {showPasswordForm && (
+            <Formik
+              initialValues={{
+                currentPassword: "",
+                newPassword: "",
+              }}
+              validationSchema={Yup.object({
+                currentPassword: Yup.string().required(
+                  "Current password is required"
+                ),
+                newPassword: Yup.string().required("New password is required"),
+              })}
+              onSubmit={handlePasswordUpdate}
+            >
+              {() => (
+                <Form className="mt-6">
+                  <div className="mb-4">
+                    <label className="block text-gray-700 text-sm font-bold mb-2">
+                      Current Password
+                    </label>
+                    <Field
+                      name="currentPassword"
+                      type="password"
+                      className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                    />
+                    <ErrorMessage
+                      name="currentPassword"
+                      component="div"
+                      className="text-red-500 text-xs mt-1"
+                    />
+                  </div>
+
+                  <div className="mb-4">
+                    <label className="block text-gray-700 text-sm font-bold mb-2">
+                      New Password
+                    </label>
+                    <Field
+                      name="newPassword"
+                      type="password"
+                      className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                    />
+                    <ErrorMessage
+                      name="newPassword"
+                      component="div"
+                      className="text-red-500 text-xs mt-1"
+                    />
+                  </div>
+
+                  <button
+                    type="submit"
+                    className="w-full bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+                  >
+                    Update Password
+                  </button>
+                </Form>
+              )}
+            </Formik>
+          )}
+
+          {/* Register and Verify Face */}
+          <div className="mt-6 flex justify-between">
+            <button
+              onClick={() => handleOpenWebcam("register")}
+              className="w-1/2 bg-indigo-500 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline mr-2"
+            >
+              Register Face
+            </button>
+            <button
+              onClick={() => handleOpenWebcam("verify")}
+              className="w-1/2 bg-purple-500 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+            >
+              Verify Face
+            </button>
+          </div>
+
+          {/* Webcam Component */}
+          {showWebcam && (
             <div className="mt-6">
-              <h2 className="text-xl font-bold mb-4">Reset Password</h2>
-              <Formik
-                initialValues={{
-                  currentPassword: "",
-                  newPassword: "",
-                }}
-                validationSchema={Yup.object({
-                  currentPassword: Yup.string().required(
-                    "Current password is required"
-                  ),
-                  newPassword: Yup.string().required(
-                    "New password is required"
-                  ),
-                })}
-                onSubmit={handlePasswordUpdate}
+              <Webcam
+                audio={false}
+                ref={webcamRef}
+                screenshotFormat="image/jpeg"
+                videoConstraints={videoConstraints}
+                className="w-full h-auto"
+              />
+              <button
+                onClick={capture}
+                className="w-full bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mt-4"
               >
-                {() => (
-                  <Form>
-                    <div className="mb-4">
-                      <label className="block text-gray-700 text-sm font-bold mb-2">
-                        Current Password
-                      </label>
-                      <Field
-                        name="currentPassword"
-                        type="password"
-                        className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                      />
-                      <ErrorMessage
-                        name="currentPassword"
-                        component="div"
-                        className="text-red-500 text-xs mt-1"
-                      />
-                    </div>
-
-                    <div className="mb-4">
-                      <label className="block text-gray-700 text-sm font-bold mb-2">
-                        New Password
-                      </label>
-                      <Field
-                        name="newPassword"
-                        type="password"
-                        className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                      />
-                      <ErrorMessage
-                        name="newPassword"
-                        component="div"
-                        className="text-red-500 text-xs mt-1"
-                      />
-                    </div>
-
-                    <button
-                      type="submit"
-                      className="w-full bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
-                    >
-                      Update Password
-                    </button>
-                  </Form>
-                )}
-              </Formik>
+                Capture Image
+              </button>
             </div>
           )}
         </div>
