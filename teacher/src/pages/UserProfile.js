@@ -16,7 +16,7 @@ function UserProfile() {
     const fetchUserInfo = async () => {
       try {
         const response = await axios.get(
-          `${process.env.REACT_APP_API_URL}/auth/student/${authState.id}`,
+          `${process.env.REACT_APP_API_URL}/auth/teacher/${authState.id}`,
           {
             headers: {
               Authorization: `Bearer ${authState.token}`,
@@ -36,7 +36,7 @@ function UserProfile() {
     <>
       <Navbar />
       <div className="max-w-md mx-auto mt-10 bg-white p-8 rounded-lg shadow-lg">
-        <h1 className="text-3xl font-bold text-center mb-6">User Profile</h1>
+        <h1 className="text-3xl font-bold text-center mb-6">Teacher Profile</h1>
 
         <div className="flex flex-col items-center">
           <img
