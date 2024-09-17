@@ -7,7 +7,7 @@ import { FlashContext } from "./helpers/FlashContext";
 import Error from "./pages/Error";
 import Register from "./pages/Register";
 import Login from "./pages/Login";
-import StudentDashboard from "./pages/StudentDashboard";
+
 import JoinClass from "./pages/JoinClass";
 import ViewClass from "./pages/ViewClass";
 import AddProject from "./pages/AddProject";
@@ -17,6 +17,7 @@ import ProfilleSettings from "./pages/ProfilleSettings";
 import ForgetPassword from "./pages/ForgetPassword";
 import ResetPassword from "./pages/ResetPassword";
 import UserProfile from "./pages/UserProfile";
+import TeacherDashboard from "./pages/TeacherDashboard";
 
 function App() {
   const [authState, setAuthState] = useState({
@@ -57,9 +58,9 @@ function App() {
               />
               <Route path="register" exact element={<Register />} />
               <Route
-                path="studentDashboard"
+                path="teacherDashboard"
                 exact
-                element={<StudentDashboard />}
+                element={<TeacherDashboard />}
               />
               <Route path="joinClass" exact element={<JoinClass />} />
               <Route

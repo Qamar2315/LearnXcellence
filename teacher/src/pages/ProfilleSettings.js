@@ -12,7 +12,7 @@ import Webcam from "react-webcam"; // Importing Webcam
 function ProfileSettings() {
   const { authState } = useContext(AuthContext);
   const { flashMessage, setFlashMessage } = useContext(FlashContext);
-  const [studentInfo, setStudentInfo] = useState(null);
+  const [teacherInfo, setTeacherInfo] = useState(null);
   const [loading, setLoading] = useState(true);
   const [showPasswordForm, setShowPasswordForm] = useState(false); // To control password form visibility
   const [showWebcam, setShowWebcam] = useState(false); // To control webcam visibility
@@ -20,22 +20,22 @@ function ProfileSettings() {
   const webcamRef = React.useRef(null); // Webcam reference
 
   // Webcam settings
-  const videoConstraints = {
-    width: 1280,
-    height: 720,
-    facingMode: "user",
-  };
+  // const videoConstraints = {
+  //   width: 1280,
+  //   height: 720,
+  //   facingMode: "user",
+  // };
 
-  // Fetch student info
+  // Fetch teacher info
   useEffect(() => {
     axios
-      .get(`${process.env.REACT_APP_API_URL}/auth/student/${authState.id}`, {
+      .get(`${process.env.REACT_APP_API_URL}/auth/teacher/${authState.id}`, {
         headers: {
           Authorization: `Bearer ${authState.token}`,
         },
       })
       .then((res) => {
-        setStudentInfo(res.data);
+        setTeacherInfo(res.data);
         setLoading(false);
       })
       .catch((error) => {
@@ -47,12 +47,12 @@ function ProfileSettings() {
           type: "error",
         });
       });
-  }, [authState, setFlashMessage, studentInfo]);
+  }, [authState, setFlashMessage, teacherInfo]);
 
   const handleNameUpdate = (values) => {
     axios
       .patch(
-        `${process.env.REACT_APP_API_URL}/auth/student/update-name`,
+        `${process.env.REACT_APP_API_URL}/auth/teacher/update-name`,
         { newName: values.name },
         {
           headers: {
@@ -61,7 +61,7 @@ function ProfileSettings() {
         }
       )
       .then((res) => {
-        setStudentInfo((prev) => ({ ...prev, name: res.data.name }));
+        setTeacherInfo((prev) => ({ ...prev, name: res.data.name }));
         setFlashMessage({
           status: true,
           message: "Name updated successfully",
@@ -86,7 +86,7 @@ function ProfileSettings() {
 
     axios
       .post(
-        `${process.env.REACT_APP_API_URL}/auth/student/upload-image`,
+        `${process.env.REACT_APP_API_URL}/auth/teacher/upload-image`,
         formData,
         {
           headers: {
@@ -96,7 +96,7 @@ function ProfileSettings() {
         }
       )
       .then((res) => {
-        setStudentInfo((prev) => ({
+        setTeacherInfo((prev) => ({
           ...prev,
           profile_picture: res.data.profile_picture,
         }));
@@ -121,7 +121,7 @@ function ProfileSettings() {
   const handlePasswordUpdate = (values) => {
     axios
       .patch(
-        `${process.env.REACT_APP_API_URL}/auth/student/update-password`,
+        `${process.env.REACT_APP_API_URL}/auth/teacher/update-password`,
         {
           currentPassword: values.currentPassword,
           newPassword: values.newPassword,
@@ -152,64 +152,64 @@ function ProfileSettings() {
   };
 
   // Capture image and send to the appropriate API (register or verify face)
-  const capture = useCallback(() => {
-    const imageSrc = webcamRef.current.getScreenshot(); // Capture the image as base64
-    const blob = dataURLToBlob(imageSrc); // Convert base64 to blob for uploading
+  // const capture = useCallback(() => {
+  //   const imageSrc = webcamRef.current.getScreenshot(); // Capture the image as base64
+  //   const blob = dataURLToBlob(imageSrc); // Convert base64 to blob for uploading
 
-    const formData = new FormData();
-    formData.append("face_image", blob, "face_image.jpg");
+  //   const formData = new FormData();
+  //   formData.append("face_image", blob, "face_image.jpg");
 
-    const url =
-      webcamAction === "register"
-        ? `${process.env.REACT_APP_API_URL}/auth/student/register-face`
-        : `${process.env.REACT_APP_API_URL}/auth/student/verify-face`;
+  //   const url =
+  //     webcamAction === "register"
+  //       ? `${process.env.REACT_APP_API_URL}/auth/student/register-face`
+  //       : `${process.env.REACT_APP_API_URL}/auth/student/verify-face`;
 
-    axios
-      .post(url, formData, {
-        headers: {
-          Authorization: `Bearer ${authState.token}`,
-          "Content-Type": "multipart/form-data",
-        },
-      })
-      .then((res) => {
-        setFlashMessage({
-          status: true,
-          message: res.data.message || "Face action completed",
-          heading: "Success",
-          type: "success",
-        });
-        setShowWebcam(false); // Hide webcam after action
-      })
-      .catch((error) => {
-        setFlashMessage({
-          status: true,
-          message:
-            error.response?.data?.message ||
-            (webcamAction === "register"
-              ? "Failed to register face"
-              : "Failed to verify face"),
-          heading: "Error",
-          type: "error",
-        });
-        setShowWebcam(false); // Hide webcam after action
-      });
-  }, [authState, webcamAction, setFlashMessage]);
+  //   axios
+  //     .post(url, formData, {
+  //       headers: {
+  //         Authorization: `Bearer ${authState.token}`,
+  //         "Content-Type": "multipart/form-data",
+  //       },
+  //     })
+  //     .then((res) => {
+  //       setFlashMessage({
+  //         status: true,
+  //         message: res.data.message || "Face action completed",
+  //         heading: "Success",
+  //         type: "success",
+  //       });
+  //       setShowWebcam(false); // Hide webcam after action
+  //     })
+  //     .catch((error) => {
+  //       setFlashMessage({
+  //         status: true,
+  //         message:
+  //           error.response?.data?.message ||
+  //           (webcamAction === "register"
+  //             ? "Failed to register face"
+  //             : "Failed to verify face"),
+  //         heading: "Error",
+  //         type: "error",
+  //       });
+  //       setShowWebcam(false); // Hide webcam after action
+  //     });
+  // }, [authState, webcamAction, setFlashMessage]);
 
-  const dataURLToBlob = (dataURL) => {
-    const byteString = atob(dataURL.split(",")[1]);
-    const mimeString = dataURL.split(",")[0].split(":")[1].split(";")[0];
-    const ab = new ArrayBuffer(byteString.length);
-    const ia = new Uint8Array(ab);
-    for (let i = 0; i < byteString.length; i++) {
-      ia[i] = byteString.charCodeAt(i);
-    }
-    return new Blob([ab], { type: mimeString });
-  };
+  // const dataURLToBlob = (dataURL) => {
+  //   const byteString = atob(dataURL.split(",")[1]);
+  //   const mimeString = dataURL.split(",")[0].split(":")[1].split(";")[0];
+  //   const ab = new ArrayBuffer(byteString.length);
+  //   const ia = new Uint8Array(ab);
+  //   for (let i = 0; i < byteString.length; i++) {
+  //     ia[i] = byteString.charCodeAt(i);
+  //   }
+  //   return new Blob([ab], { type: mimeString });
+  // };
 
-  const handleOpenWebcam = (action) => {
-    setWebcamAction(action);
-    setShowWebcam(true);
-  };
+  // const handleOpenWebcam = (action) => {
+  //   setWebcamAction(action);
+  //   setShowWebcam(true);
+  // };
 
   if (loading) {
     return <div>Loading...</div>;
@@ -239,14 +239,14 @@ function ProfileSettings() {
 
           <div className="flex items-center justify-center mb-5">
             <img
-              src={`http://localhost:9090/profile_pictures/${studentInfo.profile_picture}`}
+              src={`http://localhost:9090/profile_pictures/${teacherInfo.profile_picture}`}
               alt="Profile"
               className="w-32 h-32 rounded-full object-cover border-2 border-gray-300"
             />
           </div>
 
           <Formik
-            initialValues={{ name: studentInfo.name }}
+            initialValues={{ name: teacherInfo.name }}
             validationSchema={Yup.object({
               name: Yup.string().required("Name is required"),
             })}
@@ -361,7 +361,7 @@ function ProfileSettings() {
           )}
 
           {/* Register and Verify Face */}
-          <div className="mt-6 flex justify-between">
+          {/* <div className="mt-6 flex justify-between">
             <button
               onClick={() => handleOpenWebcam("register")}
               className="w-1/2 bg-indigo-500 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline mr-2"
@@ -374,10 +374,10 @@ function ProfileSettings() {
             >
               Verify Face
             </button>
-          </div>
+          </div> */}
 
           {/* Webcam Component */}
-          {showWebcam && (
+          {/* {showWebcam && (
             <div className="mt-6">
               <Webcam
                 audio={false}
@@ -393,7 +393,7 @@ function ProfileSettings() {
                 Capture Image
               </button>
             </div>
-          )}
+          )} */}
         </div>
       </div>
     </>

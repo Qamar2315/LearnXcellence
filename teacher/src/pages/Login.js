@@ -26,7 +26,7 @@ function Login() {
   const onSubmit = async (data) => {
     try {
       const res = await axios.post(
-        `${process.env.REACT_APP_API_URL}/auth/login`,
+        `${process.env.REACT_APP_API_URL}/auth/teacher/login`,
         data
       );
 
@@ -41,7 +41,7 @@ function Login() {
         sessionStorage.setItem("name", res.data.name);
         sessionStorage.setItem("id", res.data._id);
         sessionStorage.setItem("token", res.data.token);
-        sessionStorage.setItem("isTeacher", false);
+        sessionStorage.setItem("isTeacher", true);
         sessionStorage.setItem("status", true);
 
         setAuthState({

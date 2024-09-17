@@ -10,7 +10,7 @@ import { FaBell } from "react-icons/fa"; // FontAwesome icon for notifications
 function Navbar() {
   const { flashMessage, setFlashMessage } = useContext(FlashContext);
   const { authState, setAuthState } = useContext(AuthContext);
-  const [studentInfo, setStudentInfo] = useState(null);
+  const [teacherInfo, setTeacherInfo] = useState(null);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false); // Toggle notifications dropdown
   const [notifications, setNotifications] = useState([]); // Store fetched notifications
@@ -19,13 +19,13 @@ function Navbar() {
   // Fetch student info
   useEffect(() => {
     axios
-      .get(`${process.env.REACT_APP_API_URL}/auth/student/${authState.id}`, {
+      .get(`${process.env.REACT_APP_API_URL}/auth/teacher/${authState.id}`, {
         headers: {
           Authorization: `Bearer ${authState.token}`,
         },
       })
       .then((response) => {
-        setStudentInfo(response.data);
+        setTeacherInfo(response.data);
       })
       .catch((error) => {
         console.log("Error fetching student info:", error);
@@ -99,7 +99,7 @@ function Navbar() {
     <>
       <div className="bg-blue-600 p-4 shadow-lg flex justify-between items-center">
         <h1 className="text-3xl font-bold text-white">LearnXcellence</h1>
-        <Link to={"/studentDashboard"}>
+        <Link to={"/teacherDashboard"}>
           <h1 className="text-3xl text-white">Dashboard</h1>
         </Link>
         <div className="relative flex items-center space-x-4">
@@ -151,14 +151,14 @@ function Navbar() {
             )}
           </div>
 
-          {studentInfo && (
+          {teacherInfo && (
             <div className="relative">
               <div className="flex items-center space-x-4">
                 <span className="text-white font-semibold">
-                  {studentInfo.name}
+                  {teacherInfo.name}
                 </span>
                 <img
-                  src={`http://localhost:9090/profile_pictures/${studentInfo.profile_picture}`}
+                  src={`http://localhost:9090/profile_pictures/${teacherInfo.profile_picture}`}
                   alt="Profile"
                   className="w-10 h-10 rounded-full cursor-pointer"
                   onClick={toggleDropdown}
