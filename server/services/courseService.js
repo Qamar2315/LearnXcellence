@@ -43,7 +43,7 @@ const createCourse = async (teacherId, data) => {
 
 const joinCourse = async (studentId, courseCode) => {
   if (!courseCode) {
-    throw new AppError("Send Course Code To Join", 201);
+    throw new AppError("Send Course Code To Join", 400);
   }
   const student = await courseRepository.findStudentById(studentId);
   const getCourse = await courseRepository.findCourseBycourseCode(courseCode);
@@ -51,7 +51,7 @@ const joinCourse = async (studentId, courseCode) => {
     await getCourse.populate("students");
     for (const stu of getCourse.students) {
       if (stu.id == student.id) {
-        throw new AppError("Student Already Joined", 201);
+        throw new AppError("Student Already Joined", 400);
       }
     }
     student.courses.push(getCourse);
@@ -65,7 +65,7 @@ const joinCourse = async (studentId, courseCode) => {
       students: getCourse.students,
     };
   } else {
-    throw new AppError("Course Not Found Wrong Code", 201);
+    throw new AppError("Course Not Found Wrong Code", 404);
   }
 };
 

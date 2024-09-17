@@ -137,3 +137,7 @@ dist
 /server/public/
 
 /server/docs
+
+output.txt
+output_ new.txt
+count.py
