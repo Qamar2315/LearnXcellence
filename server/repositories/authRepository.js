@@ -4,6 +4,7 @@ const Teacher = require('../models/Teacher');
 const Otp = require('../models/OtpModel');
 
 const findAccountByEmail = (email) => Account.findOne({ email });
+const findAccountByEmailRegexp = (email) => Account.findOne({ email: { $regex: new RegExp(email, 'i') } });
 const findStudentByAccountId = (accountId) => Student.findOne({ account: accountId });
 const findTeacherByAccountId = (accountId) => Teacher.findOne({ account: accountId });
 const createAccount = (email, password) => Account.create({ email, password });
@@ -37,5 +38,6 @@ module.exports = {
     createNewOtp,
     deleteOtp,
     setAccountOtpToNull,
-    findAccountByIdForNotifications
+    findAccountByIdForNotifications,
+    findAccountByEmailRegexp
 };

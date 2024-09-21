@@ -64,6 +64,19 @@ router.get(
 );
 
 /**
+ * @route  GET /api/courses/search-student-by-email
+ * @desc   Search for a student (by email)
+ * @access Private (Teacher only)
+ */
+router.get(
+  "/search-student-by-email",
+  isLogin,
+  isEmailVerified,
+  isTeacher,
+  courseController.searchStudentByEmailEnchanced
+);
+
+/**
  * @route  POST /api/courses/join
  * @desc   Join a course using a course code
  * @access Private (Student only)

@@ -120,7 +120,16 @@ const removeStudentFromCourse = asyncHandler(async (req, res) => {
 const searchStudent = asyncHandler(async (req, res) => {
   const studentEmail = req.query.search;
   const result = await courseService.searchStudent(studentEmail);
-  res.status(201).json({
+  res.status(200).json({
+    success: true,
+    data: result,
+  });
+});
+
+const searchStudentByEmailEnchanced = asyncHandler(async (req, res) => {
+  const studentEmail = req.query.search;
+  const result = await courseService.searchStudentByEmailEnchanced(studentEmail);
+  res.status(200).json({
     success: true,
     data: result,
   });
@@ -141,4 +150,5 @@ module.exports = {
   addStudentToCourse,
   removeStudentFromCourse,
   searchStudent,
+  searchStudentByEmailEnchanced,
 };

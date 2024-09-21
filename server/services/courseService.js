@@ -398,6 +398,19 @@ const searchStudent = async (studentEmail) => {
   return student;
 };
 
+const searchStudentByEmailEnchanced = async (studentEmail) => {
+  const account = await authRepository.findAccountByEmailRegexp(studentEmail);
+  if (!account) {
+    throw new AppError("Student Not Found", 400);
+  }
+  const student = await authRepository.findStudentByAccountId(account._id);
+  if (!student) {
+    throw new AppError("Student Not Found", 400);
+  }
+  await student.populate("account", "-password -otp");
+  return student;
+};
+
 module.exports = {
   createCourse,
   joinCourse,
@@ -413,4 +426,5 @@ module.exports = {
   addStudentToCourse,
   removeStudentFromCourse,
   searchStudent,
+  searchStudentByEmailEnchanced,
 };
