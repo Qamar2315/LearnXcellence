@@ -164,7 +164,7 @@ const leaveCourse = async (courseId, studentId) => {
     courseId,
     studentId
   );
-  console.log(student);
+  // console.log(student);
   if (!student) {
     throw new AppError("Student Not Found in Course", 400);
   }

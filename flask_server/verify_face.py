@@ -34,7 +34,7 @@ def verify_face(image_path, known_face_encoding, model):
             return False, "No face detected"
 
         # isReal = test(device_id=0, model_dir="./resources/anti_spoof_models", image_path=image_path)
-        isReal = is_real_image(image_path, model, threshold=0.5)
+        isReal = is_real_image(image_path, model, threshold=0.2)
 
         if not isReal:
             return False, "Fake face detected"
