@@ -86,12 +86,14 @@ function StudentDashboard() {
           <div className="overflow-y-auto h-96 m-10 ">
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-4 m-10">
               {courses.map((classItem) => (
+                // <Link to={`/course/${classItem._id}`}>
                 <ClassCard
                   key={classItem._id}
                   id={classItem._id}
                   className={classItem.courseName}
                   teacher={classItem.teacher.name}
                 />
+                // </Link>
               ))}
             </div>
           </div>

@@ -61,7 +61,7 @@ function Login() {
 
         // Check if the user's email is verified
         if (res.data.is_email_verified) {
-          navigate("/studentDashboard");
+          navigate("/teacherDashboard");
         } else {
           navigate("/emailVerification");
         }

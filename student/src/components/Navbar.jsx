@@ -30,6 +30,7 @@ function Navbar() {
       .catch((error) => {
         console.log("Error fetching student info:", error);
       });
+    fetchNotifications();
   }, [authState.id, flashMessage]);
 
   // Fetch notifications when the icon is clicked
@@ -42,7 +43,7 @@ function Navbar() {
       })
       .then((response) => {
         setNotifications(response.data.data);
-        setNotificationsOpen(!notificationsOpen); // Toggle the dropdown
+        // Toggle the dropdown
       })
       .catch((error) => {
         console.log("Error fetching notifications:", error);
@@ -108,7 +109,7 @@ function Navbar() {
             <FaBell
               size={24}
               className="text-white cursor-pointer"
-              onClick={fetchNotifications}
+              onClick={() => setNotificationsOpen(!notificationsOpen)}
             />
             {/* Display number of unread notifications */}
             {notifications.some((notif) => !notif.read) && (
@@ -129,7 +130,7 @@ function Navbar() {
                         key={notification._id}
                         onClick={() => markAsRead(notification._id)}
                         className={`px-4 py-2 cursor-pointer ${
-                          notification.read ? "bg-gray-100" : "bg-white"
+                          notification.read ? "bg-white" : "bg-gray-100"
                         } hover:bg-gray-200`}
                       >
                         <h4 className="font-semibold">{notification.title}</h4>

@@ -3,6 +3,7 @@ import { useState } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { AuthContext } from "./helpers/AuthContext";
 import { FlashContext } from "./helpers/FlashContext";
+import ProtectedRoute from "./helpers/ProtectedRoute"; // Import ProtectedRoute
 
 import Error from "./pages/Error";
 import Register from "./pages/Register";
@@ -18,6 +19,8 @@ import ForgetPassword from "./pages/ForgetPassword";
 import ResetPassword from "./pages/ResetPassword";
 import UserProfile from "./pages/UserProfile";
 import TeacherDashboard from "./pages/TeacherDashboard";
+import CoursePage from "./pages/CoursePage";
+import Project from "./pages/Project";
 
 function App() {
   const [authState, setAuthState] = useState({
@@ -27,29 +30,20 @@ function App() {
     token: sessionStorage.getItem("token"),
     isTeacher: sessionStorage.getItem("isTeacher"),
   });
+
   const [flashMessage, setFlashMessage] = useState({
     status: false,
     message: "",
     heading: "",
     type: "",
   });
+
   return (
     <>
       <AuthContext.Provider value={{ authState, setAuthState }}>
         <FlashContext.Provider value={{ flashMessage, setFlashMessage }}>
           <Router>
             <Routes>
-              {/* <Route path='/teacher'>
-              <Route path='login' exact element={<LoginTeacher />} />
-              <Route path='register' exact element={<RegisterTeacher />} />
-              <Route path='teacherDashboard' exact element={<TeacherDashboard />}>
-                <Route path='/:classId' exact element={<Dashboard />} />
-              </Route>
-              <Route path='profile' exact element={<TeacherProfile />} />
-            </Route>
-            <Route path='/' exact element={<Navbar />}>
-              <Route path='home' exact element={<Home />} />
-            </Route> */}
               <Route path="login" exact element={<Login />} />
               <Route
                 path="emailVerification"
@@ -57,17 +51,90 @@ function App() {
                 element={<EmailVerification />}
               />
               <Route path="register" exact element={<Register />} />
+
+              {/* Protect routes by wrapping them inside ProtectedRoute */}
               <Route
                 path="teacherDashboard"
                 exact
-                element={<TeacherDashboard />}
+                element={
+                  <ProtectedRoute>
+                    <TeacherDashboard />
+                  </ProtectedRoute>
+                }
               />
-              <Route path="joinClass" exact element={<JoinClass />} />
+              <Route
+                path="joinClass"
+                exact
+                element={
+                  <ProtectedRoute>
+                    <JoinClass />
+                  </ProtectedRoute>
+                }
+              />
               <Route
                 path="profileSettings"
                 exact
-                element={<ProfilleSettings />}
+                element={
+                  <ProtectedRoute>
+                    <ProfilleSettings />
+                  </ProtectedRoute>
+                }
               />
+              <Route
+                path="course/:courseId/dashboard"
+                exact
+                element={
+                  <ProtectedRoute>
+                    <CoursePage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="course/:courseId/project"
+                exact
+                element={
+                  <ProtectedRoute>
+                    <Project />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="viewclass/:classId"
+                exact
+                element={
+                  <ProtectedRoute>
+                    <ViewClass />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="viewclass/:classId/addProject"
+                exact
+                element={
+                  <ProtectedRoute>
+                    <AddProject />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="viewclass/:classId/project/:projectId"
+                exact
+                element={
+                  <ProtectedRoute>
+                    <ViewProject />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="userprofile"
+                exact
+                element={
+                  <ProtectedRoute>
+                    <UserProfile />
+                  </ProtectedRoute>
+                }
+              />
+
               <Route
                 path="forget-password"
                 exact
@@ -78,18 +145,6 @@ function App() {
                 exact
                 element={<ResetPassword />}
               />
-              <Route path="viewclass/:classId" exact element={<ViewClass />} />
-              <Route
-                path="viewclass/:classId/addProject"
-                exact
-                element={<AddProject />}
-              />
-              <Route
-                path="viewclass/:classId/project/:projectId"
-                exact
-                element={<ViewProject />}
-              />
-              <Route path="userprofile" exact element={<UserProfile />} />
 
               <Route
                 path="*"

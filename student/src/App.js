@@ -17,6 +17,13 @@ import ProfilleSettings from "./pages/ProfilleSettings";
 import ForgetPassword from "./pages/ForgetPassword";
 import ResetPassword from "./pages/ResetPassword";
 import UserProfile from "./pages/UserProfile";
+import CoursePage from "./pages/CoursePage";
+import Project from "./pages/Project";
+import Lectures from "./pages/Lectures";
+import Assignments from "./pages/Assignments";
+import Quizzes from "./pages/Quizzes";
+import Viva from "./pages/Viva";
+import CourseSettings from "./pages/CourseSettings";
 
 function App() {
   const [authState, setAuthState] = useState({
@@ -77,7 +84,9 @@ function App() {
                 exact
                 element={<ResetPassword />}
               />
-              <Route path="viewclass/:classId" exact element={<ViewClass />} />
+              <Route path="course/:courseId" exact element={<CoursePage />} />
+
+              <Route path="viewclass/:courseId" exact element={<ViewClass />} />
               <Route
                 path="viewclass/:classId/addProject"
                 exact
@@ -88,6 +97,38 @@ function App() {
                 exact
                 element={<ViewProject />}
               />
+
+              <Route
+                path="course/:courseId/project"
+                exact
+                element={<Project />}
+              />
+              <Route
+                path="course/:courseId/lectures"
+                exact
+                element={<Lectures />}
+              />
+
+              <Route
+                path="course/:courseId/assignments"
+                exact
+                element={<Assignments />}
+              />
+
+              <Route
+                path="course/:courseId/quizzes"
+                exact
+                element={<Quizzes />}
+              />
+
+              <Route path="course/:courseId/viva" exact element={<Viva />} />
+
+              <Route
+                path="course/:courseId/coursesettings"
+                exact
+                element={<CourseSettings />}
+              />
+
               <Route path="userprofile" exact element={<UserProfile />} />
 
               <Route
