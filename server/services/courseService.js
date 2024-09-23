@@ -294,7 +294,14 @@ const sendCourse = async (courseId) => {
       path: "projectLeader status",
     },
   });
-  await getCourse.populate("students");
+  await getCourse.populate({
+    path: "students",
+    select: "-face_biometric_data -courses",
+    populate: {
+      path: "account",
+      select: "-password -notifications -otp",
+    }
+  });
   await getCourse.populate("vivas");
   return {
     _id: getCourse._id,
