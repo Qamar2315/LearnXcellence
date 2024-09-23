@@ -84,7 +84,11 @@ function App() {
                 exact
                 element={<ResetPassword />}
               />
-              <Route path="course/:courseId" exact element={<CoursePage />} />
+              <Route
+                path="course/:courseId/dashboard"
+                exact
+                element={<CoursePage />}
+              />
 
               <Route path="viewclass/:courseId" exact element={<ViewClass />} />
               <Route

@@ -225,9 +225,24 @@ function CoursePage() {
 
                 {studentInfo && (
                   <div className="mt-4">
-                    <p>
-                      <strong>Student Name:</strong> {studentInfo.name}
-                    </p>
+                    <div className="flex min-w-0 gap-x-4">
+                      <img
+                        className="h-12 w-12 flex-none rounded-full bg-gray-50"
+                        src={
+                          `http://localhost:9090/profile_pictures/${studentInfo.account.profile_picture}` ||
+                          "https://via.placeholder.com/150"
+                        }
+                        alt={studentInfo.name}
+                      />
+                      <div className="min-w-0 flex-auto">
+                        <p className="text-sm font-semibold leading-6 text-gray-900">
+                          {studentInfo.name}
+                        </p>
+                        <p className="mt-1 truncate text-xs leading-5 text-gray-500">
+                          {studentInfo.account.email}
+                        </p>
+                      </div>
+                    </div>
                     <button
                       onClick={addStudentToCourse}
                       className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full mt-2"

@@ -3,7 +3,7 @@ import { useNavigate, Link } from "react-router-dom";
 
 function ClassCard(props) {
   return (
-    <Link to={`/course/${props.id}`}>
+    <Link to={`/course/${props.id}/dashboard`}>
       <article className="rounded-lg border border-gray-100 bg-white p-4 shadow-sm transition hover:shadow-lg sm:p-6">
         <span className="inline-block rounded bg-blue-600 p-2 text-white">
           <svg
