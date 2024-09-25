@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useState } from "react";
 import { AuthContext } from "../helpers/AuthContext";
 import { FlashContext } from "../helpers/FlashContext";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import Alert from "./Alert";
 import Success from "./Success";
 import axios from "axios";
@@ -15,6 +15,7 @@ function Navbar() {
   const [notificationsOpen, setNotificationsOpen] = useState(false); // Toggle notifications dropdown
   const [notifications, setNotifications] = useState([]); // Store fetched notifications
   const navigate = useNavigate();
+  const location = useLocation();
 
   // Fetch student info
   useEffect(() => {
@@ -43,8 +44,11 @@ function Navbar() {
         },
       })
       .then((response) => {
-        setNotifications(response.data.data);
-        // setNotificationsOpen(!notificationsOpen); // Toggle the dropdown
+        // Sort notifications by created_at in descending order to show the latest first
+        const sortedNotifications = response.data.data.sort(
+          (a, b) => new Date(b.created_at) - new Date(a.created_at)
+        );
+        setNotifications(sortedNotifications);
       })
       .catch((error) => {
         console.log("Error fetching notifications:", error);
@@ -138,29 +142,44 @@ function Navbar() {
                 <div className="flex space-x-4">
                   <Link
                     to="/teacherDashboard"
-                    className="rounded-md bg-gray-900 px-3 py-2 text-sm font-medium text-white"
-                    aria-current="page"
+                    className={`${
+                      location.pathname === "/teacherDashboard"
+                        ? "rounded-md bg-gray-900 px-3 py-2 text-sm font-medium text-white"
+                        : "rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white"
+                    }`}
                   >
-                    Dashboard
+                    Courses
                   </Link>
-                  <a
-                    href="#"
-                    className="rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white"
+                  <Link
+                    to="/team"
+                    className={`${
+                      location.pathname === "/team"
+                        ? "rounded-md bg-gray-900 px-3 py-2 text-sm font-medium text-white"
+                        : "rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white"
+                    }`}
                   >
                     Team
-                  </a>
-                  <a
-                    href="#"
-                    className="rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white"
+                  </Link>
+                  <Link
+                    to="/projects"
+                    className={`${
+                      location.pathname === "/projects"
+                        ? "rounded-md bg-gray-900 px-3 py-2 text-sm font-medium text-white"
+                        : "rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white"
+                    }`}
                   >
                     Projects
-                  </a>
-                  <a
-                    href="#"
-                    className="rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white"
+                  </Link>
+                  <Link
+                    to="/profileSettings"
+                    className={`${
+                      location.pathname === "/profileSettings"
+                        ? "rounded-md bg-gray-900 px-3 py-2 text-sm font-medium text-white"
+                        : "rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white"
+                    }`}
                   >
-                    Calendar
-                  </a>
+                    Settings
+                  </Link>
                 </div>
               </div>
             </div>

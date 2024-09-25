@@ -1,4 +1,4 @@
-import React from 'react'
+import React from "react";
 
 function Error(props) {
   return (
@@ -13,14 +13,14 @@ function Error(props) {
         <p class="mt-4 text-gray-500">{props.message}</p>
 
         <a
-          href="/"
+          href="/studentDashboard"
           class="inline-block px-5 py-3 mt-6 text-sm font-medium text-white bg-indigo-600 rounded hover:bg-indigo-700 focus:outline-none focus:ring"
         >
           Go Back Home
         </a>
       </div>
     </div>
-  )
+  );
 }
 
 export default Error;

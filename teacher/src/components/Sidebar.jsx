@@ -113,11 +113,11 @@ export default function Sidebar({ children }) {
               activeClassName="bg-blue-700"
             />
             <SidebarItem
-              to={`/course/${courseId}/settings`}
+              to={`/course/${courseId}/coursesettings`}
               icon={<Settings size={20} />}
               text="Settings"
               activeClassName="bg-blue-700"
-              alert={true}
+              // alert={true}
             />
           </ul>
         </SidebarContext.Provider>
