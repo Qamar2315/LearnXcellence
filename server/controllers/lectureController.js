@@ -10,6 +10,11 @@ const createLecture = asyncHandler(async (req, res) => {
   if (req.file) {
     video_id = req.file.filename;
   }
+
+  if(!video_id) {
+    return res.status(400).json({ error: "Please upload a video file" });
+  }
+  
   const lecture = await lectureService.addLecture(
     courseId,
     teacherId,
