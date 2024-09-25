@@ -141,9 +141,9 @@ function Navbar() {
               <div className="hidden sm:ml-6 sm:block">
                 <div className="flex space-x-4">
                   <Link
-                    to="/studentDashboard"
+                    to="/course"
                     className={`${
-                      location.pathname === "/studentDashboard"
+                      location.pathname.startsWith("/course")
                         ? "rounded-md bg-gray-900 px-3 py-2 text-sm font-medium text-white"
                         : "rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white"
                     }`}
@@ -299,7 +299,7 @@ function Navbar() {
         </div>
       </nav>
       {/* Alert for flash messages */}
-      {flashMessage.status && <Alert message={flashMessage.message} />}
+      {/* {flashMessage.status && <Alert message={flashMessage.message} />} */}
     </>
   );
 }

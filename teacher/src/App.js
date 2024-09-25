@@ -22,6 +22,7 @@ import TeacherDashboard from "./pages/TeacherDashboard";
 import CoursePage from "./pages/CoursePage";
 import Project from "./pages/Project";
 import CourseSetting from "./pages/CourseSetting";
+import Lectures from "./pages/Lectures";
 
 function App() {
   const [authState, setAuthState] = useState({
@@ -55,7 +56,7 @@ function App() {
 
               {/* Protect routes by wrapping them inside ProtectedRoute */}
               <Route
-                path="teacherDashboard"
+                path="course"
                 exact
                 element={
                   <ProtectedRoute>
@@ -96,6 +97,15 @@ function App() {
                 element={
                   <ProtectedRoute>
                     <Project />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="course/:courseId/lectures"
+                exact
+                element={
+                  <ProtectedRoute>
+                    <Lectures />
                   </ProtectedRoute>
                 }
               />

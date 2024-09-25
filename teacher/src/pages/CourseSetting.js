@@ -245,14 +245,14 @@ function CourseSetting() {
           <div className="flex justify-between">
             <button
               onClick={() => setDeleteConfirmationVisible(true)}
-              className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-full"
+              className="bg-red-500 hover:bg-red-700 py-2 px-4 text-white font-semibold rounded-lg"
             >
               Delete Course
             </button>
 
             <button
               onClick={() => setShowSearchBox(!showSearchBox)}
-              className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full"
+              className="bg-blue-500 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg"
             >
               {showSearchBox ? "Cancel" : "Add Student"}
             </button>
@@ -269,7 +269,7 @@ function CourseSetting() {
               />
               <button
                 onClick={searchStudent}
-                className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-full"
+                className="bg-green-500 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded-lg"
               >
                 Search Student
               </button>
@@ -278,7 +278,7 @@ function CourseSetting() {
                 <div className="mt-4">
                   <div className="flex min-w-0 gap-x-4">
                     <img
-                      className="h-12 w-12 flex-none rounded-full bg-gray-50"
+                      className="h-12 w-12 flex-none rounded-lg bg-gray-50"
                       src={
                         `http://localhost:9090/profile_pictures/${studentInfo.account.profile_picture}` ||
                         "https://via.placeholder.com/150"
@@ -294,7 +294,7 @@ function CourseSetting() {
                       </p>
                       <button
                         onClick={addStudentToCourse}
-                        className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full"
+                        className="bg-blue-500 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg"
                       >
                         Add Student to Course
                       </button>
@@ -307,7 +307,7 @@ function CourseSetting() {
           <div className="mt-3">
             <button
               onClick={regenerateCourseCode} // Regenerate Course Code button
-              className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-full"
+              className="bg-green-500 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded-lg"
             >
               Regenerate Course Code
             </button>
@@ -368,7 +368,7 @@ function CourseSetting() {
                             setConfirmationVisible(true);
                             setStudentToRemove(student._id);
                           }}
-                          className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-full"
+                          className="bg-red-500 hover:bg-red-700 text-white font-semibold py-2 px-4 rounded-lg"
                         >
                           Remove
                         </button>
