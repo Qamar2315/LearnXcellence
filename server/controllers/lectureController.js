@@ -77,7 +77,7 @@ const downloadLecture = asyncHandler(async (req, res) => {
   const filePath = path.join(
     __dirname,
     "..",
-    "uploads",
+    "public",
     "lectures",
     lecture.video_id
   );
