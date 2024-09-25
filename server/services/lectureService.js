@@ -25,6 +25,7 @@ const addLecture = async (
     title,
     courseId
   );
+
   if (isLectureExist) {
     throw new Error(
       "Lecture with the same title already exists in the same course"
@@ -32,7 +33,7 @@ const addLecture = async (
   }
 
   const lectureData = {
-    course: courseId,
+    course_id: courseId,
     teacher: teacherId,
     title,
     description,

@@ -16,7 +16,7 @@ const getLectureById = async (lectureId) => {
 const getLectureByTitleAndCourse = async (title, courseId) => {
   return await Lecture.findOne({
     title,
-    course: courseId,
+    course_id: courseId,
   });
 };
 
