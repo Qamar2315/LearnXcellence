@@ -19,7 +19,7 @@ import ResetPassword from "./pages/ResetPassword";
 import UserProfile from "./pages/UserProfile";
 import CoursePage from "./pages/CoursePage";
 import Project from "./pages/Project";
-import Lectures from "./pages/Lectures";
+import StudentLectures from "./pages/StudentLectures";
 import Assignments from "./pages/Assignments";
 import Quizzes from "./pages/Quizzes";
 import Viva from "./pages/Viva";
@@ -63,11 +63,7 @@ function App() {
                 element={<EmailVerification />}
               />
               <Route path="register" exact element={<Register />} />
-              <Route
-                path="studentDashboard"
-                exact
-                element={<StudentDashboard />}
-              />
+              <Route path="course" exact element={<StudentDashboard />} />
               <Route path="joinClass" exact element={<JoinClass />} />
               <Route
                 path="profileSettings"
@@ -110,7 +106,7 @@ function App() {
               <Route
                 path="course/:courseId/lectures"
                 exact
-                element={<Lectures />}
+                element={<StudentLectures />}
               />
 
               <Route
