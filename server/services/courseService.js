@@ -14,6 +14,33 @@ const { parseDate } = require("../utilities/dateHelper");
 const { generateCourseCode } = require("../utilities/GenerateCode");
 const AppError = require("../utilities/AppError");
 
+// const createCourse = async (teacherId, data) => {
+//   const teacher = await courseRepository.findTeacherById(teacherId);
+//   const checkCourse = await courseRepository.findCourseByName(data.courseName);
+//   if (checkCourse) {
+//     throw new AppError("Course Already Exists With The Same Name", 400);
+//   }
+//   const courses = await courseRepository.findAllCourses();
+//   const courseCode = generateCourseCode(courses);
+//   const newCourse = await courseRepository.createCourse({
+//     courseCode,
+//     courseName: data.courseName,
+//     teacher,
+//     description: data.description,
+//     projectRequirements: data.projectRequirements,
+//   });
+//   teacher.courses.push(newCourse);
+//   await teacher.save();
+//   return {
+//     _id: newCourse._id,
+//     courseCode: newCourse.courseCode,
+//     courseName: newCourse.courseName,
+//     description: newCourse.description,
+//     projectRequirements: newCourse.projectRequirements,
+//     teacher: newCourse.teacher,
+//   };
+// };
+
 const createCourse = async (teacherId, data) => {
   const teacher = await courseRepository.findTeacherById(teacherId);
   const checkCourse = await courseRepository.findCourseByName(data.courseName);
@@ -29,15 +56,22 @@ const createCourse = async (teacherId, data) => {
     description: data.description,
     projectRequirements: data.projectRequirements,
   });
+
   teacher.courses.push(newCourse);
   await teacher.save();
+
+  // Only return essential fields and avoid returning teacher's full data to prevent circular reference
   return {
     _id: newCourse._id,
     courseCode: newCourse.courseCode,
     courseName: newCourse.courseName,
     description: newCourse.description,
     projectRequirements: newCourse.projectRequirements,
-    teacher: newCourse.teacher,
+    teacher: {
+      _id: teacher._id,
+      name: teacher.name,
+      email: teacher.email,
+    },
   };
 };
 
@@ -300,7 +334,7 @@ const sendCourse = async (courseId) => {
     populate: {
       path: "account",
       select: "-password -notifications -otp",
-    }
+    },
   });
   await getCourse.populate("vivas");
   return {
