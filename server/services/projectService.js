@@ -2,7 +2,6 @@ const projectRepository = require("../repositories/projectRepository");
 const authRepository = require("../repositories/authRepository");
 const statusRepository = require("../repositories/statusRepository");
 const notificationService = require("./notificationService");
-const statusService = require("./statusService");
 const AppError = require("../utilities/AppError");
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 const dotenv = require("dotenv");
@@ -43,7 +42,7 @@ const createProject = async (userId, projectData) => {
   // Validate all members
   for (const member of members) {
     const groupMember = await projectRepository.findStudentById(member);
-    // console.log(groupMember);
+    console.log(groupMember);
     if (!groupMember) {
       throw new AppError(`Member with ID ${member} not found`, 404);
     }
@@ -114,8 +113,8 @@ const createProject = async (userId, projectData) => {
   };
 };
 
-const updateProject = async (courseId,projectId, projectData) => {
-  const { name, scope, members } = projectData;
+const updateProject = async (projectId, projectData) => {
+  const { name, scope, members, courseId } = projectData;
 
   // Find the project by ID
   const project = await projectRepository.findProjectById(projectId);
@@ -161,35 +160,7 @@ const updateProject = async (courseId,projectId, projectData) => {
     scope,
     members: validMembers,
   });
-  
-  await statusService.updateStatus(updatedProject.status, {
-    status: "pending",
-    description: "",
-  });
 
-  for (const member of validMembers) {
-    await notificationService.createNotification(
-      {
-        title: "Project Updated",
-        content: `Your project ${updatedProject.name} has been updated`,
-        read: false,
-      },
-      member.account
-    );
-  }
-  const course = await projectRepository.findCourseById(courseId);
-  await course.populate({
-    path: "teacher",
-    select: "account",
-  })
-  await notificationService.createNotification(
-    {
-      title: "Project Updated",
-      content: `Project ${updatedProject.name} has been updated in course ${course.name}`,
-      read: false,
-    },
-    course.teacher.account._id
-  );
   return {
     _id: updatedProject._id,
     name: updatedProject.name,
