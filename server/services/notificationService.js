@@ -40,6 +40,9 @@ const createNotification = async (notificationData, accountId) => {
     notificationData
   );
   const account = await authRepository.findAccountById(accountId);
+  if (!account) {
+    throw new AppError("Account not found", 404);
+  }
   account.notifications.push(notification);
   await account.save();
   return notification;

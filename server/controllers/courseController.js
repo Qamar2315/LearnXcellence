@@ -13,7 +13,7 @@ const createCourse = asyncHandler(async (req, res) => {
 
 const joinCourse = asyncHandler(async (req, res) => {
   const result = await courseService.joinCourse(req.user._id, req.query.courseCode);
-  res.status(201).json({
+  res.status(200).json({
     success: true,
     message: "Course Joined",
     data: result,
@@ -30,7 +30,7 @@ const updateCourseName = asyncHandler(async (req, res) => {
 
 const deleteCourse = asyncHandler(async (req, res) => {
   await courseService.deleteCourse(req.params.courseId, req.user._id);
-  res.status(201).json({
+  res.status(204).json({
     success: true,
     message: "Course Deleted",
   });
@@ -38,7 +38,7 @@ const deleteCourse = asyncHandler(async (req, res) => {
 
 const leaveCourse = asyncHandler(async (req, res) => {
   await courseService.leaveCourse(req.params.courseId, req.user._id);
-  res.status(201).json({
+  res.status(200).json({
     success: true,
     message: "Course Left",
   });
