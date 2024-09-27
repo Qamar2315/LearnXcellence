@@ -95,8 +95,7 @@ const joinCourse = async (studentId, courseCode) => {
     return {
       _id: getCourse._id,
       courseCode: getCourse.courseCode,
-      courseName: getCourse.courseName,
-      students: getCourse.students,
+      courseName: getCourse.courseName
     };
   } else {
     throw new AppError("Course Not Found Wrong Code", 404);

@@ -8,9 +8,9 @@ const {
   isStudent, 
   isCourseStudent, 
   isProjectCreator,
-  isCourseCreatorOrCourseStudent 
+  isCourseCreatorOrCourseStudent
 } = require("../middlewares/authorization");
-const { validateProject } = require("../middlewares/schemaValidator");
+const { validateProject, validateUpdateProject } = require("../middlewares/schemaValidator");
 
 // Controller
 const projectController = require("../controllers/projectController");
@@ -87,16 +87,16 @@ router.route("/:courseId/:projectId")
   .get(
     isLogin, 
     isEmailVerified, 
-    isCourseCreatorOrCourseStudent, 
+    isCourseCreatorOrCourseStudent,
     projectController.sendProject 
   )
   .put(
-    isLogin, 
-    isEmailVerified, 
-    isStudent, // Assuming only the project creator (who is a student) can update
-    isProjectCreator, 
-    validateProject, 
-    projectController.updateProject
+    isLogin, // Login is required
+    isEmailVerified, // Email verification is required
+    isStudent, // Only student can update
+    isProjectCreator, // Only project creator can update
+    validateUpdateProject,  // Validate the project schema
+    projectController.updateProject // Update the project
   )
   .delete(
     isLogin, 
