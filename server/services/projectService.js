@@ -166,26 +166,27 @@ const updateProject = async (courseId,projectId, projectData) => {
     status: "pending",
     description: "",
   });
+  
+  const course = await projectRepository.findCourseById(courseId);
+  await course.populate({
+    path: "teacher",
+    select: "account",
+  });
 
   for (const member of validMembers) {
     await notificationService.createNotification(
       {
         title: "Project Updated",
-        content: `Your project ${updatedProject.name} has been updated`,
+        content: `Your project ${updatedProject.name} has been updated in course ${course.courseName}`,
         read: false,
       },
       member.account
     );
   }
-  const course = await projectRepository.findCourseById(courseId);
-  await course.populate({
-    path: "teacher",
-    select: "account",
-  })
   await notificationService.createNotification(
     {
       title: "Project Updated",
-      content: `Project ${updatedProject.name} has been updated in course ${course.name}`,
+      content: `Project ${updatedProject.name} has been updated in course ${course.courseName}`,
       read: false,
     },
     course.teacher.account._id
