@@ -128,7 +128,7 @@ function App() {
                 }
               />
               <Route
-                path="viewclass/:classId/addProject"
+                path="course/:courseId/addProject"
                 exact
                 element={
                   <ProtectedRoute>
