@@ -23,15 +23,14 @@ function AddProject() {
   );
   const model = genAI.getGenerativeModel({ model: "gemini-pro" });
 
-  let { classId } = useParams();
+  let { courseId } = useParams();
   const [value, setValue] = useState("");
   const [viewClass, setViewClass] = useState();
   const [loading, setLoading] = useState(false);
   const [showChooseMember, setShowChooseMember] = useState(false);
   const [members, setMembers] = useState([]);
   const [selectedMembers, setSelectedMembers] = useState([]);
-  const [aiResponses, setAiResponses] = useState([
-  ]);
+  const [aiResponses, setAiResponses] = useState([]);
   const { authState, setAuthState } = useContext(AuthContext);
   const { flashMessage, setFlashMessage } = useContext(FlashContext);
   const navigate = useNavigate();
@@ -61,7 +60,7 @@ function AddProject() {
           name: values.name,
           scope: values.scope,
           members: selectedMembers,
-          classId: classId,
+          courseId: courseId,
         },
         {
           headers: {
@@ -79,7 +78,7 @@ function AddProject() {
             heading: "Something went wrong",
             type: "error",
           });
-          navigate(`/viewclass/${classId}`);
+          navigate(`/course/${courseId}/project`);
         } else {
           setFlashMessage({
             status: true,
@@ -91,7 +90,7 @@ function AddProject() {
         }
       });
   };
-  
+
   const generateResponse = async () => {
     setLoading(true);
     const prompt = `give project ideas related to following keywords ${value} one line ideas for semester project only idea no description. output should be like : ["idea1","idea2","idea3","idea4","idea5"]`;

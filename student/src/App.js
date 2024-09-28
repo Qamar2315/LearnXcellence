@@ -24,6 +24,7 @@ import Assignments from "./pages/Assignments";
 import Quizzes from "./pages/Quizzes";
 import Viva from "./pages/Viva";
 import CourseSettings from "./pages/CourseSettings";
+import ProjectDetail from "./pages/ProjectDetail";
 
 function App() {
   const [authState, setAuthState] = useState({
@@ -88,7 +89,7 @@ function App() {
 
               <Route path="viewclass/:courseId" exact element={<ViewClass />} />
               <Route
-                path="viewclass/:classId/addProject"
+                path="course/:courseId/addProject"
                 exact
                 element={<AddProject />}
               />
@@ -102,6 +103,12 @@ function App() {
                 path="course/:courseId/project"
                 exact
                 element={<Project />}
+              />
+
+              <Route
+                path="course/:courseId/project/:projectId"
+                exact
+                element={<ProjectDetail />}
               />
               <Route
                 path="course/:courseId/lectures"
