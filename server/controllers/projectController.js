@@ -39,12 +39,12 @@ const sendProject = asyncHandler(async (req, res) => {
 });
 
 const addMember = asyncHandler(async (req, res) => {
-  const { projectId, courseId } = req.params;
-  const { email } = req.body;
+  const { projectId, courseId, memberId } = req.params;
+  // const { email } = req.body;
   const project = await projectService.addMemberToProject(
     projectId,
-    email,
-    courseId
+    courseId,
+    memberId
   );
   res.status(200).json({
     success: true,

@@ -36,7 +36,7 @@ router.post("/create",
  * @desc   Add a member to a project
  * @access Private (Project Creator (and enrolled in the course) only)
  */
-router.put("/:courseId/:projectId/add-member",
+router.put("/:courseId/:projectId/:memberId/add-member",
   isLogin,
   isEmailVerified,
   isCourseStudent, 
