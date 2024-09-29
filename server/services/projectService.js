@@ -214,6 +214,7 @@ const getProjectById = async (projectId) => {
     members: project.members,
     projectLeader: project.projectLeader,
     course: project.course,
+    status: project.status,
   };
 };
 
@@ -295,6 +296,7 @@ const removeMemberFromProject = async (projectId, memberId) => {
 
   const member = await authRepository.findStudentById(memberId);
   const account = await authRepository.findAccountById(member.account);
+
   // notify student
   await notificationService.createNotification(
     {

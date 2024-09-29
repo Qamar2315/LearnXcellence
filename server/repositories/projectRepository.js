@@ -12,7 +12,13 @@ const findProjectByLeaderAndCourse = (student, courseInstance) => Project.findOn
 });
 const createProject = (projectData) => Project.create(projectData);
 const createStatus = (statusData) => Status.create(statusData);
-const findProjectById = (id) => Project.findById(id).populate("members").populate("projectLeader");
+const findProjectById = (id) => Project.findById(id).populate({
+    path: "members",
+    select: "-face_biometric_data -account -courses"
+}).populate({
+    path: "projectLeader",
+    select: "-face_biometric_data -account -courses"
+});
 const updateProjectById = (id, updateData) => Project.findByIdAndUpdate(id, updateData, { new: true });
 const findProjectByIdAndCourse = (projectId, courseId) => Project.findOne({
     _id: projectId,
