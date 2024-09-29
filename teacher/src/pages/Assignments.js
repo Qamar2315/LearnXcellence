@@ -2,16 +2,17 @@ import React from "react";
 import Navbar from "../components/Navbar";
 import Sidebar from "../components/Sidebar";
 
-function Quizzes() {
+function Assignments() {
   return (
     <div>
       <Navbar />
       <div className="flex">
         <Sidebar />
         <div className="container mx-auto mt-5 p-5">
-          <h1 className="text-3xl font-bold mb-4">Quizzes</h1>
+          <h1 className="text-3xl font-bold mb-4">Assignments</h1>
           <p className="text-lg mb-6">
-            This is the quizzes page. You can add your quizzes content here.
+            This is the Assignments page. You can add your Assignments content
+            here.
           </p>
         </div>
       </div>
@@ -19,4 +20,4 @@ function Quizzes() {
   );
 }
 
-export default Quizzes;
+export default Assignments;
