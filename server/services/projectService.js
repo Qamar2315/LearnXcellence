@@ -163,7 +163,7 @@ const updateProject = async (courseId,projectId, projectData) => {
   });
   
   await statusService.updateStatus(updatedProject.status, {
-    status: "pending",
+    status: "modified",
     description: "",
   });
   
