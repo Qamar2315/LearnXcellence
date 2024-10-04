@@ -9,12 +9,28 @@ import Success from "../components/Success"; // Assuming you have a Success comp
 import Alert from "../components/Alert"; // Assuming you have an Alert component
 
 function Projects() {
+  const { projectId } = useParams();
   const [projects, setProjects] = useState([]);
+  const [projectStatus, setProjectStatus] = useState("");
   const [loading, setLoading] = useState(true);
   const { authState } = useContext(AuthContext);
   const { flashMessage, setFlashMessage } = useContext(FlashContext); // Get flash message context
   const navigate = useNavigate();
   const { courseId } = useParams();
+
+  // Function to get the status style based on its value
+  const getStatusStyle = (status) => {
+    switch (status) {
+      case "pending":
+        return "bg-yellow-300 text-yellow-800";
+      case "approved":
+        return "bg-green-300 text-green-800";
+      case "disapproved":
+        return "bg-red-300 text-red-800";
+      default:
+        return "bg-gray-300 text-gray-800";
+    }
+  };
 
   useEffect(() => {
     axios
@@ -49,6 +65,12 @@ function Projects() {
 
   const handleCardClick = (projectId) => {
     navigate(`/course/${courseId}/project/${projectId}`);
+  };
+
+  const truncateDescription = (description, length) => {
+    return description.length > length
+      ? description.substring(0, length) + "..."
+      : description;
   };
 
   return (
@@ -96,9 +118,21 @@ function Projects() {
                   onClick={() => handleCardClick(project._id)}
                 >
                   <h2 className="text-2xl font-bold mb-2">{project.name}</h2>
-                  <p className="text-gray-600 mb-4">{project.scope}</p>
-                  <p className="text-sm text-gray-500">
-                    Leader: {project.projectLeader.name}
+                  <p className="text-gray-600 mb-4">
+                    {truncateDescription(project.scope, 100)}
+                  </p>
+                  <p className="text-sm text-gray-600 flex">
+                    Leader:{"  "}
+                    <div className=" text-sm text-green-600">
+                      {project.projectLeader.name}
+                    </div>
+                  </p>
+                  <p
+                    className={`mt-3 max-w-[100px] px-3 py-1 rounded-full text-sm font-semibold text-center ${getStatusStyle(
+                      project.status.status
+                    )}`}
+                  >
+                    {project.status.status}
                   </p>
                 </div>
               ))}

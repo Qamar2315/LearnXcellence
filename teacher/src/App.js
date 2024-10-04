@@ -11,7 +11,7 @@ import Login from "./pages/Login";
 
 import JoinClass from "./pages/JoinClass";
 import ViewClass from "./pages/ViewClass";
-import AddProject from "./pages/AddProject";
+
 import ViewProject from "./pages/ViewProject";
 import EmailVerification from "./pages/EmailVerification";
 import ProfilleSettings from "./pages/ProfilleSettings";
@@ -23,6 +23,10 @@ import CoursePage from "./pages/CoursePage";
 import Project from "./pages/Project";
 import CourseSetting from "./pages/CourseSetting";
 import Lectures from "./pages/Lectures";
+import ProjectDetails from "./pages/ProjectDetails";
+import Quizzes from "./pages/Quizzes";
+import Assignments from "./pages/Assignments";
+import Viva from "./pages/Viva";
 
 function App() {
   const [authState, setAuthState] = useState({
@@ -110,6 +114,33 @@ function App() {
                 }
               />
               <Route
+                path="course/:courseId/quizzes"
+                exact
+                element={
+                  <ProtectedRoute>
+                    <Quizzes />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="course/:courseId/viva"
+                exact
+                element={
+                  <ProtectedRoute>
+                    <Viva />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="course/:courseId/assignments"
+                exact
+                element={
+                  <ProtectedRoute>
+                    <Assignments />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
                 path="course/:courseId/coursesettings"
                 exact
                 element={
@@ -128,11 +159,11 @@ function App() {
                 }
               />
               <Route
-                path="course/:courseId/addProject"
+                path="course/:courseId/project/:projectId"
                 exact
                 element={
                   <ProtectedRoute>
-                    <AddProject />
+                    <ProjectDetails />
                   </ProtectedRoute>
                 }
               />

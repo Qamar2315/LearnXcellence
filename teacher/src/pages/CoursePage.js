@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useContext } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import axios from "axios";
 import { AuthContext } from "../helpers/AuthContext";
 import { FlashContext } from "../helpers/FlashContext";
@@ -12,11 +12,24 @@ function CoursePage() {
   const { authState } = useContext(AuthContext);
   const { flashMessage, setFlashMessage } = useContext(FlashContext);
   const [course, setCourse] = useState(null);
-  const [showSearchBox, setShowSearchBox] = useState(false); // Toggle search box visibility
-  const [searchEmail, setSearchEmail] = useState("");
-  const [studentInfo, setStudentInfo] = useState(null); // Store student info
+  const [showEditPopup, setShowEditPopup] = useState(false);
+  const [showProjectPopup, setShowProjectPopup] = useState(false);
+  const [showVivaPopup, setShowVivaPopup] = useState(false);
+  const [editFormData, setEditFormData] = useState({
+    courseName: "",
+    description: "",
+    projectRequirements: "",
+  });
+  const [projectDates, setProjectDates] = useState({
+    startDate: "",
+    endDate: "",
+  });
+  const [vivaDates, setVivaDates] = useState({
+    startDate: "",
+    endDate: "",
+  });
+
   const { courseId } = useParams();
-  const navigate = useNavigate();
 
   // Fetch course details
   useEffect(() => {
@@ -49,27 +62,52 @@ function CoursePage() {
       });
   }, [authState, courseId, setFlashMessage]);
 
-  const deleteCourse = () => {
+  // Handle Edit Button Click
+  const handleEditButtonClick = () => {
+    setEditFormData({
+      courseName: course.courseName,
+      description: course.description,
+      projectRequirements: course.projectRequirements,
+    });
+    setShowEditPopup(true);
+  };
+
+  // Handle form changes
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setEditFormData((prevData) => ({
+      ...prevData,
+      [name]: value,
+    }));
+  };
+
+  // Update Course
+  const updateCourse = () => {
     axios
-      .delete(`${process.env.REACT_APP_API_URL}/course/${courseId}`, {
-        headers: {
-          "Content-type": "application/json",
-          authorization: `Bearer ${authState.token}`,
-        },
-      })
+      .patch(
+        `${process.env.REACT_APP_API_URL}/course/${courseId}`,
+        editFormData,
+        {
+          headers: {
+            "Content-type": "application/json",
+            authorization: `Bearer ${authState.token}`,
+          },
+        }
+      )
       .then((res) => {
         if (res.data.success) {
           setFlashMessage({
             status: true,
             message: res.data.message,
-            heading: "Course Deleted",
+            heading: "Course Updated",
             type: "success",
           });
-          navigate("/teacherDashboard");
+          setCourse(res.data.data);
+          setShowEditPopup(false);
         } else {
           setFlashMessage({
             status: true,
-            message: res.data.message || "Failed to delete course",
+            message: "Failed to update course",
             heading: "Error",
             type: "error",
           });
@@ -78,52 +116,19 @@ function CoursePage() {
       .catch((error) => {
         setFlashMessage({
           status: true,
-          message: error.response?.data?.message || "Failed to delete course",
+          message: error.response?.data?.message || "Failed to update course",
           heading: "Error",
           type: "error",
         });
       });
   };
 
-  const searchStudent = () => {
-    axios
-      .get(
-        `${process.env.REACT_APP_API_URL}/course/search-student-by-email?search=${searchEmail}`,
-        {
-          headers: {
-            "Content-type": "application/json",
-            authorization: `Bearer ${authState.token}`,
-          },
-        }
-      )
-      .then((res) => {
-        if (res.data.success) {
-          setStudentInfo(res.data.data);
-        } else {
-          setFlashMessage({
-            status: true,
-            message: "Failed to find student",
-            heading: "Error",
-            type: "error",
-          });
-        }
-      })
-      .catch((error) => {
-        setFlashMessage({
-          status: true,
-          message: error.response?.data?.message || "Failed to search student",
-          heading: "Error",
-          type: "error",
-        });
-      });
-  };
-
-  const addStudentToCourse = () => {
-    if (!studentInfo) return;
+  // Handle Project Date Update
+  const updateProjectDates = () => {
     axios
       .put(
-        `${process.env.REACT_APP_API_URL}/course/${courseId}/add`,
-        { studentId: studentInfo._id },
+        `${process.env.REACT_APP_API_URL}/course/updateProject/${courseId}`,
+        projectDates,
         {
           headers: {
             "Content-type": "application/json",
@@ -135,33 +140,88 @@ function CoursePage() {
         if (res.data.success) {
           setFlashMessage({
             status: true,
-            message: "Student added successfully",
+            message: "Project Schedule Updated",
             heading: "Success",
             type: "success",
           });
-          setStudentInfo(null);
-          setShowSearchBox(false); // Hide search box after adding
-        } else {
-          setFlashMessage({
-            status: true,
-            message: res.data.message || "Failed to add student",
-            heading: "Error",
-            type: "error",
-          });
-          setStudentInfo(null);
-          setShowSearchBox(false);
+          setCourse(res.data.data);
+          setShowProjectPopup(false);
         }
       })
       .catch((error) => {
         setFlashMessage({
           status: true,
-          message: error.response?.data?.message || "Failed to add student",
+          message:
+            error.response?.data?.message ||
+            "Failed to update project schedule",
           heading: "Error",
           type: "error",
         });
-        setStudentInfo(null);
-        setShowSearchBox(false);
       });
+    console.log(projectDates);
+  };
+
+  // Handle Viva Date Update
+  // Handle Viva Date Update
+  const updateVivaDates = () => {
+    // Check if the dates are valid
+    if (!vivaDates.startDate || !vivaDates.endDate) {
+      setFlashMessage({
+        status: true,
+        message: "Please enter both viva start and end dates.",
+        heading: "Error",
+        type: "error",
+      });
+      return;
+    }
+
+    const startDateObj = new Date(vivaDates.startDate);
+    const endDateObj = new Date(vivaDates.endDate);
+
+    if (isNaN(startDateObj) || isNaN(endDateObj)) {
+      setFlashMessage({
+        status: true,
+        message: "Invalid dates entered. Please provide valid dates.",
+        heading: "Error",
+        type: "error",
+      });
+      return;
+    }
+
+    // Proceed with updating the dates if validation passes
+    axios
+      .put(
+        `${process.env.REACT_APP_API_URL}/course/updateViva/${courseId}`,
+        vivaDates,
+        {
+          headers: {
+            "Content-type": "application/json",
+            authorization: `Bearer ${authState.token}`,
+          },
+        }
+      )
+      .then((res) => {
+        if (res.data.success) {
+          setFlashMessage({
+            status: true,
+            message: "Viva Schedule Updated",
+            heading: "Success",
+            type: "success",
+          });
+          setCourse(res.data.data); // Update the course data with the new viva dates
+          setShowVivaPopup(false);
+        }
+      })
+      .catch((error) => {
+        setFlashMessage({
+          status: true,
+          message:
+            error.response?.data?.message || "Failed to update viva schedule",
+          heading: "Error",
+          type: "error",
+        });
+      });
+    console.log(vivaDates);
   };
 
   if (!course) {
@@ -189,84 +249,186 @@ function CoursePage() {
             )}
           </div>
           <h1 className="text-3xl font-bold mb-4">{course.courseName}</h1>
-          <p className="text-lg mb-6">{course.description}</p>
+          <p className="text-lg mb-2">
+            <strong>Course Code:</strong> {course.courseCode}
+          </p>
+          <p className="text-lg mb-4">
+            <strong>Description:</strong> {course.description}
+          </p>
+          <p className="text-lg mb-4">
+            <strong>Project Requirements:</strong> {course.projectRequirements}
+          </p>
+          <p className="text-lg mb-4">
+            <strong>Project Start Date:</strong>{" "}
+            {course.projectStartDate || "Not Set"}
+          </p>
+          <p className="text-lg mb-4">
+            <strong>Project End Date:</strong>{" "}
+            {course.projectEndDate || "Not Set"}
+          </p>
+          <p className="text-lg mb-4">
+            <strong>Viva Start Date:</strong>{" "}
+            {course.vivaStartDate || "Not Set"}
+          </p>
+          <p className="text-lg mb-4">
+            <strong>Viva End Date:</strong> {course.vivaEndDate || "Not Set"}
+          </p>
 
+          {/* Edit Course Button */}
           <button
-            onClick={deleteCourse}
-            className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-full"
+            onClick={handleEditButtonClick}
+            className="mt-4 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition duration-200"
           >
-            Delete Course
+            Edit Course
           </button>
 
-          {/* Add Student Section */}
-          <div className="mt-6">
-            <button
-              onClick={() => setShowSearchBox(!showSearchBox)}
-              className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full"
-            >
-              {showSearchBox ? "Cancel" : "Add Student"}
-            </button>
+          {/* Update Project Dates Button */}
+          <button
+            onClick={() => setShowProjectPopup(true)}
+            className="mt-4 ml-4 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition duration-200"
+          >
+            Update Project Dates
+          </button>
 
-            {showSearchBox && (
-              <div className="mt-4">
+          {/* Update Viva Dates Button */}
+          <button
+            onClick={() => setShowVivaPopup(true)}
+            className="mt-4 ml-4 px-4 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition duration-200"
+          >
+            Update Viva Dates
+          </button>
+
+          {/* Edit Course Popup */}
+          {showEditPopup && (
+            <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center">
+              <div className="bg-white p-8 rounded-lg shadow-lg">
+                <h2 className="text-2xl font-bold mb-4">Edit Course</h2>
+                <label className="block mb-2">Course Name</label>
                 <input
                   type="text"
-                  placeholder="Enter student email"
-                  value={searchEmail}
-                  onChange={(e) => setSearchEmail(e.target.value)}
-                  className="border rounded p-2 mr-4"
+                  name="courseName"
+                  value={editFormData.courseName}
+                  onChange={handleInputChange}
+                  className="border rounded p-2 mb-4 w-full"
+                />
+                <label className="block mb-2">Description</label>
+                <textarea
+                  name="description"
+                  value={editFormData.description}
+                  onChange={handleInputChange}
+                  className="border rounded p-2 mb-4 w-full"
+                ></textarea>
+                <label className="block mb-2">Project Requirements</label>
+                <textarea
+                  name="projectRequirements"
+                  value={editFormData.projectRequirements}
+                  onChange={handleInputChange}
+                  className="border rounded p-2 mb-4 w-full"
+                ></textarea>
+                <button
+                  onClick={updateCourse}
+                  className="mt-4 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition duration-200"
+                >
+                  Save Changes
+                </button>
+                <button
+                  onClick={() => setShowEditPopup(false)}
+                  className="ml-4 px-4 py-2 mr-2 bg-gray-300 rounded-lg"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Project Date Popup */}
+          {showProjectPopup && (
+            <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center">
+              <div className="bg-white p-8 rounded-lg shadow-lg">
+                <h2 className="text-2xl font-bold mb-4">
+                  Update Project Dates
+                </h2>
+                <label className="block mb-2">Project Start Date</label>
+                <input
+                  type="date"
+                  name="startDate"
+                  value={projectDates.startDate}
+                  onChange={(e) =>
+                    setProjectDates({
+                      ...projectDates,
+                      startDate: e.target.value,
+                    })
+                  }
+                  className="border rounded p-2 mb-4 w-full"
+                />
+                <label className="block mb-2">Project End Date</label>
+                <input
+                  type="date"
+                  name="endDate"
+                  value={projectDates.endDate}
+                  onChange={(e) =>
+                    setProjectDates({
+                      ...projectDates,
+                      endDate: e.target.value,
+                    })
+                  }
+                  className="border rounded p-2 mb-4 w-full"
                 />
                 <button
-                  onClick={searchStudent}
-                  className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-full"
+                  onClick={updateProjectDates}
+                  className="mt-4 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition duration-200"
                 >
-                  Search Student
+                  Save Project Dates
                 </button>
-
-                {studentInfo && (
-                  <div className="mt-4">
-                    <div className="flex min-w-0 gap-x-4">
-                      <img
-                        className="h-12 w-12 flex-none rounded-full bg-gray-50"
-                        src={
-                          `http://localhost:9090/profile_pictures/${studentInfo.account.profile_picture}` ||
-                          "https://via.placeholder.com/150"
-                        }
-                        alt={studentInfo.name}
-                      />
-                      <div className="min-w-0 flex-auto">
-                        <p className="text-sm font-semibold leading-6 text-gray-900">
-                          {studentInfo.name}
-                        </p>
-                        <p className="mt-1 truncate text-xs leading-5 text-gray-500">
-                          {studentInfo.account.email}
-                        </p>
-                      </div>
-                    </div>
-                    <button
-                      onClick={addStudentToCourse}
-                      className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full mt-2"
-                    >
-                      Add Student to Course
-                    </button>
-                  </div>
-                )}
+                <button
+                  onClick={() => setShowProjectPopup(false)}
+                  className="ml-4 px-4 py-2 bg-gray-300 rounded-lg"
+                >
+                  Cancel
+                </button>
               </div>
-            )}
-          </div>
-
-          {/* Flash messages */}
-          {setFlashMessage.status && setFlashMessage.type === "success" && (
-            <Success
-              message={setFlashMessage.message}
-              heading={setFlashMessage.heading}
-            />
+            </div>
           )}
-          {setFlashMessage.status && setFlashMessage.type === "error" && (
-            <Alert
-              message={setFlashMessage.message}
-              heading={setFlashMessage.heading}
-            />
+
+          {/* Viva Date Popup */}
+          {showVivaPopup && (
+            <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center">
+              <div className="bg-white p-8 rounded-lg shadow-lg">
+                <h2 className="text-2xl font-bold mb-4">Update Viva Dates</h2>
+                <label className="block mb-2">Viva Start Date</label>
+                <input
+                  type="date"
+                  name="startDate"
+                  value={vivaDates.startDate}
+                  onChange={(e) =>
+                    setVivaDates({ ...vivaDates, startDate: e.target.value })
+                  }
+                  className="border rounded p-2 mb-4 w-full"
+                />
+                <label className="block mb-2">Viva End Date</label>
+                <input
+                  type="date"
+                  name="endDate"
+                  value={vivaDates.endDate}
+                  onChange={(e) =>
+                    setVivaDates({ ...vivaDates, endDate: e.target.value })
+                  }
+                  className="border rounded p-2 mb-4 w-full"
+                />
+                <button
+                  onClick={updateVivaDates}
+                  className="mt-4 px-4 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition duration-200"
+                >
+                  Save Viva Dates
+                </button>
+                <button
+                  onClick={() => setShowVivaPopup(false)}
+                  className="ml-4 px-4 py-2 bg-gray-300 rounded-lg"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
           )}
         </div>
       </div>

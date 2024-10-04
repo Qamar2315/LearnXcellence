@@ -1,11 +1,9 @@
 // libraries
-import React from "react";
+import React, { useState, useContext } from "react";
 import { Formik, Field, Form, ErrorMessage } from "formik";
 import axios from "axios";
 import * as Yup from "yup";
-import { useNavigate, Link } from "react-router-dom";
-import { useParams } from "react-router-dom";
-import { useContext, useState } from "react";
+import { useNavigate, Link, useParams } from "react-router-dom";
 import Success from "../components/Success";
 import Alert from "../components/Alert";
 // components
@@ -20,8 +18,6 @@ import "../styles/chatBot.css";
 
 function AddProject() {
   const { courseId } = useParams();
-  const [value, setValue] = useState("");
-  const [viewClass, setViewClass] = useState();
   const [loading, setLoading] = useState(false);
   const [showChooseMember, setShowChooseMember] = useState(false);
   const [selectedMembers, setSelectedMembers] = useState([]);
@@ -46,7 +42,6 @@ function AddProject() {
 
   const handleSubmit = async (values, { resetForm }) => {
     resetForm();
-
     try {
       const res = await axios.post(
         `${process.env.REACT_APP_API_URL}/project/create`,
@@ -91,29 +86,44 @@ function AddProject() {
     }
   };
 
+  const generateSuggestions = async () => {
+    setLoading(true);
+    try {
+      const res = await axios.get(
+        `${process.env.REACT_APP_API_URL}/project/${courseId}/generate-project-suggestions`,
+        {
+          headers: {
+            Authorization: `Bearer ${authState.token}`,
+          },
+        }
+      );
+
+      if (res.data.success) {
+        setAiResponses(res.data.data); // Update AI responses with the received data
+      } else {
+        setFlashMessage({
+          status: true,
+          message: "Failed to generate suggestions.",
+          heading: "Error",
+          type: "error",
+        });
+      }
+    } catch (error) {
+      setFlashMessage({
+        status: true,
+        message:
+          error.response?.data?.message || "Error generating suggestions",
+        heading: "Error",
+        type: "error",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <>
       <Navbar />
-      {viewClass && (
-        <Link to={`/viewClass/${viewClass._id}`}>
-          <button className="text-blue-500 hover:text-blue-600 text-lg font-semibold px-4">
-            Back
-          </button>
-        </Link>
-      )}
-      {viewClass && (
-        <h1 className="text-2xl font-semibold text-blue-800 px-4 py-1">
-          {viewClass.className}
-        </h1>
-      )}
-      {showChooseMember && (
-        <CreateGroupContext.Provider
-          value={{ selectedMembers, setSelectedMembers }}
-        >
-          <ChooseMember onClose={() => setShowChooseMember(false)} />
-        </CreateGroupContext.Provider>
-      )}
-
       <div className="flex justify-around mt-4">
         <div className="p-6 w-2/5 bg-white rounded-xl shadow-md">
           <h1 className="text-2xl font-semibold">Add Project</h1>
@@ -223,14 +233,13 @@ function AddProject() {
         </div>
         <div className="w-2/5 p-4 bg-gray-100 border border-gray-300 rounded-lg">
           <h2 className="text-3xl font-bold mb-8 text-center">
-            Chat with the Project Ideas Bot
+            Generate Project Suggestions
           </h2>
-          <div className="h-64 overflow-y-auto">
-            {aiResponses.map((message, index) => (
-              <div key={index}>
-                <div className="inline-block p-2 rounded-lg mb-2 bg-gray-200">
-                  {message}
-                </div>
+          <div className="h-64 overflow-y-auto mb-4">
+            {aiResponses.map((suggestion, index) => (
+              <div key={index} className="mb-4">
+                <h3 className="font-semibold">{suggestion.ideaTitle}</h3>
+                <p>{suggestion.ideaDescription}</p>
               </div>
             ))}
           </div>
@@ -243,22 +252,22 @@ function AddProject() {
             )}
           </div>
           <div className="mt-4 flex items-center">
-            <input
-              value={value}
-              type="text"
-              placeholder="Type your keywords..."
-              className="flex-grow p-2 border rounded-l-lg"
-              onChange={(e) => setValue(e.target.value)}
-            />
             <button
-              className="px-4 py-2 bg-blue-500 text-white rounded-r-lg hover:bg-blue-600"
-              // onClick={generateResponse}
+              className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
+              onClick={generateSuggestions} // Call generateSuggestions on click
             >
-              Generate
+              Generate Suggestions
             </button>
           </div>
         </div>
       </div>
+      {showChooseMember && (
+        <CreateGroupContext.Provider
+          value={{ selectedMembers, setSelectedMembers }}
+        >
+          <ChooseMember onClose={() => setShowChooseMember(false)} />
+        </CreateGroupContext.Provider>
+      )}
     </>
   );
 }

@@ -66,7 +66,7 @@ function JoinClass() {
             className="mt-8 inline-block w-full rounded-full bg-blue-600 hover:bg-blue-800 py-4 text-sm font-bold text-white shadow-xl text-center transition duration-300"
             onClick={joinClass}
           >
-            Join Class
+            Join Course
           </button>
         </section>
       </div>

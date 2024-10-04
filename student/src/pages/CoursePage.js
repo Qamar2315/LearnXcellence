@@ -1,6 +1,5 @@
-// CoursePage.js
 import React, { useEffect, useState, useContext } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import axios from "axios";
 import { AuthContext } from "../helpers/AuthContext";
 import { FlashContext } from "../helpers/FlashContext";
@@ -11,10 +10,16 @@ import Alert from "../components/Alert";
 
 function CoursePage() {
   const { authState } = useContext(AuthContext);
-  const { setFlashMessage } = useContext(FlashContext);
+  const { flashMessage, setFlashMessage } = useContext(FlashContext);
   const [course, setCourse] = useState(null);
+
   const { courseId } = useParams();
-  const navigate = useNavigate();
+
+  // Function to format date and remove time
+  const formatDate = (dateString) => {
+    const options = { year: "numeric", month: "long", day: "numeric" };
+    return new Date(dateString).toLocaleDateString(undefined, options);
+  };
 
   // Fetch course details
   useEffect(() => {
@@ -47,77 +52,80 @@ function CoursePage() {
       });
   }, [authState, courseId, setFlashMessage]);
 
-  const leaveCourse = () => {
-    axios
-      .put(
-        `${process.env.REACT_APP_API_URL}/course/${courseId}/leave`,
-        {},
-        {
-          headers: {
-            "Content-type": "application/json",
-            authorization: `Bearer ${authState.token}`,
-          },
-        }
-      )
-      .then((res) => {
-        if (res.data.success) {
-          setFlashMessage({
-            status: true,
-            message: res.data.message,
-            heading: "Course Left",
-            type: "success",
-          });
-          navigate("/studentDashboard");
-        } else {
-          setFlashMessage({
-            status: true,
-            message: res.data.message || "Failed to leave course",
-            heading: "Error",
-            type: "error",
-          });
-        }
-      })
-      .catch((error) => {
-        setFlashMessage({
-          status: true,
-          message: error.response?.data?.message || "Failed to leave course",
-          heading: "Error",
-          type: "error",
-        });
-      });
-  };
-
   if (!course) {
     return <p>Loading...</p>;
   }
 
   return (
-    <div>
+    <div className="h-screen flex flex-col">
       <Navbar />
       <div className="flex">
         <Sidebar />
         <div className="container mx-auto mt-5 p-5">
-          <h1 className="text-3xl font-bold mb-4">{course.courseName}</h1>
-          <p className="text-lg mb-6">{course.description}</p>
-          <button
-            onClick={leaveCourse}
-            className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-full"
-          >
-            Leave Course
-          </button>
-          {/* Flash messages */}
-          {setFlashMessage.status && setFlashMessage.type === "success" && (
-            <Success
-              message={setFlashMessage.message}
-              heading={setFlashMessage.heading}
-            />
-          )}
-          {setFlashMessage.status && setFlashMessage.type === "error" && (
-            <Alert
-              message={setFlashMessage.message}
-              heading={setFlashMessage.heading}
-            />
-          )}
+          <div className="  m-5 bg-white shadow-lg rounded-lg p-12 ">
+            {flashMessage.status && flashMessage.type === "error" && (
+              <Alert
+                message={flashMessage.message}
+                heading={flashMessage.heading}
+              />
+            )}
+            {flashMessage.status && flashMessage.type === "success" && (
+              <Success
+                message={flashMessage.message}
+                heading={flashMessage.heading}
+              />
+            )}
+
+            <div className="border-b pb-4 mb-4">
+              <h1 className="text-4xl font-bold text-gray-800 mb-2">
+                {course.courseName}
+              </h1>
+              <p className="text-lg text-gray-600">
+                <strong>Course Code:</strong> {course.courseCode}
+              </p>
+              <p className="text-lg text-gray-600 mt-2">
+                <strong>Description:</strong> {course.description}
+              </p>
+              <p className="text-lg text-gray-600 mt-2">
+                <strong>Project Requirements:</strong>{" "}
+                {course.projectRequirements}
+              </p>
+            </div>
+
+            <div className="flex justify-between items-center">
+              <div className="text-lg text-gray-600">
+                <strong>Project Schedule:</strong>
+              </div>
+              <div className="text-right">
+                <p className="text-lg text-gray-600">
+                  {course.projectStartDate
+                    ? formatDate(course.projectStartDate)
+                    : "Not Set"}{" "}
+                  -{" "}
+                  {course.projectEndDate
+                    ? formatDate(course.projectEndDate)
+                    : "Not Set"}
+                </p>
+              </div>
+            </div>
+
+            <div className="flex justify-between items-center mt-4">
+              <div className="text-lg text-gray-600">
+                <strong>Viva Schedule:</strong>
+              </div>
+              <div className="text-right">
+                <p className="text-lg text-gray-600">
+                  {course.vivaStartDate
+                    ? formatDate(course.vivaStartDate)
+                    : "Not Set"}{" "}
+                  -{" "}
+                  {course.vivaEndDate
+                    ? formatDate(course.vivaEndDate)
+                    : "Not Set"}
+                </p>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
