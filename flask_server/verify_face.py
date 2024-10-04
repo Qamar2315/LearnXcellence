@@ -5,7 +5,7 @@ import os
 from spoof_detector import is_real_image
 
 # Define a threshold for face matching
-FACE_MATCH_THRESHOLD = 0.6
+FACE_MATCH_THRESHOLD = 0.4
 
 
 def verify_face(image_path, known_face_encoding, model):
