@@ -134,7 +134,7 @@ const sendViva = async (vivaId) => {
   if (!viva) throw new AppError("Viva Not Found", 400);
   return {
     viva,
-    project_id: project._id,
+    project_id: project?._id,
   }
 };
 
