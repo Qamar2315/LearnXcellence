@@ -215,6 +215,7 @@ const getProjectById = async (projectId) => {
     projectLeader: project.projectLeader,
     course: project.course,
     status: project.status,
+    viva: project.viva,
   };
 };
 
