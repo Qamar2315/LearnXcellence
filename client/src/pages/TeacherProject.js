@@ -29,6 +29,8 @@ function TeacherProjects() {
         return "bg-green-300 text-green-800";
       case "disapproved":
         return "bg-red-300 text-red-800";
+      case "unsatisfactory":
+        return "bg-orange-300 text-orange-800";
       default:
         return "bg-gray-300 text-gray-800";
     }
@@ -66,7 +68,7 @@ function TeacherProjects() {
   }, [authState, courseId, setFlashMessage]); // Ensure to add setFlashMessage to dependency array
 
   const handleCardClick = (projectId) => {
-    navigate(`/course/${courseId}/project/${projectId}/teacher`);
+    navigate(`${projectId}`);
   };
 
   const truncateDescription = (description, length) => {
@@ -116,7 +118,7 @@ function TeacherProjects() {
               {projects.map((project) => (
                 <div
                   key={project._id}
-                  className="bg-white shadow-lg rounded-lg p-6 cursor-pointer hover:shadow-xl transition-shadow duration-300"
+                  className="bg-white shadow-lg rounded-lg p-6 cursor-pointer hover:shadow-xl transition-shadow duration-300 transition-transform transform hover:scale-105"
                   onClick={() => handleCardClick(project._id)}
                 >
                   <h2 className="text-2xl font-bold mb-2">{project.name}</h2>
@@ -130,7 +132,7 @@ function TeacherProjects() {
                     </div>
                   </p>
                   <p
-                    className={`mt-3 max-w-[100px] px-3 py-1 rounded-full text-sm font-semibold text-center ${getStatusStyle(
+                    className={`mt-3 max-w-[110px] px-3 py-1 rounded-full text-sm font-semibold text-center ${getStatusStyle(
                       project.status.status
                     )}`}
                   >

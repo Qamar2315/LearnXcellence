@@ -33,6 +33,8 @@ function TeacherProjectDetail() {
         return "bg-green-300 text-green-800";
       case "disapproved":
         return "bg-red-300 text-red-800";
+      case "unsatisfactory":
+        return "bg-orange-300 text-orange-800";
       default:
         return "bg-gray-300 text-gray-800";
     }
@@ -205,6 +207,14 @@ function TeacherProjectDetail() {
                 )}
               </div>
               <p className="text-lg mb-6">{project.scope}</p>
+              <p className="text-lg mb-6">
+                Viva:{" "}
+                {project.viva ? (
+                  <span className="text-green-600">Scheduled</span>
+                ) : (
+                  "Not Scheduled"
+                )}
+              </p>
 
               <div>
                 <h2 className="text-xl font-semibold mb-2">Members:</h2>
@@ -243,7 +253,7 @@ function TeacherProjectDetail() {
                   className="w-full p-2 mb-4 border rounded"
                 >
                   <option value="">Select Status</option>
-                  <option value="pending">Pending</option>
+                  {/* <option value="unsatisfactory">Unsatisfactory</option> */}
                   <option value="approved">Approved</option>
                   <option value="disapproved">Disapproved</option>
                 </select>
