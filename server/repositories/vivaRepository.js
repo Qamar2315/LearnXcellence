@@ -11,6 +11,7 @@ const saveCourse = (getCourse) => getCourse.save();
 const findVivaById = (vivaId) => Viva.findById(vivaId).populate('remarks');
 const updateViva = (vivaId, updateData) => Viva.findByIdAndUpdate(vivaId, updateData);
 const deleteVivaById = (vivaId) => Viva.findByIdAndDelete(vivaId);
+const findProjectByVivaId = (vivaId) => Project.findOne({ viva: vivaId });
 
 module.exports = {
     findProjectById,
@@ -21,5 +22,6 @@ module.exports = {
     saveCourse,
     findVivaById,
     updateViva,
-    deleteVivaById
+    deleteVivaById,
+    findProjectByVivaId,
 };
