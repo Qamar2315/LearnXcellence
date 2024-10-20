@@ -44,7 +44,6 @@ const updateAssignment = asyncHandler(async (req, res) => {
   const { courseId, assignmentId } = req.params;
   const { title, description, deadline } = req.body;
   const document_id = req.file ? req.file.filename : null;
-
   const updatedAssignment = await assignmentService.updateAssignment(
     courseId,
     assignmentId,

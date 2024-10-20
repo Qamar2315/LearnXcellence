@@ -30,9 +30,13 @@ const addAssignment = async (
     );
   }
   const formattedDate = moment
-    .tz(deadline, "DD/MM/YYYY", "your_time_zone")
-    .utc()
+    .tz(deadline, "MM/DD/YYYY", "Asia/Karachi") // replace with the appropriate timezone
     .toDate();
+    
+  if (formattedDate < Date.now()) {
+    throw new Error("Deadline must be a future date");
+  }
+
   const assignmentData = {
     course: courseId,
     teacher: teacherId,
@@ -46,7 +50,7 @@ const addAssignment = async (
   );
   course.assignments.push(assignment._id);
   await course.save();
-  
+
   // Notify students
   for (const student of course.students) {
     const student_data = await authRepository.findStudentById(student);
@@ -115,9 +119,13 @@ const updateAssignment = async (
     );
   }
   const formattedDate = moment
-    .tz(deadline, "DD/MM/YYYY", "your_time_zone")
-    .utc()
+    .tz(deadline, "MM/DD/YYYY", "Asia/Karachi") // replace with the appropriate timezone
     .toDate();
+  
+  if (formattedDate < Date.now()) {
+    throw new Error("Deadline must be a future date");
+  }
+
   assignment.title = title || assignment.title;
   assignment.description = description || assignment.description;
   assignment.document_id = document_id || assignment.document_id;
