@@ -95,7 +95,7 @@ export default function TeacherSidebar({ children }) {
               activeClassName="bg-blue-700"
             />
             <SidebarItem
-              to={`/course/${courseId}/viva`}
+              to={`/course/${courseId}/viva/teacher`}
               icon={<Mic size={20} />}
               text="Viva"
               activeClassName="bg-blue-700"

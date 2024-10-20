@@ -35,6 +35,8 @@ import TeacherLectures from "./pages/TeacherLectures";
 import TeacherCourseSetting from "./pages/TeacherCourseSetting";
 import TeacherProfileSettings from "./pages/TeacherProfileSettings";
 import TeacherProfile from "./pages/TeacherProfile";
+import TeacherViva from "./pages/TeacherViva";
+import TeacherVivaDetails from "./pages/TeacherVivaDetails";
 
 function App() {
   const [authState, setAuthState] = useState({
@@ -138,7 +140,7 @@ function App() {
               />
 
               <Route
-                path="course/:courseId/project/:projectId/teacher"
+                path="course/:courseId/project/teacher/:projectId"
                 exact
                 element={<TeacherProjectDetail />}
               />
@@ -165,7 +167,22 @@ function App() {
                 element={<Quizzes />}
               />
 
-              <Route path="course/:courseId/viva" exact element={<Viva />} />
+              <Route
+                path="course/:courseId/project/:projectId/:vivaId"
+                exact
+                element={<Viva />}
+              />
+              <Route
+                path="course/:courseId/viva/teacher"
+                exact
+                element={<TeacherViva />}
+              />
+
+              <Route
+                path="course/:courseId/viva/teacher/:vivaId"
+                exact
+                element={<TeacherVivaDetails />}
+              />
 
               <Route
                 path="course/:courseId/coursesettings"

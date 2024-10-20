@@ -370,7 +370,7 @@ function TeacherCourseSetting() {
                             setConfirmationVisible(true);
                             setStudentToRemove(student._id);
                           }}
-                          className="bg-red-500 hover:bg-red-700 text-white font-semibold py-2 px-4 rounded-lg"
+                          className="  font-semibold  rounded-lg text-red-500 ml-4 mt-2"
                         >
                           Remove
                         </button>

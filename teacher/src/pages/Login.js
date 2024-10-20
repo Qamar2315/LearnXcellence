@@ -146,7 +146,7 @@ function Login() {
                     component="span"
                   ></ErrorMessage>
                   <Field
-                    className="mt-1 w-full rounded-md border-gray-200 shadow-sm sm:text-sm"
+                    className="mt-1 h-10 w-full rounded-md border-gray-200 shadow-sm sm:text-sm "
                     name="email"
                     placeholder="enter email"
                     type="email"

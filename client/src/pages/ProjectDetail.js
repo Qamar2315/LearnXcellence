@@ -27,6 +27,7 @@ function ProjectDetail() {
   const [isLeader, setIsLeader] = useState(false); // State to check if user is leader
   const [availableMembers, setAvailableMembers] = useState([]); // Members available for addition
   const [newMember, setNewMember] = useState(""); // New members to be added
+  const [viva, setViva] = useState("");
 
   // Fetch available members (you can modify the endpoint accordingly)
   const fetchAvailableMembers = () => {
@@ -234,6 +235,8 @@ function ProjectDetail() {
         return "bg-green-300 text-green-800";
       case "disapproved":
         return "bg-red-300 text-red-800";
+      case "unsatisfactory":
+        return "bg-orange-300 text-orange-800";
       default:
         return "bg-gray-300 text-gray-800";
     }
@@ -282,6 +285,50 @@ function ProjectDetail() {
       });
   };
 
+  //add viva
+
+  const addViva = () => {
+    axios
+      .post(
+        `${process.env.REACT_APP_API_URL}/viva/${courseId}/${projectId}/add`, // Updated the URL
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${authState.token}`,
+          },
+        }
+      )
+      .then((response) => {
+        if (response.data.success) {
+          // setProject(response.data.data);
+          // setSelectedMembers(response.data.data.members);
+          setFlashMessage({
+            status: true,
+            message: response.data.message || "Member added successfully",
+            heading: "Success",
+            type: "success",
+          });
+        } else {
+          setFlashMessage({
+            status: true,
+            message: response.data.message || "Failed to add viva.", // Fallback message
+            heading: "Error",
+            type: "error",
+          });
+        }
+      })
+      .catch((error) => {
+        const errorMessage =
+          error.response?.data?.message || "Error adding viva."; // Access the response message if available
+        setFlashMessage({
+          status: true,
+          message: errorMessage,
+          heading: "Error",
+          type: "error",
+        });
+      });
+  };
+
   // Fetch project details
   useEffect(() => {
     axios
@@ -300,6 +347,10 @@ function ProjectDetail() {
           setEditName(projectData.name); // Set initial values for edit form
           setEditScope(projectData.scope);
           setSelectedMembers(projectData.members); // Extract member IDs
+
+          if (response.data.data.viva) {
+            setViva(response.data.data.viva);
+          }
 
           // Fetch project status using the statusId from the project details
           if (response.data.data.status) {
@@ -333,7 +384,11 @@ function ProjectDetail() {
         setLoading(false);
       });
     fetchAvailableMembers();
-  }, [setSelectedMembers, projectId, authState, courseId, setFlashMessage]);
+  }, [setSelectedMembers, projectId, authState, courseId, flashMessage]);
+
+  const goToViva = () => {
+    navigate(`${viva}`);
+  };
 
   return (
     <div>
@@ -377,13 +432,22 @@ function ProjectDetail() {
                     {/* Status Description */}
                     {statusDescription && (
                       <p className=" text-gray-600 text-sm mt-2">
-                        {statusDescription}
+                        feedback: {statusDescription}
                       </p>
                     )}
                   </div>
                 )}
               </div>
               <p className="text-lg mb-6">{project.scope}</p>
+              <p className="text-lg mb-6">
+                Viva:{" "}
+                {project.viva ? (
+                  <span className="text-green-600">Scheduled</span>
+                ) : (
+                  "Not Scheduled"
+                )}
+              </p>
+
               <div>
                 <h2 className="text-xl font-semibold mb-2">Members:</h2>
                 <ul className="list-disc ml-5 mb-4">
@@ -429,13 +493,50 @@ function ProjectDetail() {
               {/* Conditionally render the Edit and Delete buttons if the user is the project leader */}
               {isLeader && (
                 <div>
+                  {/* <button
+                    onClick={() => setShowEditMemberPopup(true)}
+                    disabled={project.viva ? true : false}
+                    className="mt-4 mr-2 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition duration-200"
+                  >
+                    Add Member
+                  </button> */}
                   <button
                     onClick={() => setShowEditMemberPopup(true)}
-                    className="mt-4 mr-2 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-blue-600 transition duration-200"
+                    disabled={project.viva ? true : false} // Disable if project.viva exists
+                    className={`mt-4 mr-2 px-4 py-2 text-white rounded-lg transition duration-200 ${
+                      project.viva
+                        ? "bg-gray-400 cursor-not-allowed" // Gray background and not-allowed cursor when disabled
+                        : "bg-green-500 hover:bg-green-600 cursor-pointer" // Green background when enabled
+                    }`}
                   >
                     Add Member
                   </button>
+
                   <button
+                    onClick={() => setShowEditPopup(true)}
+                    disabled={project.viva ? true : false} // Disable if project.viva exists
+                    className={`mt-4 mr-2 px-4 py-2 text-white rounded-lg transition duration-200 ${
+                      project.viva
+                        ? "bg-gray-400 cursor-not-allowed" // Gray background when disabled
+                        : "bg-blue-500 hover:bg-blue-600 cursor-pointer" // Blue background when enabled
+                    }`}
+                  >
+                    Edit Project
+                  </button>
+
+                  <button
+                    onClick={() => setShowDeleteConfirmation(true)}
+                    disabled={project.viva ? true : false} // Disable if project.viva exists
+                    className={`mt-4 mr-2 px-4 py-2 text-white rounded-lg transition duration-200 ${
+                      project.viva
+                        ? "bg-gray-400 cursor-not-allowed" // Gray background when disabled
+                        : "bg-red-600 hover:bg-red-700 cursor-pointer" // Red background when enabled
+                    }`}
+                  >
+                    Delete Project
+                  </button>
+
+                  {/* <button
                     onClick={() => setShowEditPopup(true)}
                     className="mt-4 mr-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition duration-200"
                   >
@@ -444,10 +545,33 @@ function ProjectDetail() {
 
                   <button
                     onClick={() => setShowDeleteConfirmation(true)}
-                    className="mt-4 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition duration-200"
+                    className="mt-4 mr-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition duration-200"
                   >
                     Delete Project
-                  </button>
+                  </button> */}
+
+                  {project.viva ? (
+                    <button
+                      onClick={goToViva}
+                      className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition duration-200"
+                    >
+                      View Viva
+                    </button>
+                  ) : (
+                    <button
+                      onClick={addViva}
+                      className="mt-4 px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition duration-200"
+                    >
+                      Schedule Viva
+                    </button>
+                  )}
+
+                  {!project.viva && (
+                    <p className="text-red-600">
+                      Note: After scheduling viva you can not add member, edit
+                      and delete project
+                    </p>
+                  )}
                 </div>
               )}
             </div>

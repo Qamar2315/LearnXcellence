@@ -27,6 +27,8 @@ function Projects() {
         return "bg-green-300 text-green-800";
       case "disapproved":
         return "bg-red-300 text-red-800";
+      case "unsatisfactory":
+        return "bg-orange-300 text-orange-800";
       default:
         return "bg-gray-300 text-gray-800";
     }
@@ -128,7 +130,7 @@ function Projects() {
                     </div>
                   </p>
                   <p
-                    className={`mt-3 max-w-[100px] px-3 py-1 rounded-full text-sm font-semibold text-center ${getStatusStyle(
+                    className={`mt-3 max-w-[110px] px-3 py-1 rounded-full text-sm font-semibold text-center ${getStatusStyle(
                       project.status.status
                     )}`}
                   >
