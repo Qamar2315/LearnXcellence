@@ -1,38 +1,28 @@
-//libraries
-import React from "react";
+// libraries
+import React, { useState, useContext } from "react";
 import { Formik, Field, Form, ErrorMessage } from "formik";
 import axios from "axios";
 import * as Yup from "yup";
-import { useNavigate, Link } from "react-router-dom";
-import { useParams } from "react-router-dom";
-import { useContext, useState, useEffect } from "react";
-//components
+import { useNavigate, Link, useParams } from "react-router-dom";
+import Success from "../components/Success";
+import Alert from "../components/Alert";
+// components
 import ChooseMember from "../components/ChooseMember";
 import Navbar from "../components/Navbar";
-//context
+// context
 import { FlashContext } from "../helpers/FlashContext";
 import { AuthContext } from "../helpers/AuthContext";
 import { CreateGroupContext } from "../helpers/CreateGroupContext";
-//styles
+// styles
 import "../styles/chatBot.css";
-import { GoogleGenerativeAI } from "@google/generative-ai";
 
 function AddProject() {
-  const genAI = new GoogleGenerativeAI(
-    "AIzaSyC6wl3hgmcMH8oKoBKpY4mCGajPonSqMK8"
-  );
-  const model = genAI.getGenerativeModel({ model: "gemini-pro" });
-
-  let { classId } = useParams();
-  const [value, setValue] = useState("");
-  const [viewClass, setViewClass] = useState();
+  const { courseId } = useParams();
   const [loading, setLoading] = useState(false);
   const [showChooseMember, setShowChooseMember] = useState(false);
-  const [members, setMembers] = useState([]);
   const [selectedMembers, setSelectedMembers] = useState([]);
-  const [aiResponses, setAiResponses] = useState([
-  ]);
-  const { authState, setAuthState } = useContext(AuthContext);
+  const [aiResponses, setAiResponses] = useState([]);
+  const { authState } = useContext(AuthContext);
   const { flashMessage, setFlashMessage } = useContext(FlashContext);
   const navigate = useNavigate();
 
@@ -50,18 +40,16 @@ function AddProject() {
       .max(4, "At max 4 members"),
   });
 
-  const handleSubmit = (values, { resetForm }) => {
-    // Handle form submission here, e.g., send data to the server
-    // setSelectedMembers([])
+  const handleSubmit = async (values, { resetForm }) => {
     resetForm();
-    axios
-      .post(
+    try {
+      const res = await axios.post(
         `${process.env.REACT_APP_API_URL}/project/create`,
         {
           name: values.name,
           scope: values.scope,
           members: selectedMembers,
-          classId: classId,
+          courseId: courseId,
         },
         {
           headers: {
@@ -69,90 +57,92 @@ function AddProject() {
             authorization: `Bearer ${authState.token}`,
           },
         }
-      )
-      .then((res) => {
-        setSelectedMembers([]);
-        if (res.data.message) {
-          setFlashMessage({
-            status: true,
-            message: res.data.message,
-            heading: "Something went wrong",
-            type: "error",
-          });
-          navigate(`/viewclass/${classId}`);
-        } else {
-          setFlashMessage({
-            status: true,
-            message: "Joined Class Successfully",
-            heading: "Class Joined",
-            type: "success",
-          });
-          navigate(`/viewclass/${classId}`);
-        }
+      );
+
+      setSelectedMembers([]);
+      if (res.data.message) {
+        setFlashMessage({
+          status: true,
+          message: res.data.message,
+          heading: "Project Created",
+          type: "success",
+        });
+      } else {
+        setFlashMessage({
+          status: true,
+          message: "Project created successfully",
+          heading: "Success",
+          type: "success",
+        });
+      }
+      navigate(`/course/${courseId}/project`);
+    } catch (error) {
+      setFlashMessage({
+        status: true,
+        message: error.response?.data?.message || "Failed to create project",
+        heading: "Error",
+        type: "error",
       });
-  };
-  
-  const generateResponse = async () => {
-    setLoading(true);
-    const prompt = `give project ideas related to following keywords ${value} one line ideas for semester project only idea no description. output should be like : ["idea1","idea2","idea3","idea4","idea5"]`;
-    const result = await model.generateContent(prompt);
-    const response = result.response;
-    const text = response.text();
-    console.log(text);
-    setAiResponses(JSON.parse(text));
-    setLoading(false);
-  };
-  useEffect(() => {
-    if (!authState.status && !authState.isTeacher) {
-      navigate("/login");
     }
-    axios
-      .get(`${process.env.REACT_APP_API_URL}/class/${classId}`, {
-        headers: {
-          "Content-type": "application/json",
-          authorization: `Bearer ${authState.token}`,
-        },
-      })
-      .then((res) => {
-        if (res.data.message) {
-          setFlashMessage({
-            status: true,
-            message: res.data.message,
-            heading: "Something went wrong",
-            type: "error",
-          });
-        } else {
-          setViewClass(res.data);
+  };
+
+  const generateSuggestions = async () => {
+    setLoading(true);
+    try {
+      const res = await axios.get(
+        `${process.env.REACT_APP_API_URL}/project/${courseId}/generate-project-suggestions`,
+        {
+          headers: {
+            Authorization: `Bearer ${authState.token}`,
+          },
         }
+      );
+
+      if (res.data.success) {
+        setAiResponses(res.data.data); // Update AI responses with the received data
+      } else {
+        setFlashMessage({
+          status: true,
+          message: "Failed to generate suggestions.",
+          heading: "Error",
+          type: "error",
+        });
+      }
+    } catch (error) {
+      setFlashMessage({
+        status: true,
+        message:
+          error.response?.data?.message || "Error generating suggestions",
+        heading: "Error",
+        type: "error",
       });
-  }, []);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <>
       <Navbar />
-      {viewClass && (
-        <Link to={`/viewClass/${viewClass._id}`}>
-          <button className="text-blue-500 hover:text-blue-600 text-lg font-semibold px-4">
-            back
-          </button>
-        </Link>
-      )}
-      {viewClass && (
-        <div>
-          <h1 className="text-2xl font-semibold text-blue-800 px-4 py-1">
-            {viewClass.className}
-          </h1>
-        </div>
-      )}
-      {showChooseMember && (
-        <CreateGroupContext.Provider
-          value={{ selectedMembers, setSelectedMembers }}
-        >
-          <ChooseMember onClose={() => setShowChooseMember(false)} />
-        </CreateGroupContext.Provider>
-      )}
       <div className="flex justify-around mt-4">
         <div className="p-6 w-2/5 bg-white rounded-xl shadow-md">
           <h1 className="text-2xl font-semibold">Add Project</h1>
+          {/* Flash messages */}
+          <div className="max-w-2xl mx-auto mb-4">
+            {flashMessage.status &&
+              (flashMessage.type === "error" ? (
+                <Alert
+                  message={flashMessage.message}
+                  heading={flashMessage.heading}
+                />
+              ) : (
+                <Success
+                  message={flashMessage.message}
+                  heading={flashMessage.heading}
+                />
+              ))}
+          </div>
+
           <Formik
             initialValues={initialValues}
             validationSchema={validationSchema}
@@ -213,16 +203,13 @@ function AddProject() {
                       key={index}
                       className="bg-white rounded-lg shadow-lg p-2"
                     >
-                      <div className="">
-                        <p className="text-lg font-semibold">{member.name}</p>
-                      </div>
+                      <p className="text-lg font-semibold">{member.name}</p>
                     </div>
                   ))}
                   <button
-                    onClick={() => {
-                      setShowChooseMember(true);
-                    }}
-                    className="bg-green-500 hover:bg-green-600  text-white font-bold py-2 px-4 rounded"
+                    type="button"
+                    onClick={() => setShowChooseMember(true)}
+                    className="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded"
                   >
                     Choose Members
                   </button>
@@ -246,14 +233,13 @@ function AddProject() {
         </div>
         <div className="w-2/5 p-4 bg-gray-100 border border-gray-300 rounded-lg">
           <h2 className="text-3xl font-bold mb-8 text-center">
-            Chat with the Project Ideas Bot
+            Generate Project Suggestions
           </h2>
-          <div className="h-64 overflow-y-auto">
-            {aiResponses.map((message, index) => (
-              <div key={index}>
-                <div className="inline-block p-2 rounded-lg mb-2 bg-gray-200">
-                  {message}
-                </div>
+          <div className="h-64 overflow-y-auto mb-4">
+            {aiResponses.map((suggestion, index) => (
+              <div key={index} className="mb-4">
+                <h3 className="font-semibold">{suggestion.ideaTitle}</h3>
+                <p>{suggestion.ideaDescription}</p>
               </div>
             ))}
           </div>
@@ -266,22 +252,22 @@ function AddProject() {
             )}
           </div>
           <div className="mt-4 flex items-center">
-            <input
-              value={value}
-              type="text"
-              placeholder="Type your keywords..."
-              className="flex-grow p-2 border rounded-l-lg"
-              onChange={(e) => setValue(e.target.value)}
-            />
             <button
-              className="px-4 py-2 bg-blue-500 text-white rounded-r-lg hover:bg-blue-600"
-              onClick={generateResponse}
+              className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
+              onClick={generateSuggestions} // Call generateSuggestions on click
             >
-              Generate
+              Generate Suggestions
             </button>
           </div>
         </div>
       </div>
+      {showChooseMember && (
+        <CreateGroupContext.Provider
+          value={{ selectedMembers, setSelectedMembers }}
+        >
+          <ChooseMember onClose={() => setShowChooseMember(false)} />
+        </CreateGroupContext.Provider>
+      )}
     </>
   );
 }

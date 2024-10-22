@@ -32,11 +32,11 @@ router.post("/create",
 );
 
 /**
- * @route  PUT /api/projects/:courseId/:projectId/add-member
+ * @route  PUT /api/projects/:courseId/:projectId/:memberId/add-member
  * @desc   Add a member to a project
  * @access Private (Project Creator (and enrolled in the course) only)
  */
-router.put("/:courseId/:projectId/add-member",
+router.put("/:courseId/:projectId/:memberId/add-member",
   isLogin,
   isEmailVerified,
   isCourseStudent, 

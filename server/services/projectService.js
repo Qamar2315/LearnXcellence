@@ -163,7 +163,7 @@ const updateProject = async (courseId,projectId, projectData) => {
   });
   
   await statusService.updateStatus(updatedProject.status, {
-    status: "pending",
+    status: "modified",
     description: "",
   });
   
@@ -214,23 +214,26 @@ const getProjectById = async (projectId) => {
     members: project.members,
     projectLeader: project.projectLeader,
     course: project.course,
+    status: project.status,
+    viva: project.viva,
   };
 };
 
-const addMemberToProject = async (projectId, email, courseId) => {
+const addMemberToProject = async (projectId, courseId, memberId) => {
   // Find the project by ID
   const project = await projectRepository.findProjectById(projectId);
   if (!project) {
     throw new AppError("Project Not Found", 404);
   }
-  if (project.members.length > 4) {
+  if (project.members.length == 4) {
     throw new AppError("You cannot add more then 4 members", 400);
   }
-  // Find the student by email
-  const account = await authRepository.findAccountByEmail(email);
-  const member = await authRepository.findStudentByAccountId(account._id);
+  // Find the student by id
+  const member = await authRepository.findStudentById(memberId);
+  const account = await authRepository.findAccountById(member.account);
+
   if (!member) {
-    throw new AppError(`Member with email ${email} not found`, 404);
+    throw new AppError("Member not found", 404);
   }
 
   // Ensure the member is enrolled in the course
@@ -259,6 +262,7 @@ const addMemberToProject = async (projectId, email, courseId) => {
     },
     account._id
   );
+
   return {
     _id: project._id,
     name: project.name,
@@ -290,6 +294,10 @@ const removeMemberFromProject = async (projectId, memberId) => {
   // Remove the member from the project
   project.members.splice(memberIndex, 1);
   await project.save();
+
+  const member = await authRepository.findStudentById(memberId);
+  const account = await authRepository.findAccountById(member.account);
+
   // notify student
   await notificationService.createNotification(
     {

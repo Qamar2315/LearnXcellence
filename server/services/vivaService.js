@@ -130,8 +130,12 @@ const updateViva = async (vivaId, updateData) => {
 
 const sendViva = async (vivaId) => {
   const viva = await vivaRepository.findVivaById(vivaId);
+  const project = await vivaRepository.findProjectByVivaId(vivaId);
   if (!viva) throw new AppError("Viva Not Found", 400);
-  return viva;
+  return {
+    viva,
+    project_id: project?._id,
+  }
 };
 
 const getTodaysViva = async (courseId) => {
