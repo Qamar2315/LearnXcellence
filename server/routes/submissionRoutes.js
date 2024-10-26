@@ -85,11 +85,11 @@ router
  * @access Private (Student)
  */
 router
-  .route("/assignment/:assignmentId/submissions/:submissionId")
+  .route("/assignment/:courseId/:assignmentId/submissions/:submissionId")
   .get(
     isLogin,                 // Ensure the user is logged in
     isEmailVerified,         // Ensure the user's email is verified
-    isCourseCreatorOrCourseStudent,               // Ensure the user is a student
+    isCourseCreatorOrCourseStudent,// Ensure the user is a student
     submissionController.getSubmission // Controller function to get a specific submission
   )
   .put(
