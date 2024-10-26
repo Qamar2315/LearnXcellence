@@ -96,7 +96,6 @@ router
   .route("/submission/:courseId/:submissionId/:remarkId")
   .get(
     isLogin,                // Ensure the user is logged in
-    isStudent,              // Ensure the user is a student
     isCourseCreatorOrCourseStudent, // Ensure the user is a course creator or course student
     remarkController.readSubmissionRemark // Controller function to read a submission remark
   )
