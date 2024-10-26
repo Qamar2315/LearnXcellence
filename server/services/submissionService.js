@@ -87,21 +87,24 @@ const getSubmissionsByAssignment = async (courseId, assignmentId) => {
   return submissions;
 };
 
-const getSubmission = async (assignmentId, submissionId, studentId) => {
+const getSubmission = async (assignmentId, submissionId, userId) => {
   const assignment = await assignmentRepository.getAssignmentById(assignmentId);
   if (!assignment) {
     throw new Error("Assignment not found");
   }
   const submission = await submissionRepository.getSubmissionById(submissionId);
-
   if (!submission) {
     throw new Error("Submission not found");
   }
   if (submission.assignment.toString() !== assignmentId) {
     throw new Error("Submission not found in this assignment");
   }
+  const teacher = await authRepository.findTeacherById(userId);
+  if(teacher){
+    return submission;
+  }
   // console.log(submission.student._id.toString(), studentId.toString());
-  if (submission.student._id.toString() !== studentId.toString()) {
+  if (submission.student._id.toString() !== userId.toString()) {
     throw new Error("Not authorized to view this submission");
   }
   return submission;

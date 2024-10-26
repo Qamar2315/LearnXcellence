@@ -35,11 +35,11 @@ const getSubmissions = asyncHandler(async (req, res) => {
 
 const getSubmission = asyncHandler(async (req, res) => {
   const { assignmentId, submissionId } = req.params;
-  const studentId = req.user._id;
+  const userId = req.user._id;
   const submission = await submissionService.getSubmission(
     assignmentId,
     submissionId,
-    studentId
+    userId
   );
   res.status(200).json(submission);
 });
