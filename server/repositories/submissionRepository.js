@@ -18,7 +18,7 @@ const getSubmissionById = async (submissionId) => {
       select: "name",
       populate: {
         path: "account",
-        select: "email porfile_picture",
+        select: "email profile_picture",
       }
     })
     .populate("remarks");
