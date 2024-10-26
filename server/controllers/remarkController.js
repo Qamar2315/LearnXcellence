@@ -62,11 +62,11 @@ const updateSubmissionRemark = asyncHandler(async (req, res) => {
 
 const readSubmissionRemark = asyncHandler(async (req, res) => {
   const { remarkId, submissionId } = req.params;
-  const studentId = req.user._id;
+  const userId = req.user._id;
   const remark = await remarkService.readSubmissionRemark(
     remarkId,
     submissionId,
-    studentId
+    userId
   );
   res.status(201).json({
     success: true,

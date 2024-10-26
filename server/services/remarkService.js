@@ -119,10 +119,14 @@ const addRemarkToSubmission = async (courseId, submissionId, remarkData) => {
   return submission.remarks;
 };
 
-const readSubmissionRemark = async (remarkId, submissionId, studentId) => {
+const readSubmissionRemark = async (remarkId, submissionId, userId) => {
   const submission = await submissionRepository.getSubmissionById(submissionId);
+  const teacher = await authRepository.findTeacherById(userId);
+  if(teacher){
+    return submission.remarks;
+  }
   if (!submission) throw new AppError("Submission Not Found", 400);
-  if (submission.student._id.toString() !== studentId.toString()) {
+  if (submission.student._id.toString() !== userId.toString()) {
     throw new AppError("Not authorized", 400);
   }
   if (submission.remarks._id.toString() !== remarkId) {
