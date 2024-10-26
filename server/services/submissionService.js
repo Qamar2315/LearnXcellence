@@ -93,13 +93,14 @@ const getSubmission = async (assignmentId, submissionId, studentId) => {
     throw new Error("Assignment not found");
   }
   const submission = await submissionRepository.getSubmissionById(submissionId);
-  
+
   if (!submission) {
     throw new Error("Submission not found");
   }
   if (submission.assignment.toString() !== assignmentId) {
     throw new Error("Submission not found in this assignment");
   }
+  console.log(submission.student.toString(), studentId.toString());
   if (submission.student.toString() !== studentId.toString()) {
     throw new Error("Not authorized to view this submission");
   }
