@@ -12,7 +12,16 @@ const getSubmissionsByAssignmentId = async (assignmentId) => {
 };
 
 const getSubmissionById = async (submissionId) => {
-  return await Submission.findById(submissionId).populate("remarks");
+  return await Submission.findById(submissionId)
+    .populate({
+      path: "student",
+      select: "name",
+      populate: {
+        path: "account",
+        select: "email porfile_picture",
+      }
+    })
+    .populate("remarks");
 };
 
 const deleteSubmissionsByAssignmentId = async (assignmentId) => {

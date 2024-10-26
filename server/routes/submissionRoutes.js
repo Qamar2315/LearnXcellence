@@ -9,7 +9,7 @@ const { isLogin } = require("../middlewares/isLogin");
 const { isEmailVerified } = require("../middlewares/isEmailVerified");
 
 // Middleware for role-based authorization
-const { isStudent, isTeacher, isCourseCreator, isCourseStudent } = require("../middlewares/authorization");
+const { isStudent, isTeacher, isCourseCreator, isCourseStudent, isCourseCreatorOrCourseStudent } = require("../middlewares/authorization");
 
 // Middleware for request validation
 const { validateSubmission } = require("../middlewares/schemaValidator");
@@ -75,7 +75,7 @@ router
 
 /**
  * @route GET /api/assignment/:assignmentId/submissions/:submissionId
- * @description Get a specific submission (student access)
+ * @description Get a specific submission (student or teacher access)
  * 
  * @route PUT /api/assignment/:assignmentId/submissions/:submissionId
  * @description Update a specific submission (student access)
@@ -89,7 +89,7 @@ router
   .get(
     isLogin,                 // Ensure the user is logged in
     isEmailVerified,         // Ensure the user's email is verified
-    isStudent,               // Ensure the user is a student
+    isCourseCreatorOrCourseStudent,               // Ensure the user is a student
     submissionController.getSubmission // Controller function to get a specific submission
   )
   .put(

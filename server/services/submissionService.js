@@ -93,6 +93,7 @@ const getSubmission = async (assignmentId, submissionId, studentId) => {
     throw new Error("Assignment not found");
   }
   const submission = await submissionRepository.getSubmissionById(submissionId);
+  
   if (!submission) {
     throw new Error("Submission not found");
   }
