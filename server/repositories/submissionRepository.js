@@ -6,9 +6,16 @@ const createSubmission = async (submissionData) => {
 };
 
 const getSubmissionsByAssignmentId = async (assignmentId) => {
-  return await Submission.find({ assignment: assignmentId }).populate(
-    "remarks"
-  );
+  return await Submission.find({ assignment: assignmentId })
+    .populate({
+      path: "student",
+      select: "name",
+      populate: {
+        path: "account",
+        select: "email profile_picture",
+      },
+    })
+    .populate("remarks");
 };
 
 const getSubmissionById = async (submissionId) => {
@@ -19,7 +26,7 @@ const getSubmissionById = async (submissionId) => {
       populate: {
         path: "account",
         select: "email profile_picture",
-      }
+      },
     })
     .populate("remarks");
 };
@@ -33,12 +40,15 @@ const saveSubmission = async (submission) => {
 };
 
 const getSubmissionByAssignmentAndStudent = async (assignmentId, studentId) => {
-  return await Submission.findOne({ assignment: assignmentId, student: studentId });
+  return await Submission.findOne({
+    assignment: assignmentId,
+    student: studentId,
+  });
 };
 
 const deleteSubmissionById = async (submissionId) => {
   return await Submission.findByIdAndDelete(submissionId);
-}
+};
 
 module.exports = {
   createSubmission,
@@ -48,5 +58,4 @@ module.exports = {
   saveSubmission,
   getSubmissionByAssignmentAndStudent,
   deleteSubmissionById,
-
 };
