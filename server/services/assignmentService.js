@@ -119,7 +119,7 @@ const updateAssignment = async (
       )
     );
   }
-  console.log("after delete file");
+  
   const formattedDate = moment
     .tz(deadline, "MM/DD/YYYY", "Asia/Karachi") // replace with the appropriate timezone
     .toDate();
