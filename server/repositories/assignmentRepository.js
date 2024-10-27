@@ -6,7 +6,7 @@ const createAssignment = async (assignmentData) => {
 };
 
 const getAssignments = async (courseId) => {
-  return await Assignment.find({ course: courseId });
+  return await Assignment.find({ course: courseId }).select('-submissions');
 };
 
 const getAssignmentById = async (assignmentId) => {

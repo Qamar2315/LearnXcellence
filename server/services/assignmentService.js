@@ -32,7 +32,7 @@ const addAssignment = async (
   const formattedDate = moment
     .tz(deadline, "MM/DD/YYYY", "Asia/Karachi") // replace with the appropriate timezone
     .toDate();
-    
+
   if (formattedDate < Date.now()) {
     throw new Error("Deadline must be a future date");
   }
@@ -107,7 +107,8 @@ const updateAssignment = async (
   if (course.assignments.indexOf(assignmentId) === -1) {
     throw new AppError("assignment not found in the course");
   }
-  if (document_id) {
+
+  if (document_id && assignment.document_id) {
     deleteFileByPath(
       path.join(
         __dirname,
@@ -118,10 +119,11 @@ const updateAssignment = async (
       )
     );
   }
+  console.log("after delete file");
   const formattedDate = moment
     .tz(deadline, "MM/DD/YYYY", "Asia/Karachi") // replace with the appropriate timezone
     .toDate();
-  
+
   if (formattedDate < Date.now()) {
     throw new Error("Deadline must be a future date");
   }

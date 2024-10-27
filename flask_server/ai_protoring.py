@@ -5,7 +5,6 @@ from face_detector import FaceMeshDetector
 from utils import get_eye_center, detect_pupil
 import os
 
-
 def analyze_image(image_path, model, output_dir):
     """
     Analyze an image to detect mobile phones, people, and face features.

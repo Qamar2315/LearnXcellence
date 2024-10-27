@@ -28,8 +28,7 @@ router.get(
   "/:courseId",
   isLogin,                 // Ensure the user is logged in
   isEmailVerified,         // Ensure the user's email is verified
-  isTeacher,               // Ensure the user is a teacher
-  isCourseCreator,         // Ensure the user is the course creator
+  isCourseCreatorOrCourseStudent,               //Ensure user is course creator or teacher
   assignmentController.getAssignments // Controller function to get all assignments
 );
 
