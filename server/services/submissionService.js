@@ -156,7 +156,7 @@ const deleteSubmission = async (assignmentId, submissionId, studentId) => {
   if (submission.assignment.toString() !== assignmentId) {
     throw new Error("Submission not found in this assignment");
   }
-  if (submission.student.toString() !== studentId.toString()) {
+  if (submission.student._id.toString() !== studentId.toString()) {
     throw new Error("Not authorized to delete this submission");
   }
   if (submission.document_id) {
