@@ -12,7 +12,7 @@ const getAssignments = async (courseId) => {
 const getAssignmentById = async (assignmentId) => {
   return await Assignment.findById(assignmentId).populate({
     path: 'submissions',
-    select: '_id student',
+    select: '_id student document_id remarks',
     populate: {
       path: 'student',
       select: '_id name',
