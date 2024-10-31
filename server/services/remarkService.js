@@ -126,6 +126,7 @@ const readSubmissionRemark = async (remarkId, submissionId, userId) => {
     return submission.remarks;
   }
   if (!submission) throw new AppError("Submission Not Found", 400);
+  // console.log(submission.student._id.toString(), userId.toString());
   if (submission.student._id.toString() !== userId.toString()) {
     throw new AppError("Not authorized", 400);
   }

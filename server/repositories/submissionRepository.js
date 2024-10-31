@@ -22,7 +22,7 @@ const getSubmissionById = async (submissionId) => {
   return await Submission.findById(submissionId)
     .populate({
       path: "student",
-      select: "name",
+      select: "_id name",
       populate: {
         path: "account",
         select: "email profile_picture",
