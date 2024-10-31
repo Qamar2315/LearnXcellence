@@ -133,7 +133,9 @@ const readSubmissionRemark = async (remarkId, submissionId, userId) => {
   if (submission.remarks._id.toString() !== remarkId) {
     throw new AppError("Remarks not exists on this submission", 400);
   }
-
+  if(!submission.remarks) {
+    throw new AppError("No remark found", 400);
+  }
   return submission.remarks;
 };
 
