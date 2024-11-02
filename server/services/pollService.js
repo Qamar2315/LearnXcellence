@@ -2,6 +2,7 @@ const pollRepository = require("../repositories/pollRepository");
 const courseRepository = require("../repositories/courseRepository");
 const authRepository = require("../repositories/authRepository");
 const voteRepository = require("../repositories/voteRepository");
+const notificationService = require("./notificationService");
 const AppError = require("../utilities/AppError");
 
 const addPoll = async (courseId, teacherId, title, description, options) => {
@@ -26,7 +27,7 @@ const addPoll = async (courseId, teacherId, title, description, options) => {
   course.polls.push(poll._id);
   await course.save();
   // notify students
-  for (const student in course.students) {
+  for (const student of course.students) {
     const student_data = await authRepository.findStudentById(student);
     const student_account = await authRepository.findAccountById(
       student_data.account
