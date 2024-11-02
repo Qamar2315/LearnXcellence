@@ -31,7 +31,7 @@ function JoinClass() {
           heading: "Class Joined",
           type: "success",
         });
-        navigate("/studentDashboard");
+        navigate("/course");
       })
       .catch((error) => {
         setFlashMessage({
@@ -41,7 +41,7 @@ function JoinClass() {
           type: "error",
         });
 
-        navigate("/studentDashboard");
+        navigate("/course");
       });
   };
   return (

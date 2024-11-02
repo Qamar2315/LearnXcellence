@@ -37,6 +37,11 @@ import TeacherProfileSettings from "./pages/TeacherProfileSettings";
 import TeacherProfile from "./pages/TeacherProfile";
 import TeacherViva from "./pages/TeacherViva";
 import TeacherVivaDetails from "./pages/TeacherVivaDetails";
+import TeacherAssignment from "./pages/TeacherAssignment";
+import TeacherAssignmentDetails from "./pages/TeacherAssignmentDetails";
+import StudentAssignmentDetails from "./pages/StudentAssignmentsDetails";
+import TeacherAssignmentRemarks from "./pages/TeacherAssignmentRemarks";
+import StudentAssignmentRemarks from "./pages/StudentAssignmentRemarks";
 
 function App() {
   const [authState, setAuthState] = useState({
@@ -160,6 +165,23 @@ function App() {
                 exact
                 element={<Assignments />}
               />
+              <Route
+                path="course/:courseId/assignments/:assignmentId"
+                exact
+                element={<StudentAssignmentDetails />}
+              />
+
+              <Route
+                path="course/:courseId/assignments/:assignmentId/:submissionId/remarks"
+                exact
+                element={<StudentAssignmentRemarks />}
+              />
+
+              <Route
+                path="course/:courseId/assignments/teacher"
+                exact
+                element={<TeacherAssignment />}
+              />
 
               <Route
                 path="course/:courseId/quizzes"
@@ -182,6 +204,18 @@ function App() {
                 path="course/:courseId/viva/teacher/:vivaId"
                 exact
                 element={<TeacherVivaDetails />}
+              />
+
+              <Route
+                path="course/:courseId/assignments/teacher/:assignmentId"
+                exact
+                element={<TeacherAssignmentDetails />}
+              />
+
+              <Route
+                path="course/:courseId/assignments/teacher/:assignmentId/submission/:submissionId"
+                exact
+                element={<TeacherAssignmentRemarks />}
               />
 
               <Route

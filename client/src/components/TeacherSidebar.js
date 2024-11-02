@@ -101,7 +101,7 @@ export default function TeacherSidebar({ children }) {
               activeClassName="bg-blue-700"
             />
             <SidebarItem
-              to={`/course/${courseId}/assignments`}
+              to={`/course/${courseId}/assignments/teacher`}
               icon={<Clipboard size={20} />}
               text="Assignments"
               activeClassName="bg-blue-700"

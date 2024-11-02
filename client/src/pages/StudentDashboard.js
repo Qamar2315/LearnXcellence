@@ -55,7 +55,20 @@ function StudentDashboard() {
       <Navbar />
 
       <div className="container mx-auto mt-5">
-        <h1 className="text-3xl font-bold mb-6 text-center">Courses</h1>
+        <div className="flex justify-between items-start">
+          <h1 className="text-5xl font-bold ml-16">Courses</h1>
+
+          <div className="mr-20 mt-5">
+            {" "}
+            <Link
+              to={"/joinClass"}
+              className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition duration-200"
+            >
+              Join New Course
+            </Link>
+          </div>
+        </div>
+
         <div className="max-w-2xl mx-auto m-5">
           {flashMessage.status && flashMessage.type === "error" && (
             <Alert
@@ -70,20 +83,11 @@ function StudentDashboard() {
             />
           )}
         </div>
-        <div className="flex justify-end mr-20">
-          {" "}
-          <Link
-            to={"/joinClass"}
-            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full transition duration-300"
-          >
-            Join New Course
-          </Link>
-        </div>
 
         {courses.length === 0 ? (
           <ClassNotJoinedMessage />
         ) : (
-          <div className="overflow-y-auto h-96 m-10 ">
+          <div className="m-5 h-[calc(80svh-4rem)] overflow-y-auto">
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-4 m-10">
               {courses.map((classItem) => (
                 // <Link to={`/course/${classItem._id}`}>

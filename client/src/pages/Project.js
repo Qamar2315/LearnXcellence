@@ -116,7 +116,7 @@ function Projects() {
               {projects.map((project) => (
                 <div
                   key={project._id}
-                  className="bg-white shadow-lg rounded-lg p-6 cursor-pointer hover:shadow-xl transition-shadow duration-300"
+                  className="bg-white shadow-lg rounded-lg p-6 cursor-pointer hover:shadow-xl transition-shadow duration-300 transition-transform transform hover:scale-105"
                   onClick={() => handleCardClick(project._id)}
                 >
                   <h2 className="text-2xl font-bold mb-2">{project.name}</h2>
