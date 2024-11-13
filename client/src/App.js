@@ -42,6 +42,8 @@ import TeacherAssignmentDetails from "./pages/TeacherAssignmentDetails";
 import StudentAssignmentDetails from "./pages/StudentAssignmentsDetails";
 import TeacherAssignmentRemarks from "./pages/TeacherAssignmentRemarks";
 import StudentAssignmentRemarks from "./pages/StudentAssignmentRemarks";
+import TeacherPolls from "./pages/TeacherPolls";
+import StudentPolls from "./pages/StudentPolls";
 
 function App() {
   const [authState, setAuthState] = useState({
@@ -181,6 +183,18 @@ function App() {
                 path="course/:courseId/assignments/teacher"
                 exact
                 element={<TeacherAssignment />}
+              />
+
+              <Route
+                path="course/:courseId/polls"
+                exact
+                element={<StudentPolls />}
+              />
+
+              <Route
+                path="course/:courseId/polls/teacher"
+                exact
+                element={<TeacherPolls />}
               />
 
               <Route

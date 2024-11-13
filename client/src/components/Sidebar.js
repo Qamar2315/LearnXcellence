@@ -9,6 +9,7 @@ import {
   Mic,
   Clipboard,
   List,
+  Vote,
   Settings,
 } from "lucide-react";
 import { useContext, createContext, useState, useEffect } from "react";
@@ -95,9 +96,9 @@ export default function Sidebar({ children }) {
               activeClassName="bg-blue-700"
             />
             <SidebarItem
-              to={`/course/${courseId}/viva`}
-              icon={<Mic size={20} />}
-              text="Viva"
+              to={`/course/${courseId}/polls`}
+              icon={<Vote size={20} />}
+              text="Polls"
               activeClassName="bg-blue-700"
             />
             <SidebarItem
