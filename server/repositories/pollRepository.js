@@ -13,7 +13,7 @@ const getPolls = async (courseId) => {
       select: "_id name account",
       populate: {
         path: "account",
-        select: "email profile",
+        select: "email profile_picture",
       },
     },
   });
