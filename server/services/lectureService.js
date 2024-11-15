@@ -153,7 +153,7 @@ const deleteLecture = async (courseId, lectureId) => {
     await notificationService.createNotification(
       {
         title: "Lecture Deleted",
-        message: `A lecture has been deleted from ${course.courseName}`,
+        content: `A lecture has been deleted from ${course.courseName}`,
         read: false,
       },
       student_account

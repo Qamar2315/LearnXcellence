@@ -59,7 +59,7 @@ const addViva = async (courseId, projectId) => {
     await notificationService.createNotification(
       {
         title: "Viva Scheduled",
-        message: `A viva has been scheduled for your project`,
+        content: `A viva has been scheduled for your project ${project.name}`,
         read: false,
       },
       studentAccount._id
@@ -72,7 +72,7 @@ const addViva = async (courseId, projectId) => {
   await notificationService.createNotification(
     {
       title: "Viva Scheduled",
-      message: `A viva has been scheduled for your project`,
+      content: `A viva has been scheduled for your project ${project.name}`,
       read: false,
     },
     leaderAccount._id
@@ -84,7 +84,7 @@ const addViva = async (courseId, projectId) => {
   await notificationService.createNotification(
     {
       title: "Viva Scheduled",
-      message: `A viva has been scheduled for ${project.name} project in your course`,
+      content: `A viva has been scheduled for ${project.name} project in your course`,
       read: false,
     },
     teacherAccount._id

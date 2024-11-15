@@ -35,7 +35,7 @@ const addPoll = async (courseId, teacherId, title, description, options) => {
     await notificationService.createNotification(
       {
         title: "Poll added",
-        message: `A lecture has been added in ${course.name}`,
+        content: `A new poll has been added in ${course.name} by your course teacher`,
         read: false,
       },
       student_account

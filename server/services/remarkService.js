@@ -44,7 +44,7 @@ const addRemarkToViva = async (classId, projectId, remarkData) => {
     await notificationService.createNotification(
       {
         title: "Remark Updated",
-        message: `Your remark has been updated`,
+        content: `Your remark has been updated for the viva of ${project.name}`,
         read: false,
       },
       studentAccount._id
@@ -56,7 +56,7 @@ const addRemarkToViva = async (classId, projectId, remarkData) => {
   await notificationService.createNotification(
     {
       title: "Remark Updated",
-      message: `Your remark has been updated`,
+      content: `Your remark has been updated for the viva of ${project.name}`,
       read: false,
     },
     leaderAccount._id
@@ -111,7 +111,7 @@ const addRemarkToSubmission = async (courseId, submissionId, remarkData) => {
   await notificationService.createNotification(
     {
       title: "Remark added",
-      message: `Your remark has been added`,
+      content: `Your remark has been added for the submission`,
       read: false,
     },
     studentAccount._id

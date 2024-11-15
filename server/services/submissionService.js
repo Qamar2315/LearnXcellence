@@ -61,7 +61,7 @@ const addSubmission = async (
   await notificationService.createNotification(
     {
       title: "New Submission",
-      message: `A new submission has been added to ${assignment.title}`,
+      content: `A new submission has been added to ${assignment.title}`,
     },
     account._id
   );

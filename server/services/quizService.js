@@ -78,7 +78,7 @@ const createQuiz = async (
     await notificationService.createNotification(
       {
         title: "New Quiz",
-        message: `A new quiz has been added to ${course.name}`,
+        content: `A new quiz has been added to ${course.name}`,
         read: false,
       },
       studentAccount._id
@@ -393,7 +393,7 @@ const updateSubmissionMarks = async (
   await notificationService.createNotification(
     {
       title: "Quiz Score Updated",
-      message: `Your score for the quiz ${quiz.title} has been updated.`,
+      content: `Your score for the quiz ${quiz.title} has been updated.`,
       read: false,
     },
     studentAccount._id
