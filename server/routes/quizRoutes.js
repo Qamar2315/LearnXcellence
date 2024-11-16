@@ -165,4 +165,31 @@ router.route("/:courseId/:id")
   )
   .delete(isLogin, isEmailVerified, isTeacher, isCourseCreator, quizController.deleteQuiz);
 
+/**
+ * @route  GET /api/quizzes/:courseId/:quizId/submissions
+ * @desc   Get all quiz submissions for a specific quiz (Teacher and Course Creator only)
+ * @access Private (Teacher, Course Creator)
+ */
+router.get("/:courseId/:quizId/submissions",
+  isLogin,
+  isEmailVerified,
+  isTeacher,
+  isCourseCreator,
+  quizController.getAllQuizSubmissions
+);
+
+/**
+ * @route  GET /api/quizzes/:courseId/:quizId/submission
+ * @desc   Get a specific quiz submission for the logged-in student (Student only)
+ * @access Private (Student)
+ */
+router.get("/:courseId/:quizId/submission",
+  isLogin,
+  isEmailVerified,
+  isStudent,
+  isCourseStudent,
+  quizController.getStudentSubmission
+);
+
+
 module.exports = router;

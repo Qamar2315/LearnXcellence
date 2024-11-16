@@ -222,6 +222,21 @@ const generatePDFAllStudents = asyncHandler(async (req, res) => {
   }
 });
 
+const getAllQuizSubmissions = asyncHandler(async (req, res) => {
+  const { courseId, quizId } = req.params;
+  const submissions = await quizService.getAllSubmissionsForQuiz(courseId, quizId);
+  res.status(200).json(submissions);
+});
+
+const getStudentSubmission = asyncHandler(async (req, res) => {
+  const { courseId, quizId } = req.params;
+  const studentId = req.user._id;
+
+  const submission = await quizService.getSubmissionForStudent(courseId, quizId, studentId);
+  res.status(200).json(submission);
+});
+
+
 module.exports = {
   createQuiz,
   updateQuiz,
@@ -237,4 +252,6 @@ module.exports = {
   generateQuizByTopicOrContent,
   generatePDFStudent,
   generatePDFAllStudents,
+  getAllQuizSubmissions,
+  getStudentSubmission,
 };

@@ -637,6 +637,43 @@ const generatePDFForAllStudents = async (courseId, quizId) => {
   return zip.toBuffer();
 };
 
+const getAllSubmissionsForQuiz = async (courseId, quizId) => {
+  const quiz = await quizRepository.findQuizById(quizId);
+
+  if (!quiz) {
+      throw new AppError("Quiz not found", 404);
+  }
+
+  if (quiz.course.toString() !== courseId) {
+      throw new AppError("Quiz not found in this course.", 404);
+  }
+
+  // Use the quizSubmissionRepository to get all submissions for the quiz
+  const submissions = await quizSubmissionRepository.getAllQuizSubmissions(quizId);
+
+  return submissions;
+};
+
+const getSubmissionForStudent = async (courseId, quizId, studentId) => {
+  const quiz = await quizRepository.findQuizById(quizId);
+
+  if (!quiz) {
+    throw new AppError("Quiz not found", 404);
+  }
+
+  if (quiz.course.toString() !== courseId) {
+    throw new AppError("Quiz not found in this course.", 404);
+  }
+
+  const submission = await quizSubmissionRepository.findSubmission(quizId, studentId);
+
+  if (!submission) {
+    throw new AppError("Submission not found", 404);
+  }
+  
+  return submission;
+};
+
 
 module.exports = {
   createQuiz,
@@ -653,4 +690,6 @@ module.exports = {
   generateQuestionsByContent,
   generatePDFStudent,
   generatePDFForAllStudents,
+  getAllSubmissionsForQuiz,
+  getSubmissionForStudent,
 };
