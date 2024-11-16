@@ -97,9 +97,15 @@ const votePoll = async (courseId, pollId, studentId, option) => {
     } else {
       // Update the existing vote
       existingVote.option = option;
+
+      // update vote updated_at
+      existingVote.updated_at = Date.now();
+      
       await voteRepository.saveVote(existingVote);
+
       poll.updated_at = Date.now();
       await pollRepository.savePoll(poll);
+
       // Retrieve the updated poll from the database
       const updatedPoll = await pollRepository.getPollById(poll._id);
 
@@ -112,6 +118,7 @@ const votePoll = async (courseId, pollId, studentId, option) => {
       poll: pollId,
       student: studentId,
       option,
+      updated_at: Date.now(),
     });
     poll.votes.push(newVote._id);
     poll.updated_at = Date.now();
