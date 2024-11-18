@@ -567,9 +567,14 @@ const generatePDFStudent = async (courseId, id, studentId) => {
     )
     .moveDown();
 
-  // Shuffle and Add Questions to PDF
+  // Shuffle and limit the number of questions
   const shuffledQuestions = quiz.questions.sort(() => Math.random() - 0.5);
-  shuffledQuestions.forEach((question, index) => {
+  const selectedQuestions = shuffledQuestions.slice(
+    0,
+    quiz.number_of_questions
+  );
+
+  selectedQuestions.forEach((question, index) => {
     doc
       .fontSize(14)
       .text(`${index + 1}. ${question.content}`)
@@ -599,7 +604,6 @@ const generatePDFStudent = async (courseId, id, studentId) => {
     });
   });
 };
-
 
 /**
  * Generates PDFs for all students enrolled in a course and compresses them into a zip file.
@@ -641,15 +645,17 @@ const getAllSubmissionsForQuiz = async (courseId, quizId) => {
   const quiz = await quizRepository.findQuizById(quizId);
 
   if (!quiz) {
-      throw new AppError("Quiz not found", 404);
+    throw new AppError("Quiz not found", 404);
   }
 
   if (quiz.course.toString() !== courseId) {
-      throw new AppError("Quiz not found in this course.", 404);
+    throw new AppError("Quiz not found in this course.", 404);
   }
 
   // Use the quizSubmissionRepository to get all submissions for the quiz
-  const submissions = await quizSubmissionRepository.getAllQuizSubmissions(quizId);
+  const submissions = await quizSubmissionRepository.getAllQuizSubmissions(
+    quizId
+  );
 
   return submissions;
 };
@@ -665,15 +671,17 @@ const getSubmissionForStudent = async (courseId, quizId, studentId) => {
     throw new AppError("Quiz not found in this course.", 404);
   }
 
-  const submission = await quizSubmissionRepository.findSubmission(quizId, studentId);
+  const submission = await quizSubmissionRepository.findSubmission(
+    quizId,
+    studentId
+  );
 
   if (!submission) {
     throw new AppError("Submission not found", 404);
   }
-  
+
   return submission;
 };
-
 
 module.exports = {
   createQuiz,
