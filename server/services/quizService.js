@@ -109,31 +109,61 @@ const updateQuiz = async (
     throw new AppError("Input all required fields", 400);
   }
 
+  // Validate that the deadline is in the future
+  if (new Date(deadline) < new Date()) {
+    throw new AppError("Deadline must be in the future", 400);
+  }
+
+  // Fetch the quiz by ID
   const quiz = await quizRepository.getQuizById(quizId);
   if (!quiz) {
     throw new AppError("Quiz not found", 404);
   }
-  if (new Date(deadline) < new Date()) {
-    throw new AppError("Deadline must be in the future", 400);
-  }
+
   const questionIds = [];
+
+  // Process each question in the payload
   for (const questionData of questions) {
-    let question = await questionRepository.findQuestionByContent(
-      questionData.content
-    );
-    if (!question) {
-      question = await questionRepository.createQuestion(questionData);
+    const { _id, content, options, correct_option } = questionData;
+
+    // Ensure required fields exist
+    if (!_id || !content || !options || !correct_option) {
+      throw new AppError(
+        "Each question must include _id, content, options, and correct_option",
+        400
+      );
     }
-    questionIds.push(question._id);
+
+    if (options.length !== 4) {
+      throw new AppError("Each question must have exactly 4 options", 400);
+    }
+
+    // Check if the question exists
+    const question = await questionRepository.getQuestionById(_id);
+    if (!question) {
+      throw new AppError(`Question with ID ${_id} not found`, 404);
+    }
+
+    // Update the question fields
+    question.content = content;
+    question.options = options;
+    question.correct_option = correct_option;
+    await question.save();
+
+    questionIds.push(_id);
   }
 
+  // Update the quiz fields
   quiz.title = title;
   quiz.topic = topic;
   quiz.deadline = deadline;
   quiz.duration = duration;
   quiz.number_of_questions = number_of_questions;
   quiz.questions = questionIds;
+  // Save the updated quiz
+  quiz.updated_at = new Date();
   await quiz.save();
+  await quiz.populate("questions");
   return quiz;
 };
 
