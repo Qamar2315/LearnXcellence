@@ -13,7 +13,8 @@ const {
   validateUpdateQuizScore, 
   validateUpdateSubmissionFlag,
   validateQuizGenerationQuery,
-  validateQuizGenerationBody
+  validateQuizGenerationBody,
+  validateUpdateQuiz
 } = require("../middlewares/schemaValidator");
 
 // --- Quiz Routes ---
@@ -160,7 +161,7 @@ router.route("/:courseId/:id")
     isEmailVerified, 
     isTeacher, 
     isCourseCreator, 
-    validateQuiz, 
+    validateUpdateQuiz, 
     quizController.updateQuiz
   )
   .delete(isLogin, isEmailVerified, isTeacher, isCourseCreator, quizController.deleteQuiz);
