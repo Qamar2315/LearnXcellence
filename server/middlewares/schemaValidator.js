@@ -9,7 +9,10 @@ const {
 } = require("../schemas/authSchema");
 const { courseSchema } = require("../schemas/courseSchema");
 const { dateSchema } = require("../schemas/dateSchema");
-const { projectSchema, updateProjectSchema } = require("../schemas/projectSchema");
+const {
+  projectSchema,
+  updateProjectSchema,
+} = require("../schemas/projectSchema");
 const { remarkSchema } = require("../schemas/remarkSchema");
 const { statusSchema } = require("../schemas/statusSchema");
 const { vivaSchema } = require("../schemas/vivaSchema");
@@ -29,6 +32,8 @@ const {
   quizGenerationBodySchema,
   quizGenerationQuerySchema,
 } = require("../schemas/quizGenerationSchemas");
+const { updateQuizSchema } = require("../schemas/updateQuizSchema");
+
 const AppError = require("../utilities/AppError");
 
 module.exports.validateRegister = (req, res, next) => {
@@ -263,6 +268,16 @@ module.exports.validateResetPassword = (req, res, next) => {
 
 module.exports.validateUpdateProject = (req, res, next) => {
   const { error } = updateProjectSchema.validate(req.body);
+  if (error) {
+    const msg = error.details.map((el) => el.message).join(",");
+    throw new AppError(msg, 400);
+  } else {
+    next();
+  }
+};
+
+module.exports.validateUpdateQuiz = (req, res, next) => {
+  const { error } = updateQuizSchema.validate(req.body);
   if (error) {
     const msg = error.details.map((el) => el.message).join(",");
     throw new AppError(msg, 400);
