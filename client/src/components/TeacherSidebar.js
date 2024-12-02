@@ -114,7 +114,7 @@ export default function TeacherSidebar({ children }) {
               activeClassName="bg-blue-700"
             />
             <SidebarItem
-              to={`/course/${courseId}/quizzes`}
+              to={`/course/${courseId}/quizzes/teacher`}
               icon={<List size={20} />}
               text="Quizzes"
               activeClassName="bg-blue-700"
@@ -132,7 +132,7 @@ export default function TeacherSidebar({ children }) {
         {/* Sidebar footer with user info */}
         {/* Hide user info when sidebar is collapsed */}
 
-        <div className="border-t flex items-center p-3 mt-18 ">
+        <div className="border-t flex items-center p-3 mt-10 ">
           <img
             src={`http://localhost:9090/profile_pictures/${userInfo.profile_picture}`}
             alt="User Avatar"

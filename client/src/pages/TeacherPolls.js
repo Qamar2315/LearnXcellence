@@ -57,9 +57,10 @@ function TeacherPolls() {
       setFlashMessage({
         status: true,
         message: "All fields and options are required.",
-        heading: "Warning",
-        type: "warning",
+        heading: "Error",
+        type: "error",
       });
+      setShowCreatePollForm(false);
       return;
     }
 

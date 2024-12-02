@@ -182,7 +182,7 @@ function TeacherLectures() {
   };
 
   return (
-    <div className="overflow-hidden">
+    <div className="h-screen flex flex-col ">
       {" "}
       {/* Added this class to hide the scroll bar */}
       <TeacherNavbar />

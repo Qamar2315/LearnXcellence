@@ -6,10 +6,10 @@ import { AuthContext } from "../helpers/AuthContext";
 import { FlashContext } from "../helpers/FlashContext";
 import Success from "../components/Success";
 import Alert from "../components/Alert";
-import Navbar from "../components/Navbar";
-import Sidebar from "../components/Sidebar";
+import TeacherNavbar from "../components/TeacherNavbar";
+import TeacherSidebar from "../components/TeacherSidebar";
 
-function Quizzes() {
+function TeacherQuiz() {
   const [quizzes, setQuizzes] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -65,13 +65,20 @@ function Quizzes() {
 
   return (
     <div>
-      <Navbar />
+      <TeacherNavbar />
       <div className="flex">
-        <Sidebar />
+        <TeacherSidebar />
         <div className="container mx-auto mt-5 p-5">
           <div className="flex justify-between items-start">
             <h1 className="text-4xl font-bold ">Quizzes</h1>
-            <div className="mr-5 mt-5 mb-2"></div>
+            <div className="mr-5 mt-5 mb-2">
+              <button
+                className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition duration-200"
+                onClick={() => navigate(`createquiz`)}
+              >
+                Create Quiz
+              </button>
+            </div>
           </div>
 
           {/* Flash messages */}
@@ -121,4 +128,4 @@ function Quizzes() {
   );
 }
 
-export default Quizzes;
+export default TeacherQuiz;

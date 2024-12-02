@@ -44,6 +44,12 @@ import TeacherAssignmentRemarks from "./pages/TeacherAssignmentRemarks";
 import StudentAssignmentRemarks from "./pages/StudentAssignmentRemarks";
 import TeacherPolls from "./pages/TeacherPolls";
 import StudentPolls from "./pages/StudentPolls";
+import TeacherQuiz from "./pages/TeacherQuiz";
+import CreateQuiz from "./pages/CreateQuiz";
+import TeacherQuizDetails from "./pages/TeacherQuizDetails";
+import StudentQuizPage from "./pages/StudentQuizPage";
+import QuizPage from "./pages/QuizPage";
+import TeacherQuizSubmission from "./pages/TeacherQuizSubmission";
 
 function App() {
   const [authState, setAuthState] = useState({
@@ -201,6 +207,42 @@ function App() {
                 path="course/:courseId/quizzes"
                 exact
                 element={<Quizzes />}
+              />
+
+              <Route
+                path="course/:courseId/quizzes/:quizId"
+                exact
+                element={<StudentQuizPage />}
+              />
+
+              <Route
+                path="course/:courseId/quizzes/:quizId/start"
+                exact
+                element={<QuizPage />}
+              />
+
+              <Route
+                path="course/:courseId/quizzes/teacher"
+                exact
+                element={<TeacherQuiz />}
+              />
+
+              <Route
+                path="course/:courseId/quizzes/teacher/:quizId"
+                exact
+                element={<TeacherQuizDetails />}
+              />
+
+              <Route
+                path="course/:courseId/quizzes/teacher/:quizId/submission/:submissionId"
+                exact
+                element={<TeacherQuizSubmission />}
+              />
+
+              <Route
+                path="course/:courseId/quizzes/teacher/createquiz"
+                exact
+                element={<CreateQuiz />}
               />
 
               <Route
