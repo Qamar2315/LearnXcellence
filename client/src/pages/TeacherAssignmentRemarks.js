@@ -7,16 +7,18 @@ import Success from "../components/Success";
 import Alert from "../components/Alert";
 import TeacherNavbar from "../components/TeacherNavbar";
 import TeacherSidebar from "../components/TeacherSidebar";
+import { FaFileDownload, FaFileUpload, FaTrash } from "react-icons/fa";
 
 function TeacherAssignmentRemarks() {
   const { flashMessage, setFlashMessage } = useContext(FlashContext);
-  const { courseId, submissionId } = useParams();
+  const { courseId, submissionId, assignmentId } = useParams();
   const { authState } = useContext(AuthContext);
   const [remark, setRemark] = useState(null);
   const [loading, setLoading] = useState(true);
   const [showAddRemarkForm, setShowAddRemarkForm] = useState(false);
   const [showEditRemarkForm, setShowEditRemarkForm] = useState(false);
   const [remarksId, setRemarksId] = useState("");
+  const [submission, setSubmission] = useState("");
   const [formData, setFormData] = useState({
     overallPerformance: "",
     feedback: "",
@@ -52,8 +54,20 @@ function TeacherAssignmentRemarks() {
     }
   };
 
+  const fetchSubmission = async () => {
+    const submissionRes = await axios.get(
+      `${process.env.REACT_APP_API_URL}/submissions/assignment/${courseId}/${assignmentId}/submissions/${submissionId}`,
+      {
+        headers: {
+          authorization: `Bearer ${authState.token}`,
+        },
+      }
+    );
+    setSubmission(submissionRes.data);
+  };
   useEffect(() => {
     fetchRemark();
+    fetchSubmission();
   }, [flashMessage]);
 
   // Handle add remark
@@ -117,6 +131,35 @@ function TeacherAssignmentRemarks() {
     }
   };
 
+  const handleSubmissionDownload = async () => {
+    try {
+      const response = await axios.get(
+        `${process.env.REACT_APP_API_URL}/submissions/${courseId}/submission/${submission._id}/download`,
+        {
+          headers: {
+            authorization: `Bearer ${authState.token}`,
+          },
+          responseType: "blob",
+        }
+      );
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", `${submission.document_id}.pdf`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } catch (error) {
+      setFlashMessage({
+        status: true,
+        message:
+          error.response?.data?.message || "Failed to download submission.",
+        heading: "Error",
+        type: "error",
+      });
+    }
+  };
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
@@ -152,6 +195,19 @@ function TeacherAssignmentRemarks() {
             <p>Loading submission details...</p>
           ) : (
             <div className="bg-white shadow-lg rounded-lg p-6">
+              <h2 className="text-2xl font-semibold mb-4">Submission</h2>
+              {submission && (
+                <div className="flex items-center mt-4">
+                  <div
+                    className="flex items-center cursor-pointer mb-4"
+                    onClick={handleSubmissionDownload}
+                  >
+                    <FaFileDownload className="text-2xl text-gray-500 mr-2" />
+                    <span>{submission.document_id.split("-")[1]}</span>
+                  </div>
+                </div>
+              )}
+
               <h2 className="text-2xl font-semibold mb-4">Remarks</h2>
               {remark ? (
                 <div>

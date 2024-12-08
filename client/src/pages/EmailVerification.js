@@ -65,7 +65,7 @@ function EmailVerification() {
           heading: "Email Verified",
           type: "success",
         });
-        navigate("/studentDashboard");
+        navigate("/course");
       }
     } catch (error) {
       setFlashMessage({

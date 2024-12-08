@@ -209,7 +209,7 @@ function StudentAssignmentDetails() {
           {loading ? (
             <p>Loading assignment details...</p>
           ) : assignment ? (
-            <div className="bg-white shadow-lg rounded-lg p-6">
+            <div className="bg-white shadow-lg rounded-lg p-3">
               <h1 className="text-3xl font-bold mb-4">{assignment.title}</h1>
               <p className="text-lg mb-4">{assignment.description}</p>
               <p className="text-lg mb-4">

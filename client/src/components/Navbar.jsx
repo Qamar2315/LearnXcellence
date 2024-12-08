@@ -134,9 +134,7 @@ function Navbar() {
             </div>
             <div className="flex flex-1 items-center justify-center sm:items-stretch sm:justify-start">
               <div className="flex flex-shrink-0 items-center">
-                <h1 className="text-3xl font-bold text-white">
-                  LearnXcellence
-                </h1>
+                <h1 className="text-3xl font-bold text-white">STUDENT</h1>
               </div>
               <div className="hidden sm:ml-6 sm:block">
                 <div className="flex space-x-4">
@@ -186,16 +184,17 @@ function Navbar() {
             <div className="relative flex items-center space-x-4 pr-2">
               {/* Notification Icon */}
               <div className="relative">
-                <FaBell
-                  size={24}
-                  className="text-white cursor-pointer"
+                <div
+                  className="cursor-pointer"
                   onClick={() => setNotificationsOpen(!notificationsOpen)}
-                />
-                {notifications.some((notif) => !notif.read) && (
-                  <span className="absolute top-0 right-0 bg-red-500 text-white rounded-full h-4 w-4 text-xs flex items-center justify-center">
-                    {notifications.filter((notif) => !notif.read).length}
-                  </span>
-                )}
+                >
+                  <FaBell size={24} className="text-white cursor-pointer" />
+                  {notifications.some((notif) => !notif.read) && (
+                    <span className="absolute top-0 right-0 bg-red-500 text-white rounded-full h-4 w-4 text-xs flex items-center justify-center">
+                      {notifications.filter((notif) => !notif.read).length}
+                    </span>
+                  )}
+                </div>
                 {/* Notifications Dropdown */}
                 {notificationsOpen && (
                   <div className="absolute right-0 mt-2 w-64 bg-white rounded-md shadow-lg py-2 z-10">

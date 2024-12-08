@@ -126,7 +126,7 @@ export default function Sidebar({ children }) {
         {/* Sidebar footer with user info */}
         {/* Hide user info when sidebar is collapsed */}
 
-        <div className="border-t flex items-center p-3 mt-24 ">
+        <div className="border-t flex items-center p-3 mt-20 ">
           <img
             src={`http://localhost:9090/profile_pictures/${userInfo.profile_picture}`}
             alt="User Avatar"
