@@ -716,7 +716,7 @@ const getSubmissionForStudent = async (courseId, quizId, studentId) => {
 const getSubmissionForTeacher = async (
   courseId,
   quizId,
-  studentId,
+  submissionId,
   teacherId
 ) => {
   const quiz = await quizRepository.findQuizById(quizId);
@@ -741,13 +741,10 @@ const getSubmissionForTeacher = async (
     );
   }
 
-  const submission = await quizSubmissionRepository.findSubmission(
-    quizId,
-    studentId
-  );
+  const submission = await quizSubmissionRepository.findSubmissionById(submissionId);
 
   if (!submission) {
-    throw new AppError("Submission not found for this student.", 404);
+    throw new AppError("Submission not found.", 404);
   }
 
   return submission;

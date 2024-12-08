@@ -14,12 +14,12 @@ def collect_code(folder_path, output_file="output_new.txt"):
             if 'node_modules' in root or '.env' in root:
                 continue
             for file in files:
-                if file.endswith('.py'):
+                if file.endswith('.js') or file.endswith('.js'):
                     file_path = os.path.join(root, file)
                     with open(file_path, 'r', encoding='utf-8') as infile:
                         outfile.write(infile.read() + "\n")  # Add newline after each file
 
 if __name__ == "__main__":
-    project_folder = "flask_server"  # Replace with your project folder path
+    project_folder = "server"  # Replace with your project folder path
     collect_code(project_folder)
     print("All JavaScript code collected and saved to 'output.txt'")

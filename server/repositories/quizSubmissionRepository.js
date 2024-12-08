@@ -13,22 +13,27 @@ const getAllQuizSubmissions = async (quizId) => {
 };
 
 const findSubmissionById = async (submissionId) => {
-  return await QuizSubmission.findById(submissionId);
+  return await QuizSubmission.findById(submissionId).populate({
+    path: "student",
+    select: "name account",
+    populate: { path: "account", select: "email profile_picture" },
+  });
 };
 
 const findSubmission = async (quizId, studentId) => {
-    return await QuizSubmission.findOne({ quiz: quizId, student: studentId }).populate({
-      path: "student",
-      select: "name account",
-      populate: { path: "account", select: "email profile_picture" },
-    });
-  };
+  return await QuizSubmission.findOne({
+    quiz: quizId,
+    student: studentId,
+  }).populate({
+    path: "student",
+    select: "name account",
+    populate: { path: "account", select: "email profile_picture" },
+  });
+};
 
-  
 module.exports = {
   createSubmission,
   findSubmission,
   findSubmissionById,
   getAllQuizSubmissions,
-
 };

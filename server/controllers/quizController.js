@@ -243,12 +243,12 @@ const getStudentSubmission = asyncHandler(async (req, res) => {
 });
 
 const getStudentSubmissionForTeacher = asyncHandler(async (req, res) => {
-  const { courseId, quizId, studentId } = req.params;
+  const { courseId, quizId, submissionId } = req.params;
   const teacherId = req.user._id;
   const submission = await quizService.getSubmissionForTeacher(
     courseId,
     quizId,
-    studentId,
+    submissionId,
     teacherId
   );
   res.status(200).json(submission);
