@@ -9,12 +9,14 @@ import Navbar from "../components/Navbar";
 import ClassNotJoinedMessage from "../components/ClassNotJoinedMessage";
 import Success from "../components/Success";
 import Alert from "../components/Alert";
+import DotSpinner from "../components/DotSpinner"; // Adjust the path accordingly
 
 function StudentDashboard() {
   const { flashMessage, setFlashMessage } = useContext(FlashContext);
   const { authState, setAuthState } = useContext(AuthContext);
   const [courses, setCourses] = useState([]);
   const navigate = useNavigate();
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (!authState.status && !authState.isTeacher) {
@@ -31,6 +33,7 @@ function StudentDashboard() {
       .then((res) => {
         if (res.data.success) {
           setCourses(res.data.data.courses);
+          setLoading(false);
         } else {
           setFlashMessage({
             status: true,
@@ -49,6 +52,14 @@ function StudentDashboard() {
         });
       });
   }, [authState, navigate, setFlashMessage]);
+
+  if (loading) {
+    return (
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+        <DotSpinner />
+      </div>
+    );
+  }
 
   return (
     <div>

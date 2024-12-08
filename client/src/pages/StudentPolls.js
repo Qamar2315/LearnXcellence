@@ -7,6 +7,7 @@ import Sidebar from "../components/Sidebar";
 import Success from "../components/Success";
 import Alert from "../components/Alert";
 import { useParams, useNavigate } from "react-router-dom"; // useNavigate import
+import DotSpinner from "../components/DotSpinner"; // Adjust the path accordingly
 
 function StudentPolls() {
   const { authState } = useContext(AuthContext);
@@ -95,6 +96,14 @@ function StudentPolls() {
     );
     return userVote ? userVote.option : null;
   };
+
+  if (loading) {
+    return (
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+        <DotSpinner />
+      </div>
+    );
+  }
 
   return (
     <div>

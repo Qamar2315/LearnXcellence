@@ -7,6 +7,7 @@ import Success from "../components/Success";
 import Alert from "../components/Alert";
 import Navbar from "../components/Navbar";
 import Sidebar from "../components/Sidebar";
+import DotSpinner from "../components/DotSpinner"; // Adjust the path accordingly
 
 function StudentAssignmentRemarks() {
   const { flashMessage, setFlashMessage } = useContext(FlashContext);
@@ -79,7 +80,9 @@ function StudentAssignmentRemarks() {
           </div>
 
           {loading ? (
-            <p>Loading submission details...</p>
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+              <DotSpinner />
+            </div>
           ) : (
             <div className="bg-white shadow-lg rounded-lg p-6">
               <h2 className="text-2xl font-semibold mb-4">Remarks</h2>

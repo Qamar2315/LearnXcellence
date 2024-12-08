@@ -8,6 +8,7 @@ import Alert from "../components/Alert";
 import TeacherNavbar from "../components/TeacherNavbar";
 import TeacherSidebar from "../components/TeacherSidebar";
 import { FaFile } from "react-icons/fa";
+import DotSpinner from "../components/DotSpinner"; // Adjust the path accordingly
 
 function TeacherQuizDetails() {
   const { courseId, quizId } = useParams();
@@ -234,7 +235,11 @@ function TeacherQuizDetails() {
   };
 
   if (loading) {
-    return <p>Loading...</p>;
+    return (
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+        <DotSpinner />
+      </div>
+    );
   }
 
   return (
@@ -356,7 +361,11 @@ function TeacherQuizDetails() {
                     <p className="text-sm text-gray-500">
                       {submission.student.account.email}
                     </p>
-                    <p>{submission.score}</p>
+                    {submission.isFlagged ? (
+                      <p className="text-red-500">Flagged</p>
+                    ) : (
+                      <p>{submission.score}</p>
+                    )}
                   </div>
                 </div>
               ))

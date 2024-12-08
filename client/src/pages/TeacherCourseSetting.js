@@ -9,6 +9,7 @@ import Alert from "../components/Alert";
 import { useParams, useNavigate } from "react-router-dom";
 import TeacherNavbar from "../components/TeacherNavbar";
 import TeacherSidebar from "../components/TeacherSidebar";
+import DotSpinner from "../components/DotSpinner"; // Adjust the path accordingly
 
 function TeacherCourseSetting() {
   const { authState } = useContext(AuthContext);
@@ -220,6 +221,14 @@ function TeacherCourseSetting() {
     }
   };
 
+  if (loading) {
+    return (
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+        <DotSpinner />
+      </div>
+    );
+  }
+
   return (
     <div>
       <TeacherNavbar />
@@ -247,14 +256,14 @@ function TeacherCourseSetting() {
           <div className="flex justify-between">
             <button
               onClick={() => setDeleteConfirmationVisible(true)}
-              className="bg-red-500 hover:bg-red-700 py-2 px-4 text-white font-semibold rounded-lg"
+              className=" mt-4 bg-red-500 text-white py-2 px-4 rounded hover:bg-red-600 transition-all hover:shadow-xl transition-shadow duration-300 transition-transform transform hover:scale-105 self-end "
             >
               Delete Course
             </button>
 
             <button
               onClick={() => setShowSearchBox(!showSearchBox)}
-              className="bg-blue-500 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg"
+              className=" mt-4 bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 transition-all hover:shadow-xl transition-shadow duration-300 transition-transform transform hover:scale-105 self-end "
             >
               {showSearchBox ? "Cancel" : "Add Student"}
             </button>
@@ -271,7 +280,7 @@ function TeacherCourseSetting() {
               />
               <button
                 onClick={searchStudent}
-                className="bg-green-500 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded-lg"
+                className=" mt-4 bg-green-500 text-white py-2 px-4 rounded hover:bg-green-600 transition-all hover:shadow-xl transition-shadow duration-300 transition-transform transform hover:scale-105 self-end "
               >
                 Search Student
               </button>
@@ -296,7 +305,7 @@ function TeacherCourseSetting() {
                       </p>
                       <button
                         onClick={addStudentToCourse}
-                        className="bg-blue-500 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg"
+                        className=" mt-4 bg-green-500 text-white py-2 px-4 rounded hover:bg-green-600 transition-all hover:shadow-xl transition-shadow duration-300 transition-transform transform hover:scale-105 self-end "
                       >
                         Add Student to Course
                       </button>
@@ -309,7 +318,7 @@ function TeacherCourseSetting() {
           <div className="mt-3">
             <button
               onClick={regenerateCourseCode} // Regenerate Course Code button
-              className="bg-green-500 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded-lg"
+              className=" mt-4 bg-green-500 text-white py-2 px-4 rounded hover:bg-green-600 transition-all hover:shadow-xl transition-shadow duration-300 transition-transform transform hover:scale-105 self-end "
             >
               Regenerate Course Code
             </button>
@@ -370,7 +379,7 @@ function TeacherCourseSetting() {
                             setConfirmationVisible(true);
                             setStudentToRemove(student._id);
                           }}
-                          className="  font-semibold  rounded-lg text-red-500 ml-4 mt-2"
+                          className=" mt-4 bg-red-500 text-white py-2 px-4 rounded hover:bg-red-600 transition-all hover:shadow-xl transition-shadow duration-300 transition-transform transform hover:scale-105 self-end "
                         >
                           Remove
                         </button>

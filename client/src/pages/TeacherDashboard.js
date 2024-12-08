@@ -10,12 +10,14 @@ import Success from "../components/Success";
 import Alert from "../components/Alert";
 import TeacherNavbar from "../components/TeacherNavbar";
 import TeacherClassCard from "../components/TeacherClassCard";
+import DotSpinner from "../components/DotSpinner"; // Adjust the path accordingly
 
 function TeacherDashboard() {
   const { flashMessage, setFlashMessage } = useContext(FlashContext);
   const { authState } = useContext(AuthContext);
   const [courses, setCourses] = useState([]);
   const [showCreateForm, setShowCreateForm] = useState(false); // State for showing the form
+  const [loading, setLoading] = useState(true);
   const [courseData, setCourseData] = useState({
     courseName: "",
     description: "",
@@ -38,6 +40,7 @@ function TeacherDashboard() {
       .then((res) => {
         if (res.data.success) {
           setCourses(res.data.data.courses);
+          setLoading(false);
         } else {
           setFlashMessage({
             status: true,
@@ -99,6 +102,14 @@ function TeacherDashboard() {
         setShowCreateForm(false);
       });
   };
+
+  if (loading) {
+    return (
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+        <DotSpinner />
+      </div>
+    );
+  }
 
   return (
     <div>

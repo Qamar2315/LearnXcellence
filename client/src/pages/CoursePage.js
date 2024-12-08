@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useContext } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { AuthContext } from "../helpers/AuthContext";
 import { FlashContext } from "../helpers/FlashContext";
@@ -7,12 +7,14 @@ import Navbar from "../components/Navbar";
 import Sidebar from "../components/Sidebar";
 import Success from "../components/Success";
 import Alert from "../components/Alert";
+import DotSpinner from "../components/DotSpinner"; // Adjust the path accordingly
 
 function CoursePage() {
   const { authState } = useContext(AuthContext);
   const { flashMessage, setFlashMessage } = useContext(FlashContext);
   const [course, setCourse] = useState(null);
   const [announcements, setAnnouncements] = useState([]);
+  const navigate = useNavigate();
 
   const { courseId } = useParams();
 
@@ -89,8 +91,52 @@ function CoursePage() {
       });
   }, [authState, courseId, setFlashMessage]);
 
+  const leaveCourse = () => {
+    axios
+      .put(
+        `${process.env.REACT_APP_API_URL}/course/${courseId}/leave`,
+        {},
+        {
+          headers: {
+            "Content-type": "application/json",
+            authorization: `Bearer ${authState.token}`,
+          },
+        }
+      )
+      .then((res) => {
+        if (res.data.success) {
+          setFlashMessage({
+            status: true,
+            message: res.data.message,
+            heading: "Course Left",
+            type: "success",
+          });
+          navigate("/course");
+        } else {
+          setFlashMessage({
+            status: true,
+            message: res.data.message || "Failed to leave course",
+            heading: "Error",
+            type: "error",
+          });
+        }
+      })
+      .catch((error) => {
+        setFlashMessage({
+          status: true,
+          message: error.response?.data?.message || "Failed to leave course",
+          heading: "Error",
+          type: "error",
+        });
+      });
+  };
+
   if (!course) {
-    return <p>Loading...</p>;
+    return (
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+        <DotSpinner />
+      </div>
+    );
   }
 
   return (
@@ -164,6 +210,12 @@ function CoursePage() {
                   </p>
                 </div>
               </div>
+              <button
+                onClick={leaveCourse}
+                className=" mt-4 bg-red-500 text-white py-2 px-4 rounded hover:bg-red-600 transition-all hover:shadow-xl transition-shadow duration-300 transition-transform transform hover:scale-105 self-end "
+              >
+                Leave Course
+              </button>
             </div>
 
             {/* Right Section: Announcements */}

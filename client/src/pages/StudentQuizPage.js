@@ -7,6 +7,7 @@ import { AuthContext } from "../helpers/AuthContext";
 import { FlashContext } from "../helpers/FlashContext";
 import Success from "../components/Success";
 import Alert from "../components/Alert";
+import DotSpinner from "../components/DotSpinner"; // Adjust the path accordingly
 
 function StudentQuizPage() {
   const { courseId, quizId } = useParams();
@@ -55,15 +56,17 @@ function StudentQuizPage() {
           },
         }
       );
+
       setSubmission(res.data);
     } catch (error) {
-      setFlashMessage({
-        status: true,
-        message:
-          error.response?.data?.message || "Failed to fetch quiz details.",
-        heading: "Error",
-        type: "error",
-      });
+      // setFlashMessage({
+      //   status: true,
+      //   message:
+      //     error.response?.data?.message ||
+      //     "Failed to fetch submission details.",
+      //   heading: "Error",
+      //   type: "error",
+      // });
     }
   };
 
@@ -89,7 +92,14 @@ function StudentQuizPage() {
         return (
           <div className="text-center mt-6">
             <h2 className={`text-2xl font-bold ${scoreColor}`}>
-              You scored: {score}
+              <p>
+                Score:{" "}
+                {submission.isFlagged ? (
+                  <span className="text-red-500 font-medium">Flagged</span>
+                ) : (
+                  <span>{score}</span>
+                )}
+              </p>
             </h2>
           </div>
         );
@@ -122,7 +132,9 @@ function StudentQuizPage() {
               ))}
           </div>
           {loading ? (
-            <p>Loading quiz details...</p>
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+              <DotSpinner />
+            </div>
           ) : quiz ? (
             <div className="bg-white shadow-lg rounded-lg p-6">
               <h1 className="text-3xl font-bold mb-4">{quiz.title}</h1>
@@ -140,7 +152,7 @@ function StudentQuizPage() {
                 {new Date(quiz.deadline).toLocaleString()}
               </p>
               {renderScore()}
-              {isDeadlinePassed && (
+              {isDeadlinePassed && !isQuizAttempted && (
                 <p className=" text-red-600  ">
                   Note: The deadline for this quiz has passed. You cannot start
                   it.

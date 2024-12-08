@@ -150,7 +150,7 @@ function TeacherNavbar() {
                   >
                     Courses
                   </Link>
-                  <Link
+                  {/* <Link
                     to="/team"
                     className={`${
                       location.pathname === "/team"
@@ -159,7 +159,7 @@ function TeacherNavbar() {
                     }`}
                   >
                     Team
-                  </Link>
+                  </Link> */}
                   <Link
                     to="/teacherProfile"
                     className={`${

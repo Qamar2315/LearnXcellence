@@ -2,6 +2,7 @@ import React, { useContext, useEffect, useState } from "react";
 import axios from "axios";
 import { AuthContext } from "../helpers/AuthContext";
 import Navbar from "../components/Navbar";
+import DotSpinner from "../components/DotSpinner"; // Adjust the path accordingly
 
 function UserProfile() {
   const [userInfo, setUserInfo] = useState({
@@ -10,6 +11,7 @@ function UserProfile() {
     profile_picture: "",
   });
   const { authState, setAuthState } = useContext(AuthContext);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     // Fetch the user information from the API
@@ -24,6 +26,7 @@ function UserProfile() {
           }
         );
         setUserInfo(response.data);
+        setLoading(false);
       } catch (error) {
         console.error("Error fetching user info:", error);
       }
@@ -32,6 +35,13 @@ function UserProfile() {
     fetchUserInfo();
   }, []);
 
+  if (loading) {
+    return (
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+        <DotSpinner />
+      </div>
+    );
+  }
   return (
     <>
       <Navbar />

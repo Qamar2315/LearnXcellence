@@ -8,6 +8,7 @@ import Alert from "../components/Alert";
 import TeacherNavbar from "../components/TeacherNavbar";
 import TeacherSidebar from "../components/TeacherSidebar";
 import { FaFileDownload, FaFileUpload, FaTrash } from "react-icons/fa";
+import DotSpinner from "../components/DotSpinner"; // Adjust the path accordingly
 
 function TeacherAssignmentRemarks() {
   const { flashMessage, setFlashMessage } = useContext(FlashContext);
@@ -192,7 +193,9 @@ function TeacherAssignmentRemarks() {
           </div>
 
           {loading ? (
-            <p>Loading submission details...</p>
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+              <DotSpinner />
+            </div>
           ) : (
             <div className="bg-white shadow-lg rounded-lg p-6">
               <h2 className="text-2xl font-semibold mb-4">Submission</h2>

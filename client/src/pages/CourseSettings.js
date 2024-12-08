@@ -8,6 +8,7 @@ import Navbar from "../components/Navbar";
 import Sidebar from "../components/Sidebar";
 import Success from "../components/Success";
 import Alert from "../components/Alert";
+import DotSpinner from "../components/DotSpinner"; // Adjust the path accordingly
 
 function CourseSettings() {
   const { authState } = useContext(AuthContext);
@@ -88,7 +89,11 @@ function CourseSettings() {
   };
 
   if (!course) {
-    return <p>Loading...</p>;
+    return (
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+        <DotSpinner />
+      </div>
+    );
   }
 
   return (
@@ -101,7 +106,7 @@ function CourseSettings() {
           <p className="text-lg mb-6">{course.description}</p>
           <button
             onClick={leaveCourse}
-            className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-full"
+            className=" mt-4 bg-red-500 text-white py-2 px-4 rounded hover:bg-red-600 transition-all hover:shadow-xl transition-shadow duration-300 transition-transform transform hover:scale-105 self-end "
           >
             Leave Course
           </button>

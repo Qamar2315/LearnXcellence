@@ -9,6 +9,7 @@ import Success from "../components/Success"; // Assuming you have a Success comp
 import Alert from "../components/Alert"; // Assuming you have an Alert component
 import TeacherNavbar from "../components/TeacherNavbar";
 import TeacherSidebar from "../components/TeacherSidebar";
+import DotSpinner from "../components/DotSpinner"; // Adjust the path accordingly
 
 function TeacherProjects() {
   const { projectId } = useParams();
@@ -112,7 +113,9 @@ function TeacherProjects() {
           </div>
 
           {loading ? (
-            <p>Loading projects...</p>
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+              <DotSpinner />
+            </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {projects.map((project) => (

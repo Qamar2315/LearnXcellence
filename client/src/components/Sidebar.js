@@ -113,20 +113,20 @@ export default function Sidebar({ children }) {
               text="Quizzes"
               activeClassName="bg-blue-700"
             />
-            <SidebarItem
+            {/* <SidebarItem
               to={`/course/${courseId}/coursesettings`}
               icon={<Settings size={20} />}
               text="Settings"
               activeClassName="bg-blue-700"
               // alert={true}
-            />
+            /> */}
           </ul>
         </SidebarContext.Provider>
 
         {/* Sidebar footer with user info */}
         {/* Hide user info when sidebar is collapsed */}
 
-        <div className="border-t flex items-center p-3 mt-20 ">
+        <div className="border-t flex items-center p-3 mt-32 ">
           <img
             src={`http://localhost:9090/profile_pictures/${userInfo.profile_picture}`}
             alt="User Avatar"

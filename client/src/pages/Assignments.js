@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
-
+import DotSpinner from "../components/DotSpinner"; // Adjust the path accordingly
 import { AuthContext } from "../helpers/AuthContext";
 import { FlashContext } from "../helpers/FlashContext";
 import Success from "../components/Success";
@@ -59,7 +59,11 @@ function StudentAssignment() {
   };
 
   if (loading) {
-    return <p>Loading...</p>;
+    return (
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+        <DotSpinner />
+      </div>
+    );
   }
 
   return (

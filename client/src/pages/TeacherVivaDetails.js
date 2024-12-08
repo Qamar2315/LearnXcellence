@@ -7,6 +7,7 @@ import { AuthContext } from "../helpers/AuthContext";
 import Success from "../components/Success";
 import Alert from "../components/Alert";
 import { FlashContext } from "../helpers/FlashContext"; // Import FlashContext
+import DotSpinner from "../components/DotSpinner"; // Adjust the path accordingly
 
 function TeacherVivaDetails() {
   const [viva, setViva] = useState(null);
@@ -257,7 +258,11 @@ function TeacherVivaDetails() {
   }, []);
 
   if (loading) {
-    return <p>Loading...</p>;
+    return (
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+        <DotSpinner />
+      </div>
+    );
   }
 
   return (

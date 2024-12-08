@@ -7,6 +7,7 @@ import { AuthContext } from "../helpers/AuthContext";
 import { FlashContext } from "../helpers/FlashContext"; // Import FlashContext
 import Success from "../components/Success"; // Assuming you have a Success component
 import Alert from "../components/Alert"; // Assuming you have an Alert component
+import DotSpinner from "../components/DotSpinner"; // Adjust the path accordingly
 
 function Projects() {
   const { projectId } = useParams();
@@ -44,6 +45,7 @@ function Projects() {
       .then((response) => {
         if (response.data.success) {
           setProjects(response.data.data.projects);
+          setLoading(false);
         } else {
           setFlashMessage({
             status: true,
@@ -110,7 +112,9 @@ function Projects() {
           </div>
 
           {loading ? (
-            <p>Loading projects...</p>
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+              <DotSpinner />
+            </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {projects.map((project) => (

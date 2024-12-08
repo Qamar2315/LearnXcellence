@@ -8,6 +8,7 @@ import Alert from "../components/Alert";
 import TeacherNavbar from "../components/TeacherNavbar";
 import TeacherSidebar from "../components/TeacherSidebar";
 import { FaFile } from "react-icons/fa";
+import DotSpinner from "../components/DotSpinner"; // Adjust the path accordingly
 
 function TeacherAssignmentDetails() {
   const { courseId, assignmentId } = useParams();
@@ -197,7 +198,9 @@ function TeacherAssignmentDetails() {
             </div>
 
             {loading ? (
-              <p>Loading assignment details...</p>
+              <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+                <DotSpinner />
+              </div>
             ) : assignment ? (
               <div>
                 <h2 className="text-3xl font-bold">{assignment.title}</h2>

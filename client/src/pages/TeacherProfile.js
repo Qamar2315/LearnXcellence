@@ -3,6 +3,7 @@ import axios from "axios";
 import { AuthContext } from "../helpers/AuthContext";
 import Navbar from "../components/Navbar";
 import TeacherNavbar from "../components/TeacherNavbar";
+import DotSpinner from "../components/DotSpinner"; // Adjust the path accordingly
 
 function TeacherProfile() {
   const [userInfo, setUserInfo] = useState({
@@ -11,6 +12,7 @@ function TeacherProfile() {
     profile_picture: "",
   });
   const { authState, setAuthState } = useContext(AuthContext);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     // Fetch the user information from the API
@@ -25,6 +27,7 @@ function TeacherProfile() {
           }
         );
         setUserInfo(response.data);
+        setLoading(false);
       } catch (error) {
         console.error("Error fetching user info:", error);
       }
@@ -32,6 +35,14 @@ function TeacherProfile() {
 
     fetchUserInfo();
   }, []);
+
+  if (loading) {
+    return (
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+        <DotSpinner />
+      </div>
+    );
+  }
 
   return (
     <>

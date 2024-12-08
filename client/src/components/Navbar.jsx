@@ -148,7 +148,7 @@ function Navbar() {
                   >
                     Courses
                   </Link>
-                  <Link
+                  {/* <Link
                     to="/team"
                     className={`${
                       location.pathname === "/team"
@@ -157,7 +157,7 @@ function Navbar() {
                     }`}
                   >
                     Team
-                  </Link>
+                  </Link> */}
                   <Link
                     to="/userprofile"
                     className={`${

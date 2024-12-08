@@ -9,6 +9,7 @@ import Alert from "../components/Alert";
 import { useParams } from "react-router-dom";
 import TeacherNavbar from "../components/TeacherNavbar";
 import TeacherSidebar from "../components/TeacherSidebar";
+import DotSpinner from "../components/DotSpinner"; // Adjust the path accordingly
 
 function TeacherLectures() {
   const { authState } = useContext(AuthContext);
@@ -18,6 +19,7 @@ function TeacherLectures() {
   const [showEditForm, setShowEditForm] = useState(false);
   const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
   const [selectedLecture, setSelectedLecture] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [formData, setFormData] = useState({
     title: "",
     description: "",
@@ -33,6 +35,7 @@ function TeacherLectures() {
       })
       .then((response) => {
         setLectures(response.data);
+        setLoading(false);
       })
       .catch((error) => {
         console.error("Error fetching lectures:", error);
@@ -181,6 +184,13 @@ function TeacherLectures() {
     });
   };
 
+  if (loading) {
+    return (
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+        <DotSpinner />
+      </div>
+    );
+  }
   return (
     <div className="h-screen flex flex-col ">
       {" "}

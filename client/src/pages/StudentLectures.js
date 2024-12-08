@@ -7,12 +7,14 @@ import { FlashContext } from "../helpers/FlashContext"; // Import Flash Context
 import Success from "../components/Success";
 import Alert from "../components/Alert";
 import { useParams } from "react-router-dom";
+import DotSpinner from "../components/DotSpinner"; // Adjust the path accordingly
 
 function StudentLectures() {
   const { authState } = useContext(AuthContext);
   const { flashMessage, setFlashMessage } = useContext(FlashContext);
   const [lectures, setLectures] = useState([]);
   const { courseId } = useParams();
+  const [loading, setLoading] = useState(true);
 
   // Fetch lectures
   useEffect(() => {
@@ -22,7 +24,7 @@ function StudentLectures() {
       })
       .then((response) => {
         setLectures(response.data);
-        console.log(response.data);
+        setLoading(false);
       })
       .catch((error) => {
         console.error("Error fetching lectures:", error);
@@ -57,6 +59,14 @@ function StudentLectures() {
         });
       });
   };
+
+  if (loading) {
+    return (
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+        <DotSpinner />
+      </div>
+    );
+  }
 
   return (
     <div className="overflow-hidden">
