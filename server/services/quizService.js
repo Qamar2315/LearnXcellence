@@ -713,6 +713,46 @@ const getSubmissionForStudent = async (courseId, quizId, studentId) => {
   return submission;
 };
 
+const getSubmissionForTeacher = async (
+  courseId,
+  quizId,
+  studentId,
+  teacherId
+) => {
+  const quiz = await quizRepository.findQuizById(quizId);
+
+  if (!quiz) {
+    throw new AppError("Quiz not found", 404);
+  }
+
+  if (quiz.course.toString() !== courseId) {
+    throw new AppError("Quiz not found in this course.", 404);
+  }
+
+  // Check if the teacher is associated with the course  (Important!)
+  const isTeacherInCourse = await courseRepository.isTeacherInCourse(
+    courseId,
+    teacherId
+  );
+  if (!isTeacherInCourse) {
+    throw new AppError(
+      "You are not authorized to view submissions for this course.",
+      403
+    );
+  }
+
+  const submission = await quizSubmissionRepository.findSubmission(
+    quizId,
+    studentId
+  );
+
+  if (!submission) {
+    throw new AppError("Submission not found for this student.", 404);
+  }
+
+  return submission;
+};
+
 module.exports = {
   createQuiz,
   updateQuiz,
@@ -730,4 +770,5 @@ module.exports = {
   generatePDFForAllStudents,
   getAllSubmissionsForQuiz,
   getSubmissionForStudent,
+  getSubmissionForTeacher,
 };

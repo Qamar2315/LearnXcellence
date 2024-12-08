@@ -192,5 +192,17 @@ router.get("/:courseId/:quizId/submission",
   quizController.getStudentSubmission
 );
 
+/**
+ * @route  GET /api/quizzes/:courseId/:quizId/submission/:studentId
+ * @desc   Get a specific quiz submission for a student (Teacher only)
+ * @access Private (Teacher)
+ */
+router.get("/:courseId/:quizId/submission/:studentId",
+  isLogin,
+  isEmailVerified,
+  isTeacher,
+  isCourseCreator,
+  quizController.getStudentSubmissionForTeacher
+);
 
 module.exports = router;

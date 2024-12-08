@@ -9,8 +9,7 @@ const findStudentById = (id) => Student.findById(id);
 const findCourseByName = (name) => Course.findOne({ courseName: name });
 const findAllCourses = () => Course.find({});
 const createCourse = (courseData) => Course.create(courseData);
-const findCourseBycourseCode = (courseCode) =>
-  Course.findOne({ courseCode });
+const findCourseBycourseCode = (courseCode) => Course.findOne({ courseCode });
 const findCourseById = (id) => Course.findById(id);
 const updateCourseName = (courseId, courseName) =>
   Course.findByIdAndUpdate(courseId, { courseName: courseName });
@@ -27,6 +26,13 @@ const getStudentFromCourse = (courseId, studentId) =>
   Student.findOne({ _id: studentId, courses: courseId });
 const getCourseById = (courseId) => Course.findById(courseId);
 
+const isTeacherInCourse = async (courseId, teacherId) => {
+  const course = await Course.findById(courseId);
+  if (!course) {
+    return false; // Course not found
+  }
+  return course.teacher.toString() === teacherId.toString();
+};
 
 module.exports = {
   findTeacherById,
@@ -45,4 +51,5 @@ module.exports = {
   removeCourseFromStudent,
   getStudentFromCourse,
   getCourseById,
+  isTeacherInCourse,
 };
