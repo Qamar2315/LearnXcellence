@@ -78,7 +78,7 @@ const createQuiz = async (
     await notificationService.createNotification(
       {
         title: "New Quiz",
-        content: `A new quiz has been added to ${course.name}`,
+        content: `A new quiz has been added to course: ${course.courseName}`,
         read: false,
       },
       studentAccount._id
