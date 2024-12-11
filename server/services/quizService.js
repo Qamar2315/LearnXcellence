@@ -653,6 +653,97 @@ const generateQuestionsByContent = async (
   }
 };
 
+// const generatePDFStudent = async (courseId, id, studentId) => {
+//   // Fetch Quiz, Student, and Course Information
+//   const quiz = await quizRepository.findQuizById(id);
+//   if (!quiz) {
+//     throw new AppError("Quiz not found", 404);
+//   }
+
+//   const student = await authRepository.findStudentById(studentId);
+//   if (!student) {
+//     throw new AppError("Student not found", 404);
+//   }
+
+//   const account = await authRepository.findAccountById(student.account);
+//   if (!account) {
+//     throw new AppError("Account not found", 404);
+//   }
+
+//   const course = await courseRepository.getCourseById(courseId);
+//   if (!course) {
+//     throw new AppError("Course not found", 404);
+//   }
+
+//   // Check if student is enrolled in the course
+//   if (course.students.indexOf(studentId) === -1) {
+//     throw new AppError("Student not enrolled in the course", 400);
+//   }
+
+//   const enrollment = extractEnrollment(account.email);
+
+//   // Generate the PDF document
+//   const doc = new PDFDocument();
+//   let buffers = [];
+//   doc.on("data", buffers.push.bind(buffers));
+//   doc.on("end", () => {});
+
+//   // Add Quiz and Student Details to the PDF
+//   doc.fontSize(18).text(`${quiz.title}`, { align: "center" }).moveDown();
+//   doc.fontSize(14).text(`Topic: ${quiz.topic}`).moveDown();
+//   doc
+//     .fontSize(12)
+//     .text(
+//       "---------------------------------------------------------------------------------------------------------------------"
+//     )
+//     .moveDown();
+//   doc.text(`Student Name: ${student.name}`).moveDown();
+//   doc.text(`Student Enrollment: ${enrollment}`).moveDown();
+//   doc
+//     .fontSize(12)
+//     .text(
+//       "---------------------------------------------------------------------------------------------------------------------"
+//     )
+//     .moveDown();
+
+//   // Shuffle and limit the number of questions
+//   const shuffledQuestions = quiz.questions.sort(() => Math.random() - 0.5);
+//   const selectedQuestions = shuffledQuestions.slice(
+//     0,
+//     quiz.number_of_questions
+//   );
+
+//   selectedQuestions.forEach((question, index) => {
+//     doc
+//       .fontSize(14)
+//       .text(`${index + 1}. ${question.content}`)
+//       .moveDown(0.5); // Slightly reduce space between questions
+
+//     // Add options with circles before them
+//     question.options.forEach((option) => {
+//       doc.fontSize(12).text(`o    ${option}`, {
+//         indent: 20,
+//       }); // Indent options
+//       doc.moveDown(0.2); // Reduce space between options
+//     });
+//     doc.moveDown(0.5); // Move down a bit after each question
+//   });
+
+//   // Finalize the PDF Document
+//   doc.end();
+
+//   // Wait until the PDF is generated
+//   return new Promise((resolve, reject) => {
+//     doc.on("end", () => {
+//       const pdfData = Buffer.concat(buffers);
+//       resolve(pdfData);
+//     });
+//     doc.on("error", (err) => {
+//       reject(err);
+//     });
+//   });
+// };
+
 const generatePDFStudent = async (courseId, id, studentId) => {
   // Fetch Quiz, Student, and Course Information
   const quiz = await quizRepository.findQuizById(id);
@@ -683,26 +774,41 @@ const generatePDFStudent = async (courseId, id, studentId) => {
   const enrollment = extractEnrollment(account.email);
 
   // Generate the PDF document
-  const doc = new PDFDocument();
+  const doc = new PDFDocument({ margin: 50 });
   let buffers = [];
   doc.on("data", buffers.push.bind(buffers));
   doc.on("end", () => {});
 
-  // Add Quiz and Student Details to the PDF
-  doc.fontSize(18).text(`${quiz.title}`, { align: "center" }).moveDown();
-  doc.fontSize(14).text(`Topic: ${quiz.topic}`).moveDown();
+  // Add Quiz Title and Total Marks
+  doc.fontSize(18).text(`${quiz.title}`, { align: "center" }).moveDown(0.5);
+  doc
+    .fontSize(14)
+    .text(`Topic: ${quiz.topic}`, { align: "center" })
+    .moveDown(0.5);
+  doc
+    .fontSize(14)
+    .text(`Total Marks: ${quiz.number_of_questions}`, { align: "center" })
+    .moveDown(1);
+
+  // Add a separator line
   doc
     .fontSize(12)
     .text(
-      "---------------------------------------------------------------------------------------------------------------------"
+      "---------------------------------------------------------------------------------------------------------------------",
+      { align: "center" }
     )
     .moveDown();
-  doc.text(`Student Name: ${student.name}`).moveDown();
-  doc.text(`Student Enrollment: ${enrollment}`).moveDown();
+
+  // Add Student Details
+  doc.fontSize(14).text(`Student Name: ${student.name}`).moveDown(0.2);
+  doc.text(`Student Enrollment: ${enrollment}`).moveDown(1);
+
+  // Add another separator line
   doc
     .fontSize(12)
     .text(
-      "---------------------------------------------------------------------------------------------------------------------"
+      "---------------------------------------------------------------------------------------------------------------------",
+      { align: "center" }
     )
     .moveDown();
 
@@ -717,14 +823,12 @@ const generatePDFStudent = async (courseId, id, studentId) => {
     doc
       .fontSize(14)
       .text(`${index + 1}. ${question.content}`)
-      .moveDown(0.5); // Slightly reduce space between questions
+      .moveDown(0.5);
 
     // Add options with circles before them
     question.options.forEach((option) => {
-      doc.fontSize(12).text(`o    ${option}`, {
-        indent: 20,
-      }); // Indent options
-      doc.moveDown(0.2); // Reduce space between options
+      doc.fontSize(12).text(`○    ${option}`, { indent: 20 }); // Indent options with a circle
+      doc.moveDown(0.2);
     });
     doc.moveDown(0.5); // Move down a bit after each question
   });
