@@ -18,6 +18,80 @@ const AdmZip = require("adm-zip");
 const axios = require("axios");
 require("dotenv").config();
 
+// API service message deprecated
+// const createQuiz = async (
+//   courseId,
+//   title,
+//   topic,
+//   questions,
+//   deadline,
+//   duration,
+//   number_of_questions
+// ) => {
+//   if (
+//     !courseId ||
+//     !title ||
+//     !questions ||
+//     !topic ||
+//     !deadline ||
+//     !duration ||
+//     !number_of_questions
+//   ) {
+//     throw new AppError("Input all required fields", 400);
+//   }
+//   if (questions.length < number_of_questions) {
+//     throw new AppError("", );
+//   }
+//   if (new Date(deadline) < new Date()) {
+//     throw new AppError("Deadline must be in the future", 400);
+//   }
+//   let course = await courseRepository.getCourseById(courseId);
+
+//   if (!course) {
+//     throw new AppError("Course not found", 404);
+//   }
+//   const questionIds = [];
+//   for (const questionData of questions) {
+//     let question = await questionRepository.findQuestionByContent(
+//       questionData.content
+//     );
+//     if (!question) {
+//       question = await questionRepository.createQuestion(questionData);
+//     }
+//     questionIds.push(question._id);
+//   }
+
+//   const quiz = await quizRepository.createQuiz({
+//     course,
+//     title,
+//     deadline,
+//     topic,
+//     duration,
+//     number_of_questions,
+//     questions: questionIds,
+//   });
+//   course.quizzes.push(quiz._id);
+//   await course.save();
+
+//   // notify students
+//   for (const student of course.students) {
+//     const studentData = await authRepository.findStudentById(student);
+//     const studentAccount = await authRepository.findAccountById(
+//       studentData.account
+//     );
+//     await notificationService.createNotification(
+//       {
+//         title: "New Quiz",
+//         content: `A new quiz has been added to course: ${course.courseName}`,
+//         read: false,
+//       },
+//       studentAccount._id
+//     );
+//   }
+
+//   return quiz;
+// };
+
 const createQuiz = async (
   courseId,
   title,
@@ -38,16 +112,40 @@ const createQuiz = async (
   ) {
     throw new AppError("Input all required fields", 400);
   }
+
+  if (!Array.isArray(questions) || questions.length === 0) {
+    throw new AppError("Questions must be a non-empty array", 400);
+  }
+
+  if (questions.length < number_of_questions) {
+    throw new AppError(
+      `The number of provided questions (${questions.length}) is less than the required number (${number_of_questions})`,
+      400
+    );
+  }
+
+  if (isNaN(new Date(deadline).getTime())) {
+    throw new AppError("Invalid deadline format", 400);
+  }
+
   if (new Date(deadline) < new Date()) {
     throw new AppError("Deadline must be in the future", 400);
   }
-  let course = await courseRepository.getCourseById(courseId);
 
+  let course = await courseRepository.getCourseById(courseId);
   if (!course) {
     throw new AppError("Course not found", 404);
   }
+
   const questionIds = [];
   for (const questionData of questions) {
+    if (!questionData.content || !questionData.type || !questionData.options) {
+      throw new AppError(
+        "Each question must have content, type, and options",
+        400
+      );
+    }
+
     let question = await questionRepository.findQuestionByContent(
       questionData.content
     );
@@ -66,15 +164,26 @@ const createQuiz = async (
     number_of_questions,
     questions: questionIds,
   });
+
   course.quizzes.push(quiz._id);
   await course.save();
 
-  // notify students
+  // Notify students
   for (const student of course.students) {
     const studentData = await authRepository.findStudentById(student);
+    if (!studentData) {
+      console.warn(`Student with ID ${student} not found`);
+      continue;
+    }
+
     const studentAccount = await authRepository.findAccountById(
       studentData.account
     );
+    if (!studentAccount) {
+      console.warn(`Account for student ID ${student} not found`);
+      continue;
+    }
+
     await notificationService.createNotification(
       {
         title: "New Quiz",
@@ -741,7 +850,9 @@ const getSubmissionForTeacher = async (
     );
   }
 
-  const submission = await quizSubmissionRepository.findSubmissionById(submissionId);
+  const submission = await quizSubmissionRepository.findSubmissionById(
+    submissionId
+  );
 
   if (!submission) {
     throw new AppError("Submission not found.", 404);
