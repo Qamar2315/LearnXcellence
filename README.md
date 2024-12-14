@@ -2,7 +2,7 @@
 
 LearnXcellence is a comprehensive online learning platform designed specifically for educational institutions. It addresses the limitations of generic video conferencing and classroom management tools by providing a suite of features tailored for academic purposes, including AI-powered proctoring, automated quiz generation and grading, and personalized learning experiences.
 
-## User Interface
+<!-- ## User Interface
 
 LearnXcellence features an intuitive and user-friendly interface, designed for both students and teachers:
 
@@ -27,7 +27,7 @@ LearnXcellence features an intuitive and user-friendly interface, designed for b
 *AI-powered quiz generation simplifies quiz creation and allows customization of topic, difficulty, and question type.*
 
 ![Proctoring Report](screenshots/8.PNG)  
-*Detailed proctoring reports, including cheating probability analysis and captured images, help maintain academic integrity.*
+*Detailed proctoring reports, including cheating probability analysis and captured images, help maintain academic integrity.* -->
 
 ## Features
 
