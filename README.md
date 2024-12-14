@@ -6,27 +6,27 @@ LearnXcellence is a comprehensive online learning platform designed specifically
 
 LearnXcellence features an intuitive and user-friendly interface, designed for both students and teachers:
 
-![Student Dashboard](screenshots/1.png)
+![Student Dashboard](screenshots/1.PNG)
 *The student dashboard provides easy access to enrolled courses, assignments, and announcements.*
 
-![Student Course View](screenshots/2.png)
+![Student Course View](screenshots/2.PNG)
 *Inside a course, students can access lectures, assignments, quizzes, polls, and project details.*
 
-![Student Notifications](screenshots/7.png)
+![Student Notifications](screenshots/7.PNG)
 *Real-time notifications keep students informed of important course activities and updates.*
 
-![Student Assignment Submission](screenshots/4.png)
+![Student Assignment Submission](screenshots/4.PNG)
 *Submitting assignments is streamlined with clear instructions and file upload capabilities.*
 
-![Student Poll Interface](screenshots/5.png)
+![Student Poll Interface](screenshots/5.PNG)
 *Interactive polls allow students to provide feedback and participate in course discussions.*
 
 **Teacher Views:**
 
-![Quiz Generation](screenshots/7.png)
+![Quiz Generation](screenshots/7.PNG)
 *AI-powered quiz generation simplifies quiz creation and allows customization of topic, difficulty, and question type.*
 
-![Proctoring Report](screenshots/8.png)  
+![Proctoring Report](screenshots/8.PNG)  
 *Detailed proctoring reports, including cheating probability analysis and captured images, help maintain academic integrity.*
 
 ## Features
