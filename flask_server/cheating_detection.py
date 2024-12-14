@@ -1,9 +1,6 @@
 import random
 import pandas as pd
 
-import random
-import pandas as pd
-
 def predict_cheating_probability(features, loaded_model):
     """
     Predict the probability of cheating based on input features, introducing randomness
