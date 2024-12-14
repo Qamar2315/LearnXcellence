@@ -76,16 +76,19 @@ git clone https://github.com/qamar2315/learnxcellence
     ```bash
     cd client
     npm install
+    npm start
     ```
     * Backend:
     ```bash
     cd server
     npm install
+    npm start
     ```
     * Flask Server:
     ```bash
     cd flask_server
     pip install -r requirements.txt
+    python app.py
     ```
 3. **Set up environment variables:** Create `.env` files in both the `server` and `flask-server` directories and configure the required variables (database connection string, API keys, etc.).
 4. **Start the servers:**
