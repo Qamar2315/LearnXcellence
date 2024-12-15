@@ -218,10 +218,9 @@ function TeacherCoursePage() {
   };
 
   // Handle Viva Date Update
-  // Handle Viva Date Update
+
   const updateVivaDates = () => {
     // Check if the dates are valid
-
     if (!vivaDates.startDate || !vivaDates.endDate) {
       setFlashMessage({
         status: true,
@@ -245,13 +244,24 @@ function TeacherCoursePage() {
       return;
     }
 
-    // Proceed with updating the dates if validation passes
+    // Format the dates as MM/DD/YYYY
+    const formatDate = (date) => {
+      const month = String(date.getMonth() + 1).padStart(2, "0");
+      const day = String(date.getDate()).padStart(2, "0");
+      const year = date.getFullYear();
+      return `${month}/${day}/${year}`;
+    };
 
+    const formattedVivaDates = {
+      startDate: formatDate(startDateObj),
+      endDate: formatDate(endDateObj),
+    };
+
+    // Proceed with updating the dates if validation passes
     axios
       .put(
-        `
-        ${process.env.REACT_APP_API_URL}/course/updateViva/${courseId}`,
-        vivaDates,
+        `${process.env.REACT_APP_API_URL}/course/updateViva/${courseId}`,
+        formattedVivaDates,
         {
           headers: {
             "Content-type": "application/json",
@@ -280,7 +290,7 @@ function TeacherCoursePage() {
           type: "error",
         });
       });
-    console.log(vivaDates);
+    console.log(formattedVivaDates);
   };
 
   // Handle Add Announcement Button Click

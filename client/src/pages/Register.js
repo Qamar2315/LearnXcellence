@@ -173,9 +173,9 @@ function Register() {
                     component="span"
                   ></ErrorMessage>
                   <Field
-                    className="mt-1 h-8 w-full rounded-md border-gray-200 shadow-sm sm:text-sm"
+                    className="mt-1 h-8 w-full rounded-md border-gray-200 shadow-sm sm:text-sm h-10 pl-2"
                     name="name"
-                    placeholder="enter your name"
+                    placeholder="Enter your Name"
                   />
                 </div>
 
@@ -189,9 +189,9 @@ function Register() {
                     component="span"
                   ></ErrorMessage>
                   <Field
-                    className="mt-1 w-full rounded-md border-gray-200 shadow-sm sm:text-sm"
+                    className="mt-1 w-full rounded-md border-gray-200 shadow-sm sm:text-sm h-10 pl-2"
                     name="email"
-                    placeholder="enter email"
+                    placeholder="Enter Email"
                     type="email"
                   />
                 </div>
@@ -205,9 +205,9 @@ function Register() {
                     component="span"
                   ></ErrorMessage>
                   <Field
-                    className="mt-1 w-full rounded-md border-gray-200 shadow-sm sm:text-sm"
+                    className="mt-1 w-full rounded-md border-gray-200 shadow-sm sm:text-sm h-10 pl-2"
                     name="pass"
-                    placeholder="enter password"
+                    placeholder="Enter Password"
                     type="password"
                   />
                 </div>

@@ -59,11 +59,11 @@ export default function Sidebar({ children }) {
           {/* Hide logo when sidebar is collapsed */}
 
           <img
-            src="https://img.logoipsum.com/243.svg"
+            src="/logo.png"
             className={`overflow-hidden transition-all ${
               expanded ? "w-32" : "w-0"
             }`}
-            alt=""
+            alt="Logo"
           />
 
           <button

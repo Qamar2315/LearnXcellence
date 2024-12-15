@@ -53,7 +53,8 @@ function TeacherQuizDetails() {
     } catch (error) {
       setFlashMessage({
         status: true,
-        message: "Failed to fetch quiz details.",
+        message:
+          error.response?.data?.message || "Failed to fetch quiz details.",
         heading: "Error",
         type: "error",
       });
@@ -75,7 +76,8 @@ function TeacherQuizDetails() {
     } catch (error) {
       setFlashMessage({
         status: true,
-        message: "Failed to fetch submissions.",
+        message:
+          error.response?.data?.message || "Failed to fetch submissions.",
         heading: "Error",
         type: "error",
       });
@@ -122,7 +124,7 @@ function TeacherQuizDetails() {
   useEffect(() => {
     fetchQuiz();
     fetchSubmissions();
-  }, [flashMessage]);
+  }, []);
 
   // Handle edit quiz
   const handleEditQuiz = async (e) => {

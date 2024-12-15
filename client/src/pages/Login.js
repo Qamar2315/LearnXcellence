@@ -146,9 +146,9 @@ function Login() {
                     component="span"
                   ></ErrorMessage>
                   <Field
-                    className="mt-1 w-full rounded-md border-gray-200 shadow-sm sm:text-sm"
+                    className="mt-1 w-full rounded-md border-gray-200 shadow-sm sm:text-sm h-10 pl-2"
                     name="email"
-                    placeholder="enter email"
+                    placeholder="Enter Email"
                     type="email"
                   />
                 </div>
@@ -162,9 +162,9 @@ function Login() {
                     component="span"
                   ></ErrorMessage>
                   <Field
-                    className="mt-1 w-full rounded-md border-gray-200 shadow-sm sm:text-sm"
+                    className="mt-1 w-full rounded-md border-gray-200 shadow-sm sm:text-sm h-10 pl-2"
                     name="pass"
-                    placeholder="enter password"
+                    placeholder="Enter Password"
                     type="password"
                   />
                 </div>

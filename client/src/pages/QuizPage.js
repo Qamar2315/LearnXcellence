@@ -79,7 +79,7 @@ const QuizPage = () => {
 
       const interval = setInterval(() => {
         captureImageAndSend();
-      }, 30000); // 30 seconds
+      }, 20000); // 20 seconds
       setProctorInterval(interval);
     } catch (error) {
       setFlashMessage({

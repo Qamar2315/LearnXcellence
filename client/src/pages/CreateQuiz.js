@@ -156,7 +156,6 @@ function CreateQuizPage() {
       setLoading(false);
     }
   };
-
   const handleGenerateByTopic = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -172,7 +171,18 @@ function CreateQuizPage() {
           headers: { authorization: `Bearer ${authState.token}` },
         }
       );
-      setGeneratedQuestions(response.data.data);
+      const fetchedQuestions = response.data.data;
+
+      // Update the quizData.questions with the fetched questions
+      setQuizData((prevData) => ({
+        ...prevData,
+        questions: fetchedQuestions.map((q) => ({
+          content: q.content,
+          options: q.options,
+          correct_option: q.correct_option,
+        })),
+      }));
+
       setFlashMessage({
         status: true,
         message: "Successfully generated Questions.",
@@ -204,7 +214,18 @@ function CreateQuizPage() {
           headers: { authorization: `Bearer ${authState.token}` },
         }
       );
-      setGeneratedQuestions(response.data.data);
+      const fetchedQuestions = response.data.data;
+
+      // Update the quizData.questions with the fetched questions
+      setQuizData((prevData) => ({
+        ...prevData,
+        questions: fetchedQuestions.map((q) => ({
+          content: q.content,
+          options: q.options,
+          correct_option: q.correct_option,
+        })),
+      }));
+
       setFlashMessage({
         status: true,
         message: "Successfully generated Questions.",
