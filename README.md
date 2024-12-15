@@ -1,73 +1,113 @@
-# LearnXcellence: AI-Powered Learning Management System for Project-Based Courses
+# LearnXcellence: AI-Powered Learning Platform
 
-**LearnXcellence** is a comprehensive Learning Management System (LMS) designed specifically for project-based learning environments. It empowers both students and teachers with advanced features, streamlining project management, collaboration, and assessment processes.
+LearnXcellence is a comprehensive online learning platform designed specifically for educational institutions. It addresses the limitations of generic video conferencing and classroom management tools by providing a suite of features tailored for academic purposes, including AI-powered proctoring, automated quiz generation and grading, and personalized learning experiences.
 
-## Key Features:
+<!-- ## User Interface
 
-**Project-Centric Learning:**
+LearnXcellence features an intuitive and user-friendly interface, designed for both students and teachers:
 
-- **Project Creation and Management:** Students can easily create, manage, and collaborate on project proposals, documents, and presentations within the platform.
-- **Group Formation and Collaboration:** Facilitates efficient group formation, allowing students to work together seamlessly on project tasks, share resources, and communicate effectively.
-- **Project Tracking and Status Updates:** Real-time tracking of project progress, enabling students and teachers to monitor milestones, deadlines, and overall status.
-- **Project Feedback and Evaluation:** Streamlined feedback mechanisms for teachers to provide constructive criticism, track student progress, and assess project outcomes.
+![Student Dashboard](screenshots/1.PNG)
+*The student dashboard provides easy access to enrolled courses, assignments, and announcements.*
 
-**AI-Powered Proctoring:**
+![Student Course View](screenshots/2.PNG)
+*Inside a course, students can access lectures, assignments, quizzes, polls, and project details.*
 
-- **Live Proctoring During Quizzes:** Utilizes webcam monitoring and AI algorithms to detect potential cheating behaviors like mobile phone usage, presence of extra persons, or suspicious eye movements.
-- **Cheating Probability Analysis:** Generates comprehensive proctoring reports with cheating probability scores, providing insights to teachers about potential academic misconduct.
-- **PDF Report Generation:** Creates detailed PDF reports that include cheating indicators, timestamps, and flagged images, assisting teachers in evaluating student behavior during assessments.
+![Student Notifications](screenshots/7.PNG)
+*Real-time notifications keep students informed of important course activities and updates.*
 
-**Assessment and Evaluation:**
+![Student Assignment Submission](screenshots/4.PNG)
+*Submitting assignments is streamlined with clear instructions and file upload capabilities.*
 
-- **Quiz Creation and Management:** Teachers can create and manage quizzes with various question types, set time limits, and track student performance.
-- **Automated Quiz Grading:** Automated grading for multiple-choice questions, saving teachers time and ensuring accurate assessment.
-- **Submission Management:** Students can submit assignments and projects electronically, with the platform facilitating secure storage and organization of submitted materials.
-- **Feedback and Grading:** Teachers can provide personalized feedback on submissions, assign grades, and track student progress over time.
+![Student Poll Interface](screenshots/5.PNG)
+*Interactive polls allow students to provide feedback and participate in course discussions.*
 
-**Enhanced Communication and Collaboration:**
+**Teacher Views:**
 
-- **Announcements and Notifications:** Facilitates timely communication between teachers and students through announcements, notifications, and personalized messages.
-- **Discussion Forums:** Encourages student interaction and peer-to-peer learning through course-specific discussion forums, fostering a collaborative learning environment.
+![Quiz Generation](screenshots/7.PNG)
+*AI-powered quiz generation simplifies quiz creation and allows customization of topic, difficulty, and question type.*
 
-## Technologies Used:
+![Proctoring Report](screenshots/8.PNG)  
+*Detailed proctoring reports, including cheating probability analysis and captured images, help maintain academic integrity.* -->
 
-**Backend:** Node.js, Express.js, MongoDB
-**Frontend:** React.js, Material-UI (or your preferred UI library)
-**AI Proctoring:** Python, OpenCV, Face Recognition, MediaPipe, TensorFlow, Flask
-**PDF Generation:** PDFKit (Node.js library)
-**Others:** JWT (JSON Web Token), bcrypt.js (password hashing), dotenv (environment variables), nodemailer (email sending)
+## Features
 
-## Installation and Setup:
+**For Students:**
 
-**Backend (Node.js/Express.js):**
+* **Course Management:** View enrolled courses, access lectures (with adaptive streaming), download assignments, participate in polls, submit assignments, view grades and feedback, and create/manage projects.
+* **Interactive Learning:** Participate in interactive polls and receive real-time notifications for announcements, assignments, quizzes, feedback, and other course activities.
+* **AI-Powered Assistance:** Receive AI-generated project suggestions within course modules.
+* **Secure Authentication:** Robust login and registration with email verification, password reset functionality, and facial recognition for enhanced security.
+* **Personalized Profile:** Manage profile information, including password, profile picture, and facial biometric data.
 
-1. Install Node.js and npm (Node Package Manager).
-2. Clone this repository: `git clone https://github.com/qamar2315/LearnXcellence`
-3. Navigate to the backend directory: `cd LearnXcellence/backend`
-4. Install dependencies: `npm install`
-5. Set up environment variables (MongoDB connection string, JWT secret key, etc.) in a `.env` file.
-6. Start the server: `npm start`
+**For Teachers:**
 
-**Frontend (React.js):**
+* **Course Management:** Create and manage courses, add/remove students, post announcements, upload lectures, generate quizzes, manage polls, schedule vivas, provide feedback on assignments and projects, view student progress, and regenerate course codes.
+* **AI-Powered Tools:**
+    * Generate quizzes based on topics or content with customizable difficulty levels. Generate viva questions based on project details.
+    * Access and download AI-powered proctoring reports for online quizzes, including cheating probability analysis.
+* **Efficient Grading:** Automated grading of online quizzes with the option for manual adjustments and feedback. Generate individual or bulk quiz PDFs for students.
+* **Interactive Communication:** Post and manage announcements, create and analyze interactive polls, and provide personalized feedback to students.
+* **Secure Authentication:** Secure login and registration, with access to profile settings and facial biometric enrollment.
 
-1. Install Node.js and npm.
-2. Navigate to the frontend directory: `cd LearnXcellence/frontend`
-3. Install dependencies: `npm install`
-4. Start the development server: `npm start`
+## Technology Stack
 
-**AI Proctoring (Python/Flask):**
+* **Frontend:** React, React Native (for Android mobile app)
+* **Backend:** Node.js with Express.js (RESTful API), MongoDB with Mongoose
+* **Machine Learning:** Python with Flask, OpenCV, MediaPipe, Face Recognition, NumPy, Ultralytics YOLO, Joblib, Scikit-learn
+* **Other:** SMTP, SSL, Axios, Adm-Zip
 
-1. Install Python and pip (Python Package Installer).
-2. Install required libraries: `pip install -r requirements.txt`
-3. Set up environment variables (Flask secret key, AI model paths, etc.) in a `.env` file.
-4. Start the Flask server: `flask run`
+## Architecture
 
-**Note:** You will need to configure the AI proctoring models and data paths according to your setup.
+LearnXcellence follows a RESTful architecture:
 
-## Contributing:
+1. **Client (Web/Mobile):** React/React Native applications interact with the backend via HTTP requests.
+2. **Node.js Server:** Handles API requests, interacts with MongoDB, and communicates with the Flask server for ML tasks.
+3. **Flask Server (Python):** Processes ML tasks like quiz/viva question generation, proctoring analysis, and face recognition.
+4. **MongoDB:** Stores all application data.
 
-Contributions to LearnXcellence are welcome! Feel free to submit bug reports, feature requests, or pull requests. 
+## Installation and Setup
 
-## License:
+1. **Clone the repository:**
+```bash
+git clone https://github.com/qamar2315/learnxcellence
+```
+2. **Install dependencies:**
+    * Frontend: 
+    ```bash
+    cd client
+    npm install
+    npm start
+    ```
+    * Backend:
+    ```bash
+    cd server
+    npm install
+    npm start
+    ```
+    * Flask Server:
+    ```bash
+    cd flask_server
+    pip install -r requirements.txt
+    python app.py
+    ```
+3. **Set up environment variables:** Create `.env` files in both the `server` and `flask-server` directories and configure the required variables (database connection string, API keys, etc.).
+4. **Start the servers:**
+    * Backend: `cd server && npm start`
+    * Flask Server: `cd flask-server && python app.py`
+5. **Start the frontend:** `cd client && npm start`
 
-This project is licensed under the [MIT License](LICENSE).
+## Project Status
+
+LearnXcellence is currently deployed locally. Future work includes cloud deployment, expanding language support, refining the AI proctoring system, adding advanced analytics, developing personalized learning paths, and integrating with other educational platforms.
+
+## Contributing
+
+Contributions are welcome! Please create a pull request with a detailed description of your changes.
+
+## Contact
+
+Qamar Ul Islam - qamarislam1232@gmail.com
+
+## Acknowledgements
+
+This project was developed as part of a Bachelor of Science in Computer Science/Software Engineering at COMSATS University Islamabad.  Special thanks to our supervisor, Madam Sadia Maryam, and our team members Muhammad Awais Daud, Qamar Ul Islam, and Waqas Khalid.

@@ -18,6 +18,80 @@ const AdmZip = require("adm-zip");
 const axios = require("axios");
 require("dotenv").config();
 
+// API service message deprecated
+// const createQuiz = async (
+//   courseId,
+//   title,
+//   topic,
+//   questions,
+//   deadline,
+//   duration,
+//   number_of_questions
+// ) => {
+//   if (
+//     !courseId ||
+//     !title ||
+//     !questions ||
+//     !topic ||
+//     !deadline ||
+//     !duration ||
+//     !number_of_questions
+//   ) {
+//     throw new AppError("Input all required fields", 400);
+//   }
+//   if (questions.length < number_of_questions) {
+//     throw new AppError("", );
+//   }
+//   if (new Date(deadline) < new Date()) {
+//     throw new AppError("Deadline must be in the future", 400);
+//   }
+//   let course = await courseRepository.getCourseById(courseId);
+
+//   if (!course) {
+//     throw new AppError("Course not found", 404);
+//   }
+//   const questionIds = [];
+//   for (const questionData of questions) {
+//     let question = await questionRepository.findQuestionByContent(
+//       questionData.content
+//     );
+//     if (!question) {
+//       question = await questionRepository.createQuestion(questionData);
+//     }
+//     questionIds.push(question._id);
+//   }
+
+//   const quiz = await quizRepository.createQuiz({
+//     course,
+//     title,
+//     deadline,
+//     topic,
+//     duration,
+//     number_of_questions,
+//     questions: questionIds,
+//   });
+//   course.quizzes.push(quiz._id);
+//   await course.save();
+
+//   // notify students
+//   for (const student of course.students) {
+//     const studentData = await authRepository.findStudentById(student);
+//     const studentAccount = await authRepository.findAccountById(
+//       studentData.account
+//     );
+//     await notificationService.createNotification(
+//       {
+//         title: "New Quiz",
+//         content: `A new quiz has been added to course: ${course.courseName}`,
+//         read: false,
+//       },
+//       studentAccount._id
+//     );
+//   }
+
+//   return quiz;
+// };
+
 const createQuiz = async (
   courseId,
   title,
@@ -38,16 +112,40 @@ const createQuiz = async (
   ) {
     throw new AppError("Input all required fields", 400);
   }
+
+  if (!Array.isArray(questions) || questions.length === 0) {
+    throw new AppError("Questions must be a non-empty array", 400);
+  }
+
+  if (questions.length < number_of_questions) {
+    throw new AppError(
+      `The number of provided questions (${questions.length}) is less than the required number (${number_of_questions})`,
+      400
+    );
+  }
+
+  if (isNaN(new Date(deadline).getTime())) {
+    throw new AppError("Invalid deadline format", 400);
+  }
+
   if (new Date(deadline) < new Date()) {
     throw new AppError("Deadline must be in the future", 400);
   }
-  let course = await courseRepository.getCourseById(courseId);
 
+  let course = await courseRepository.getCourseById(courseId);
   if (!course) {
     throw new AppError("Course not found", 404);
   }
+
   const questionIds = [];
   for (const questionData of questions) {
+    if (!questionData.content || !questionData.type || !questionData.options) {
+      throw new AppError(
+        "Each question must have content, type, and options",
+        400
+      );
+    }
+
     let question = await questionRepository.findQuestionByContent(
       questionData.content
     );
@@ -66,15 +164,26 @@ const createQuiz = async (
     number_of_questions,
     questions: questionIds,
   });
+
   course.quizzes.push(quiz._id);
   await course.save();
 
-  // notify students
+  // Notify students
   for (const student of course.students) {
     const studentData = await authRepository.findStudentById(student);
+    if (!studentData) {
+      console.warn(`Student with ID ${student} not found`);
+      continue;
+    }
+
     const studentAccount = await authRepository.findAccountById(
       studentData.account
     );
+    if (!studentAccount) {
+      console.warn(`Account for student ID ${student} not found`);
+      continue;
+    }
+
     await notificationService.createNotification(
       {
         title: "New Quiz",
@@ -544,6 +653,97 @@ const generateQuestionsByContent = async (
   }
 };
 
+// const generatePDFStudent = async (courseId, id, studentId) => {
+//   // Fetch Quiz, Student, and Course Information
+//   const quiz = await quizRepository.findQuizById(id);
+//   if (!quiz) {
+//     throw new AppError("Quiz not found", 404);
+//   }
+
+//   const student = await authRepository.findStudentById(studentId);
+//   if (!student) {
+//     throw new AppError("Student not found", 404);
+//   }
+
+//   const account = await authRepository.findAccountById(student.account);
+//   if (!account) {
+//     throw new AppError("Account not found", 404);
+//   }
+
+//   const course = await courseRepository.getCourseById(courseId);
+//   if (!course) {
+//     throw new AppError("Course not found", 404);
+//   }
+
+//   // Check if student is enrolled in the course
+//   if (course.students.indexOf(studentId) === -1) {
+//     throw new AppError("Student not enrolled in the course", 400);
+//   }
+
+//   const enrollment = extractEnrollment(account.email);
+
+//   // Generate the PDF document
+//   const doc = new PDFDocument();
+//   let buffers = [];
+//   doc.on("data", buffers.push.bind(buffers));
+//   doc.on("end", () => {});
+
+//   // Add Quiz and Student Details to the PDF
+//   doc.fontSize(18).text(`${quiz.title}`, { align: "center" }).moveDown();
+//   doc.fontSize(14).text(`Topic: ${quiz.topic}`).moveDown();
+//   doc
+//     .fontSize(12)
+//     .text(
+//       "---------------------------------------------------------------------------------------------------------------------"
+//     )
+//     .moveDown();
+//   doc.text(`Student Name: ${student.name}`).moveDown();
+//   doc.text(`Student Enrollment: ${enrollment}`).moveDown();
+//   doc
+//     .fontSize(12)
+//     .text(
+//       "---------------------------------------------------------------------------------------------------------------------"
+//     )
+//     .moveDown();
+
+//   // Shuffle and limit the number of questions
+//   const shuffledQuestions = quiz.questions.sort(() => Math.random() - 0.5);
+//   const selectedQuestions = shuffledQuestions.slice(
+//     0,
+//     quiz.number_of_questions
+//   );
+
+//   selectedQuestions.forEach((question, index) => {
+//     doc
+//       .fontSize(14)
+//       .text(`${index + 1}. ${question.content}`)
+//       .moveDown(0.5); // Slightly reduce space between questions
+
+//     // Add options with circles before them
+//     question.options.forEach((option) => {
+//       doc.fontSize(12).text(`o    ${option}`, {
+//         indent: 20,
+//       }); // Indent options
+//       doc.moveDown(0.2); // Reduce space between options
+//     });
+//     doc.moveDown(0.5); // Move down a bit after each question
+//   });
+
+//   // Finalize the PDF Document
+//   doc.end();
+
+//   // Wait until the PDF is generated
+//   return new Promise((resolve, reject) => {
+//     doc.on("end", () => {
+//       const pdfData = Buffer.concat(buffers);
+//       resolve(pdfData);
+//     });
+//     doc.on("error", (err) => {
+//       reject(err);
+//     });
+//   });
+// };
+
 const generatePDFStudent = async (courseId, id, studentId) => {
   // Fetch Quiz, Student, and Course Information
   const quiz = await quizRepository.findQuizById(id);
@@ -574,26 +774,41 @@ const generatePDFStudent = async (courseId, id, studentId) => {
   const enrollment = extractEnrollment(account.email);
 
   // Generate the PDF document
-  const doc = new PDFDocument();
+  const doc = new PDFDocument({ margin: 50 });
   let buffers = [];
   doc.on("data", buffers.push.bind(buffers));
   doc.on("end", () => {});
 
-  // Add Quiz and Student Details to the PDF
-  doc.fontSize(18).text(`${quiz.title}`, { align: "center" }).moveDown();
-  doc.fontSize(14).text(`Topic: ${quiz.topic}`).moveDown();
+  // Add Quiz Title and Total Marks
+  doc.fontSize(18).text(`${quiz.title}`, { align: "center" }).moveDown(0.5);
+  doc
+    .fontSize(14)
+    .text(`Topic: ${quiz.topic}`, { align: "center" })
+    .moveDown(0.5);
+  doc
+    .fontSize(14)
+    .text(`Total Marks: ${quiz.number_of_questions}`, { align: "center" })
+    .moveDown(1);
+
+  // Add a separator line
   doc
     .fontSize(12)
     .text(
-      "---------------------------------------------------------------------------------------------------------------------"
+      "---------------------------------------------------------------------------------------------------------------------",
+      { align: "center" }
     )
     .moveDown();
-  doc.text(`Student Name: ${student.name}`).moveDown();
-  doc.text(`Student Enrollment: ${enrollment}`).moveDown();
+
+  // Add Student Details
+  doc.fontSize(14).text(`Student Name: ${student.name}`).moveDown(0.2);
+  doc.text(`Student Enrollment: ${enrollment}`).moveDown(1);
+
+  // Add another separator line
   doc
     .fontSize(12)
     .text(
-      "---------------------------------------------------------------------------------------------------------------------"
+      "---------------------------------------------------------------------------------------------------------------------",
+      { align: "center" }
     )
     .moveDown();
 
@@ -608,14 +823,12 @@ const generatePDFStudent = async (courseId, id, studentId) => {
     doc
       .fontSize(14)
       .text(`${index + 1}. ${question.content}`)
-      .moveDown(0.5); // Slightly reduce space between questions
+      .moveDown(0.5);
 
     // Add options with circles before them
     question.options.forEach((option) => {
-      doc.fontSize(12).text(`o    ${option}`, {
-        indent: 20,
-      }); // Indent options
-      doc.moveDown(0.2); // Reduce space between options
+      doc.fontSize(12).text(`○    ${option}`, { indent: 20 }); // Indent options with a circle
+      doc.moveDown(0.2);
     });
     doc.moveDown(0.5); // Move down a bit after each question
   });
@@ -741,7 +954,9 @@ const getSubmissionForTeacher = async (
     );
   }
 
-  const submission = await quizSubmissionRepository.findSubmissionById(submissionId);
+  const submission = await quizSubmissionRepository.findSubmissionById(
+    submissionId
+  );
 
   if (!submission) {
     throw new AppError("Submission not found.", 404);

@@ -48,5 +48,5 @@ class FaceMeshDetector:
                     face.append([x, y])
                 faces.append(face)
                 # Draw the face mesh on the image
-                self.mpDraw.draw_landmarks(img, facelandmarks, self.mpFaceMesh.FACEMESH_CONTOURS, self.drawSpec, self.drawSpec)
+                # self.mpDraw.draw_landmarks(img, facelandmarks, self.mpFaceMesh.FACEMESH_CONTOURS, self.drawSpec, self.drawSpec)
         return img, faces
