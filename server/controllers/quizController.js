@@ -1,6 +1,7 @@
 const asyncHandler = require("../utilities/CatchAsync");
 const quizService = require("../services/quizService");
 const AppError = require("../utilities/AppError");
+const path = require("path");
 
 const createQuiz = asyncHandler(async (req, res) => {
   const { title, topic, questions, deadline, duration, number_of_questions } =
@@ -170,31 +171,55 @@ const generateQuizByTopicOrContent = asyncHandler(async (req, res) => {
 });
 
 // Controller Function to Handle Request
+// const generatePDFStudent = asyncHandler(async (req, res) => {
+//   try {
+//     const { courseId, id, studentId } = req.params;
+//     const pdfBuffer = await quizService.generatePDFStudent(
+//       courseId,
+//       id,
+//       studentId
+//     );
+
+//     // Set Response Headers
+//     res.setHeader("Content-Type", "application/pdf");
+//     res.setHeader(
+//       "Content-Disposition",
+//       `attachment; filename=report_${studentId}.pdf`
+//     );
+
+//     // Send the PDF Buffer
+//     res.send(pdfBuffer);
+//   } catch (error) {
+//     // Handle Errors Appropriately
+//     res.status(error.statusCode || 500).json({
+//       success: false,
+//       message: error.message || "An error occurred while generating the PDF",
+//     });
+//   }
+// });
+
 const generatePDFStudent = asyncHandler(async (req, res) => {
-  try {
-    const { courseId, id, studentId } = req.params;
-    const pdfBuffer = await quizService.generatePDFStudent(
-      courseId,
-      id,
-      studentId
-    );
+  const { courseId, id, studentId } = req.params;
+  const uniqueId = await quizService.generatePDFStudentSingle(
+    courseId,
+    id,
+    studentId
+  );
 
-    // Set Response Headers
-    res.setHeader("Content-Type", "application/pdf");
-    res.setHeader(
-      "Content-Disposition",
-      `attachment; filename=report_${studentId}.pdf`
-    );
+  // Construct the file path
+  const filePath = path.join(
+    __dirname,
+    "../uploads/quizzes",
+    `${uniqueId}.pdf`
+  );
 
-    // Send the PDF Buffer
-    res.send(pdfBuffer);
-  } catch (error) {
-    // Handle Errors Appropriately
-    res.status(error.statusCode || 500).json({
-      success: false,
-      message: error.message || "An error occurred while generating the PDF",
-    });
-  }
+  // Send the file as a response
+  res.download(filePath, `report_${studentId}.pdf`, (err) => {
+    if (err) {
+      console.error("Error sending the file:", err);
+      res.status(500).send("Failed to download the report.");
+    }
+  });
 });
 
 const generatePDFAllStudents = asyncHandler(async (req, res) => {
