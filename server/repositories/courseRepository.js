@@ -25,6 +25,7 @@ const removeCourseFromStudent = (studentId, courseId) =>
 const getStudentFromCourse = (courseId, studentId) =>
   Student.findOne({ _id: studentId, courses: courseId });
 const getCourseById = (courseId) => Course.findById(courseId);
+const getCourseByIdAlongWithTeacher = (courseId) => Course.findById(courseId).populate('teacher');
 
 const isTeacherInCourse = async (courseId, teacherId) => {
   const course = await Course.findById(courseId);
@@ -52,4 +53,5 @@ module.exports = {
   getStudentFromCourse,
   getCourseById,
   isTeacherInCourse,
+  getCourseByIdAlongWithTeacher
 };
