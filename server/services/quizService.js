@@ -139,7 +139,7 @@ const createQuiz = async (
 
   const questionIds = [];
   for (const questionData of questions) {
-    if (!questionData.content || !questionData.type || !questionData.options) {
+    if (!questionData.content || !questionData.options) {
       throw new AppError(
         "Each question must have content, type, and options",
         400
@@ -827,7 +827,7 @@ const generatePDFStudent = async (courseId, id, studentId) => {
 
     // Add options with circles before them
     question.options.forEach((option) => {
-      doc.fontSize(12).text(`○    ${option}`, { indent: 20 }); // Indent options with a circle
+      doc.fontSize(12).text(`o    ${option}`, { indent: 20 }); // Indent options with a circle
       doc.moveDown(0.2);
     });
     doc.moveDown(0.5); // Move down a bit after each question

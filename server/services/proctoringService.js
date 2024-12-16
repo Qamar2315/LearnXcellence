@@ -1,13 +1,14 @@
 const axios = require("axios");
 const proctoringReportRepository = require("../repositories/proctoringReportRepository");
 const quizSubmissionRepository = require("../repositories/quizSubmissionRepository");
+const authRepository = require("../repositories/authRepository");
 const quizRepository = require("../repositories/quizRepository");
 const AppError = require("../utilities/AppError");
 const { deleteFileByPath } = require("../utilities/deleteFilesBypath");
 const path = require("path");
 const PDFDocument = require("pdfkit");
 const fs = require("fs");
-const { deprecate } = require("util");
+const { extractEnrollment } = require("../utilities/extractEnrollment");
 
 const analyzeImage = async (studentId, quizId, imagePath) => {
   const submission = await quizSubmissionRepository.findSubmission(
@@ -27,7 +28,7 @@ const analyzeImage = async (studentId, quizId, imagePath) => {
   const timeRemaining = submission.endTime - currentTime;
 
   // Check if at least 40 seconds remain before the quiz ends
-  if (timeRemaining < 40000) {
+  if (timeRemaining < 30000) {
     throw new AppError("Cannot take image, quiz about to end", 400);
   }
 
@@ -57,6 +58,7 @@ const analyzeImage = async (studentId, quizId, imagePath) => {
     updatedReport,
   };
 };
+
 // Deprecated
 // const generatePdfReport = async (courseId, quizId, studentId) => {
 //   // Fetch the quiz and submission details
@@ -219,7 +221,7 @@ const generatePdfReport = async (courseId, quizId, studentId) => {
       timeStyle: "medium",
     }
   );
-
+  const student = await authRepository.findStudentById(studentId);
   // Generate the PDF report
   const doc = new PDFDocument({ margin: 50 });
   let buffers = [];
@@ -246,7 +248,7 @@ const generatePdfReport = async (courseId, quizId, studentId) => {
     .font("Helvetica")
     .text(`Student Name: ${submission.student.name}`)
     .moveDown(0.2);
-  doc.text(`Student ID: ${submission.student._id}`).moveDown(0.2);
+  doc.text(`Student Enrollment: ${extractEnrollment(student.account.email)}`).moveDown(0.2);
   doc.text(`Quiz Title: ${quiz.title}`).moveDown(0.2);
   doc.text(`Topic: ${quiz.topic}`).moveDown(0.2);
   doc.text(`Submitted At: ${formattedDateTime}`);
