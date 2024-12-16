@@ -1,5 +1,4 @@
 const asyncHandler = require("../utilities/CatchAsync");
-const axios = require("axios");
 const AppError = require("../utilities/AppError");
 const proctoringService = require("../services/proctoringService");
 const authRepository = require("../repositories/authRepository");

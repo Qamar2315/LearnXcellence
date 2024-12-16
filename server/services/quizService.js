@@ -7,7 +7,6 @@ const authRepository = require("../repositories/authRepository");
 const notificationService = require("./notificationService");
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 const fs = require("fs");
-const PDFDocument = require("pdfkit");
 const genAI = new GoogleGenerativeAI(process.env.GEMENI_API_KEY);
 const model = genAI.getGenerativeModel({ model: "gemini-pro" });
 const { calculateQuizScore } = require("../utilities/calculateQuizScore");
