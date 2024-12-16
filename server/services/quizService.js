@@ -16,6 +16,9 @@ const _ = require("lodash");
 const AppError = require("../utilities/AppError");
 const AdmZip = require("adm-zip");
 const axios = require("axios");
+const puppeteer = require("puppeteer");
+const path= require("path");
+
 require("dotenv").config();
 
 // API service message deprecated
@@ -653,6 +656,7 @@ const generateQuestionsByContent = async (
   }
 };
 
+// Deprecated V1
 // const generatePDFStudent = async (courseId, id, studentId) => {
 //   // Fetch Quiz, Student, and Course Information
 //   const quiz = await quizRepository.findQuizById(id);
@@ -744,6 +748,112 @@ const generateQuestionsByContent = async (
 //   });
 // };
 
+// v2
+// const generatePDFStudent = async (courseId, id, studentId) => {
+//   // Fetch Quiz, Student, and Course Information
+//   const quiz = await quizRepository.findQuizById(id);
+//   if (!quiz) {
+//     throw new AppError("Quiz not found", 404);
+//   }
+
+//   const student = await authRepository.findStudentById(studentId);
+//   if (!student) {
+//     throw new AppError("Student not found", 404);
+//   }
+
+//   const account = await authRepository.findAccountById(student.account);
+//   if (!account) {
+//     throw new AppError("Account not found", 404);
+//   }
+
+//   const course = await courseRepository.getCourseById(courseId);
+//   if (!course) {
+//     throw new AppError("Course not found", 404);
+//   }
+
+//   // Check if student is enrolled in the course
+//   if (course.students.indexOf(studentId) === -1) {
+//     throw new AppError("Student not enrolled in the course", 400);
+//   }
+
+//   const enrollment = extractEnrollment(account.email);
+
+//   // Generate the PDF document
+//   const doc = new PDFDocument({ margin: 50 });
+//   let buffers = [];
+//   doc.on("data", buffers.push.bind(buffers));
+//   doc.on("end", () => {});
+
+//   // Add Quiz Title and Total Marks
+//   doc.fontSize(18).text(`${quiz.title}`, { align: "center" }).moveDown(0.5);
+//   doc
+//     .fontSize(14)
+//     .text(`Topic: ${quiz.topic}`, { align: "center" })
+//     .moveDown(0.5);
+//   doc
+//     .fontSize(14)
+//     .text(`Total Marks: ${quiz.number_of_questions}`, { align: "center" })
+//     .moveDown(1);
+
+//   // Add a separator line
+//   doc
+//     .fontSize(12)
+//     .text(
+//       "---------------------------------------------------------------------------------------------------------------------",
+//       { align: "center" }
+//     )
+//     .moveDown();
+
+//   // Add Student Details
+//   doc.fontSize(14).text(`Student Name: ${student.name}`).moveDown(0.2);
+//   doc.text(`Student Enrollment: ${enrollment}`).moveDown(1);
+
+//   // Add another separator line
+//   doc
+//     .fontSize(12)
+//     .text(
+//       "---------------------------------------------------------------------------------------------------------------------",
+//       { align: "center" }
+//     )
+//     .moveDown();
+
+//   // Shuffle and limit the number of questions
+//   const shuffledQuestions = quiz.questions.sort(() => Math.random() - 0.5);
+//   const selectedQuestions = shuffledQuestions.slice(
+//     0,
+//     quiz.number_of_questions
+//   );
+
+//   selectedQuestions.forEach((question, index) => {
+//     doc
+//       .fontSize(14)
+//       .text(`${index + 1}. ${question.content}`)
+//       .moveDown(0.5);
+
+//     // Add options with circles before them
+//     question.options.forEach((option) => {
+//       doc.fontSize(12).text(`o    ${option}`, { indent: 20 }); // Indent options with a circle
+//       doc.moveDown(0.2);
+//     });
+//     doc.moveDown(0.5); // Move down a bit after each question
+//   });
+
+//   // Finalize the PDF Document
+//   doc.end();
+
+//   // Wait until the PDF is generated
+//   return new Promise((resolve, reject) => {
+//     doc.on("end", () => {
+//       const pdfData = Buffer.concat(buffers);
+//       resolve(pdfData);
+//     });
+//     doc.on("error", (err) => {
+//       reject(err);
+//     });
+//   });
+// };
+
+// V3 Generate PDF
 const generatePDFStudent = async (courseId, id, studentId) => {
   // Fetch Quiz, Student, and Course Information
   const quiz = await quizRepository.findQuizById(id);
@@ -761,7 +871,7 @@ const generatePDFStudent = async (courseId, id, studentId) => {
     throw new AppError("Account not found", 404);
   }
 
-  const course = await courseRepository.getCourseById(courseId);
+  const course = await courseRepository.getCourseByIdAlongWithTeacher(courseId);
   if (!course) {
     throw new AppError("Course not found", 404);
   }
@@ -773,79 +883,292 @@ const generatePDFStudent = async (courseId, id, studentId) => {
 
   const enrollment = extractEnrollment(account.email);
 
-  // Generate the PDF document
-  const doc = new PDFDocument({ margin: 50 });
-  let buffers = [];
-  doc.on("data", buffers.push.bind(buffers));
-  doc.on("end", () => {});
-
-  // Add Quiz Title and Total Marks
-  doc.fontSize(18).text(`${quiz.title}`, { align: "center" }).moveDown(0.5);
-  doc
-    .fontSize(14)
-    .text(`Topic: ${quiz.topic}`, { align: "center" })
-    .moveDown(0.5);
-  doc
-    .fontSize(14)
-    .text(`Total Marks: ${quiz.number_of_questions}`, { align: "center" })
-    .moveDown(1);
-
-  // Add a separator line
-  doc
-    .fontSize(12)
-    .text(
-      "---------------------------------------------------------------------------------------------------------------------",
-      { align: "center" }
-    )
-    .moveDown();
-
-  // Add Student Details
-  doc.fontSize(14).text(`Student Name: ${student.name}`).moveDown(0.2);
-  doc.text(`Student Enrollment: ${enrollment}`).moveDown(1);
-
-  // Add another separator line
-  doc
-    .fontSize(12)
-    .text(
-      "---------------------------------------------------------------------------------------------------------------------",
-      { align: "center" }
-    )
-    .moveDown();
-
-  // Shuffle and limit the number of questions
   const shuffledQuestions = quiz.questions.sort(() => Math.random() - 0.5);
   const selectedQuestions = shuffledQuestions.slice(
     0,
     quiz.number_of_questions
   );
 
-  selectedQuestions.forEach((question, index) => {
-    doc
-      .fontSize(14)
-      .text(`${index + 1}. ${question.content}`)
-      .moveDown(0.5);
+  const htmlContent = `
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>Quiz PDF</title>
+      <style>
+        body {
+          font-family: Arial, sans-serif;
+          margin: 20px;
+          padding: 0;
+        }
+        .header {
+          text-align: center;
+          margin-bottom: 15px;
+        }
+        .header h1 {
+          font-size: 30px;
+          margin-bottom: 5px;
+        }
+        .header h3 {
+          font-size: 18px;
+          margin: 2px 0;
+        }
+        .separator {
+          border-top: 2px solid #000;
+          margin: 15px 0;
+        }
+        .student-info {
+          display: flex;
+          justify-content: space-between;
+          margin-bottom: 15px;
+        }
+        .rules-section, .question-section {
+          margin-bottom: 15px;
+        }
+        .question {
+          margin-bottom: 8px;
+        }
+        .option {
+          margin-left: 20px;
+          margin-bottom: 10px;
+          
+        }
+        .rules-section ul {
+          list-style-type: disc;
+          padding-left: 40px;
+        }
+      </style>
+    </head>
+    <body>
+      <div class="header">
+        <h1>${quiz.title}</h1>
+        <h3>Topic: ${quiz.topic}</h3>
+        <h3>Total Marks: ${quiz.number_of_questions}</h3>
+        <h3>Duration: ${quiz.duration} minutes</h3>
+      </div>
 
-    // Add options with circles before them
-    question.options.forEach((option) => {
-      doc.fontSize(12).text(`o    ${option}`, { indent: 20 }); // Indent options with a circle
-      doc.moveDown(0.2);
-    });
-    doc.moveDown(0.5); // Move down a bit after each question
+      <div class="separator"></div>
+
+      <div class="student-info">
+        <div>
+          <p><strong>Student Name:</strong> ${student.name}</p>
+          <p><strong>Student Enrollment:</strong> ${enrollment}</p>
+        </div>
+        <div>
+          <p><strong>Course:</strong> ${course.courseName}</p>
+          <p><strong>Teacher:</strong> ${course.teacher.name}</p>
+        </div>
+      </div>
+
+      <div class="separator"></div>
+
+      <div class="rules-section">
+        <h3>Quiz Rules:</h3>
+        <ul>
+          <li>Finish the quiz within the allotted time.</li>
+          <li>Do not use any external help or materials.</li>
+          <li>All answers must be submitted before the time expires.</li>
+          <li>No cheating or collaboration with others is allowed.</li>
+          <li>Follow all instructions provided by the instructor.</li>
+        </ul>
+      </div>
+
+      <div class="separator"></div>
+
+      <div class="question-section">
+        ${selectedQuestions
+          .map(
+            (question, index) => `
+          <div class="question">
+            <p><strong>${index + 1}. ${question.content}</strong></p>
+            ${question.options
+              .map(
+                (option) => `
+              <p class="option">o ${option}</p>
+            `
+              )
+              .join("")}
+          </div>
+        `
+          )
+          .join("")}
+      </div>
+    </body>
+    </html>
+  `;
+
+  const browser = await puppeteer.launch();
+  const page = await browser.newPage();
+
+  await page.setContent(htmlContent);
+
+  return new Promise(async (resolve, reject) => {
+    try {
+      const pdfBuffer = await page.pdf({
+        format: "A4",
+        printBackground: true,
+        margin: {
+          top: "15mm",
+          bottom: "15mm",
+          left: "10mm",
+          right: "10mm",
+        },
+      });
+
+      await browser.close();
+
+      // Resolve with the PDF buffer
+      resolve(pdfBuffer);
+    } catch (error) {
+      reject(error);
+    }
   });
+};
 
-  // Finalize the PDF Document
-  doc.end();
+const generatePDFStudentSingle = async (courseId, id, studentId) => {
+  // Fetch Quiz, Student, and Course Information
+  const quiz = await quizRepository.findQuizById(id);
+  if (!quiz) {
+    throw new AppError("Quiz not found", 404);
+  }
 
-  // Wait until the PDF is generated
-  return new Promise((resolve, reject) => {
-    doc.on("end", () => {
-      const pdfData = Buffer.concat(buffers);
-      resolve(pdfData);
+  const student = await authRepository.findStudentById(studentId);
+  if (!student) {
+    throw new AppError("Student not found", 404);
+  }
+
+  const account = await authRepository.findAccountById(student.account);
+  if (!account) {
+    throw new AppError("Account not found", 404);
+  }
+
+  const course = await courseRepository.getCourseByIdAlongWithTeacher(courseId);
+  if (!course) {
+    throw new AppError("Course not found", 404);
+  }
+
+  // Check if student is enrolled in the course
+  if (course.students.indexOf(studentId) === -1) {
+    throw new AppError("Student not enrolled in the course", 400);
+  }
+
+  const enrollment = extractEnrollment(account.email);
+
+  const shuffledQuestions = quiz.questions.sort(() => Math.random() - 0.5);
+  const selectedQuestions = shuffledQuestions.slice(
+    0,
+    quiz.number_of_questions
+  );
+
+  const htmlContent = `
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>Quiz PDF</title>
+      <style>
+        body { font-family: Arial, sans-serif; margin: 20px; padding: 0; }
+        .header { text-align: center; margin-bottom: 15px; }
+        .separator { border-top: 2px solid #000; margin: 15px 0; }
+        .student-info { display: flex; justify-content: space-between; margin-bottom: 15px; }
+        .rules-section ul { list-style-type: disc; padding-left: 40px; }
+        .question { margin-bottom: 8px; }
+        .option { margin-left: 20px; margin-bottom: 10px; }
+      </style>
+    </head>
+    <body>
+      <div class="header">
+        <h1>${quiz.title}</h1>
+        <h3>Topic: ${quiz.topic}</h3>
+        <h3>Total Marks: ${quiz.number_of_questions}</h3>
+        <h3>Duration: ${quiz.duration} minutes</h3>
+      </div>
+
+      <div class="separator"></div>
+
+      <div class="student-info">
+        <div>
+          <p><strong>Student Name:</strong> ${student.name}</p>
+          <p><strong>Student Enrollment:</strong> ${enrollment}</p>
+        </div>
+        <div>
+          <p><strong>Course:</strong> ${course.courseName}</p>
+          <p><strong>Teacher:</strong> ${course.teacher.name}</p>
+        </div>
+      </div>
+
+      <div class="separator"></div>
+
+      <div class="rules-section">
+        <h3>Quiz Rules:</h3>
+        <ul>
+          <li>Finish the quiz within the allotted time.</li>
+          <li>Do not use any external help or materials.</li>
+          <li>All answers must be submitted before the time expires.</li>
+          <li>No cheating or collaboration with others is allowed.</li>
+        </ul>
+      </div>
+
+      <div class="separator"></div>
+
+      <div class="question-section">
+        ${selectedQuestions
+          .map(
+            (question, index) => `
+          <div class="question">
+            <p><strong>${index + 1}. ${question.content}</strong></p>
+            ${question.options
+              .map((option) => `<p class="option">o ${option}</p>`)
+              .join("")}
+          </div>
+        `
+          )
+          .join("")}
+      </div>
+    </body>
+    </html>
+  `;
+
+  const browser = await puppeteer.launch();
+  const page = await browser.newPage();
+  await page.setContent(htmlContent);
+
+  try {
+    // Ensure the `reports` directory exists
+    const quizPDFDir = path.join(__dirname, "../uploads/quizzes");
+    if (!fs.existsSync(quizPDFDir)) {
+      fs.mkdirSync(quizPDFDir, { recursive: true });
+    }
+
+    // Generate PDF file path with a unique ID
+    const uniqueId = `${studentId}_${Date.now()}`;
+    const filePath = path.join(quizPDFDir, `${uniqueId}.pdf`);
+
+    // Save the PDF file
+    await page.pdf({
+      path: filePath,
+      format: "A4",
+      printBackground: true,
+      margin: {
+        top: "15mm",
+        bottom: "15mm",
+        left: "10mm",
+        right: "10mm",
+      },
     });
-    doc.on("error", (err) => {
-      reject(err);
-    });
-  });
+
+    await browser.close();
+
+    // Return the unique file ID or file path
+    return uniqueId;
+
+  } catch (error) {
+    console.error("Error generating PDF:", error);
+    await browser.close();
+    throw error;
+  }
 };
 
 /**
@@ -983,4 +1306,5 @@ module.exports = {
   getAllSubmissionsForQuiz,
   getSubmissionForStudent,
   getSubmissionForTeacher,
+  generatePDFStudentSingle,
 };
