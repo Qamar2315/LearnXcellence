@@ -94,6 +94,7 @@ function TeacherCourseSetting() {
           },
         }
       );
+
       if (response.data.success) {
         setFlashMessage({
           status: true,
@@ -101,12 +102,24 @@ function TeacherCourseSetting() {
           heading: "Success",
           type: "success",
         });
-        navigate("/teacherDashboard");
+
+        // Delay navigation slightly to ensure flash message is visible
+        setTimeout(() => {
+          navigate("/course/teacher");
+        }, 100); // Adjust delay if needed
+      } else {
+        setFlashMessage({
+          status: true,
+          message: response.data.message || "Failed to delete course",
+          heading: "Error",
+          type: "error",
+        });
       }
     } catch (error) {
+      console.error("Error deleting course:", error); // Log for debugging
       setFlashMessage({
         status: true,
-        message: "Failed to delete course",
+        message: error.response?.data?.message || "Failed to delete course",
         heading: "Error",
         type: "error",
       });
@@ -223,7 +236,7 @@ function TeacherCourseSetting() {
 
   if (loading) {
     return (
-      <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+      <div className="fixed inset-0 bg-white flex justify-center items-center z-50">
         <DotSpinner />
       </div>
     );

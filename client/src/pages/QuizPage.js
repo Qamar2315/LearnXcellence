@@ -222,7 +222,7 @@ const QuizPage = () => {
       <Navbar />
       <div className="flex">
         <Sidebar />
-        <div className="flex-1 p-6">
+        <div className="flex-1 p-2">
           {/* Flash messages */}
           <div className="max-w-2xl mx-auto mb-4">
             {flashMessage.status &&

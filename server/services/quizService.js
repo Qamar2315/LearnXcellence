@@ -16,7 +16,7 @@ const AppError = require("../utilities/AppError");
 const AdmZip = require("adm-zip");
 const axios = require("axios");
 const puppeteer = require("puppeteer");
-const path= require("path");
+const path = require("path");
 
 require("dotenv").config();
 
@@ -1162,7 +1162,6 @@ const generatePDFStudentSingle = async (courseId, id, studentId) => {
 
     // Return the unique file ID or file path
     return uniqueId;
-
   } catch (error) {
     console.error("Error generating PDF:", error);
     await browser.close();

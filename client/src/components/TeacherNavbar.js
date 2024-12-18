@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect, useState, useRef } from "react";
 import { AuthContext } from "../helpers/AuthContext";
 import { FlashContext } from "../helpers/FlashContext";
 import { Link, useNavigate, useLocation } from "react-router-dom";
@@ -16,6 +16,10 @@ function TeacherNavbar() {
   const [notifications, setNotifications] = useState([]); // Store fetched notifications
   const navigate = useNavigate();
   const location = useLocation();
+
+  // Refs to detect clicks outside the dropdowns
+  const profileDropdownRef = useRef(null);
+  const notificationsDropdownRef = useRef(null);
 
   // Fetch student info
   useEffect(() => {
@@ -101,6 +105,29 @@ function TeacherNavbar() {
     setDropdownOpen(!dropdownOpen);
   };
 
+  // Close dropdown if click happens outside of the dropdown
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (
+        profileDropdownRef.current &&
+        !profileDropdownRef.current.contains(event.target)
+      ) {
+        setDropdownOpen(false);
+      }
+      if (
+        notificationsDropdownRef.current &&
+        !notificationsDropdownRef.current.contains(event.target)
+      ) {
+        setNotificationsOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
   return (
     <>
       <nav className="bg-[#3A6D8C]">
@@ -134,9 +161,12 @@ function TeacherNavbar() {
             </div>
             <div className="flex flex-1 items-center justify-center sm:items-stretch sm:justify-start">
               <div className="flex flex-shrink-0 items-center">
-                <h1 className="text-3xl font-bold text-white">
-                  {/* LearnXcellence */} INSTRUCTOR
-                </h1>
+                <Link
+                  to="/course/teacher"
+                  className="text-3xl font-bold text-white"
+                >
+                  INSTRUCTOR
+                </Link>
               </div>
               <div className="hidden sm:ml-6 sm:block">
                 <div className="flex space-x-4">
@@ -150,16 +180,6 @@ function TeacherNavbar() {
                   >
                     Courses
                   </Link>
-                  {/* <Link
-                    to="/team"
-                    className={`${
-                      location.pathname === "/team"
-                        ? "rounded-md bg-gray-900 px-3 py-2 text-sm font-medium text-white"
-                        : "rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white"
-                    }`}
-                  >
-                    Team
-                  </Link> */}
                   <Link
                     to="/teacherProfile"
                     className={`${
@@ -199,7 +219,10 @@ function TeacherNavbar() {
                 </div>
                 {/* Notifications Dropdown */}
                 {notificationsOpen && (
-                  <div className="absolute right-0 mt-2 w-64 bg-white rounded-md shadow-lg py-2 z-10">
+                  <div
+                    ref={notificationsDropdownRef}
+                    className="absolute right-0 mt-2 w-64 bg-white rounded-md shadow-lg py-2 z-10"
+                  >
                     <h3 className="px-4 py-2 font-bold text-gray-700">
                       Notifications
                     </h3>
@@ -249,7 +272,10 @@ function TeacherNavbar() {
                     />
                   </div>
                   {dropdownOpen && (
-                    <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-2 z-10">
+                    <div
+                      ref={profileDropdownRef}
+                      className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-2 z-10"
+                    >
                       <Link
                         to="/teacherProfile"
                         className="block px-4 py-2 text-gray-700 hover:bg-gray-100"
@@ -276,36 +302,6 @@ function TeacherNavbar() {
           </div>
         </div>
       </nav>
-      {/* Mobile menu */}
-      <div className="sm:hidden" id="mobile-menu">
-        <div className="space-y-1 px-2 pb-3 pt-2">
-          <a
-            href="#"
-            className="block rounded-md bg-gray-900 px-3 py-2 text-base font-medium text-white"
-            aria-current="page"
-          >
-            Dashboard
-          </a>
-          <a
-            href="#"
-            className="block rounded-md px-3 py-2 text-base font-medium text-gray-300 hover:bg-gray-700 hover:text-white"
-          >
-            Team
-          </a>
-          <a
-            href="#"
-            className="block rounded-md px-3 py-2 text-base font-medium text-gray-300 hover:bg-gray-700 hover:text-white"
-          >
-            Projects
-          </a>
-          <a
-            href="#"
-            className="block rounded-md px-3 py-2 text-base font-medium text-gray-300 hover:bg-gray-700 hover:text-white"
-          >
-            Calendar
-          </a>
-        </div>
-      </div>
     </>
   );
 }

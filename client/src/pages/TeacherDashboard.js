@@ -89,6 +89,11 @@ function TeacherDashboard() {
             type: "success",
           });
           setCourses([...courses, res.data.data]); // Update course list
+          setCourseData({
+            courseName: "",
+            description: "",
+            projectRequirements: "",
+          });
           setShowCreateForm(false); // Close the form after creation
         }
       })
@@ -105,7 +110,7 @@ function TeacherDashboard() {
 
   if (loading) {
     return (
-      <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+      <div className="fixed inset-0 bg-white flex justify-center items-center z-50">
         <DotSpinner />
       </div>
     );

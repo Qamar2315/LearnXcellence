@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect, useState, useRef } from "react";
 import { AuthContext } from "../helpers/AuthContext";
 import { FlashContext } from "../helpers/FlashContext";
 import { Link, useNavigate, useLocation } from "react-router-dom";
@@ -16,6 +16,10 @@ function Navbar() {
   const [notifications, setNotifications] = useState([]); // Store fetched notifications
   const navigate = useNavigate();
   const location = useLocation(); // Hook to determine current route
+
+  // Refs to detect clicks outside the dropdowns
+  const profileDropdownRef = useRef(null);
+  const notificationsDropdownRef = useRef(null);
 
   // Fetch student info
   useEffect(() => {
@@ -44,7 +48,6 @@ function Navbar() {
         },
       })
       .then((response) => {
-        // Sort notifications by created_at in descending order to show the latest first
         const sortedNotifications = response.data.data.sort(
           (a, b) => new Date(b.created_at) - new Date(a.created_at)
         );
@@ -68,7 +71,6 @@ function Navbar() {
         }
       )
       .then(() => {
-        // Mark the notification as read locally
         setNotifications((prevNotifications) =>
           prevNotifications.map((notif) =>
             notif._id === notificationId ? { ...notif, read: true } : notif
@@ -100,6 +102,29 @@ function Navbar() {
   const toggleDropdown = () => {
     setDropdownOpen(!dropdownOpen);
   };
+
+  // Close dropdown if click happens outside of the dropdown
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (
+        profileDropdownRef.current &&
+        !profileDropdownRef.current.contains(event.target)
+      ) {
+        setDropdownOpen(false);
+      }
+      if (
+        notificationsDropdownRef.current &&
+        !notificationsDropdownRef.current.contains(event.target)
+      ) {
+        setNotificationsOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   return (
     <>
@@ -134,7 +159,9 @@ function Navbar() {
             </div>
             <div className="flex flex-1 items-center justify-center sm:items-stretch sm:justify-start">
               <div className="flex flex-shrink-0 items-center">
-                <h1 className="text-3xl font-bold text-white">STUDENT</h1>
+                <Link to="/course" className="text-3xl font-bold text-white">
+                  STUDENT
+                </Link>
               </div>
               <div className="hidden sm:ml-6 sm:block">
                 <div className="flex space-x-4">
@@ -148,16 +175,6 @@ function Navbar() {
                   >
                     Courses
                   </Link>
-                  {/* <Link
-                    to="/team"
-                    className={`${
-                      location.pathname === "/team"
-                        ? "rounded-md bg-gray-900 px-3 py-2 text-sm font-medium text-white"
-                        : "rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white"
-                    }`}
-                  >
-                    Team
-                  </Link> */}
                   <Link
                     to="/userprofile"
                     className={`${
@@ -183,14 +200,14 @@ function Navbar() {
             </div>
             <div className="relative flex items-center space-x-4 pr-2">
               {/* Notification Icon */}
-              <div className="relative">
+              <div className="relative" ref={notificationsDropdownRef}>
                 <div
                   className="cursor-pointer"
                   onClick={() => setNotificationsOpen(!notificationsOpen)}
                 >
                   <FaBell size={24} className="text-white cursor-pointer" />
                   {notifications.some((notif) => !notif.read) && (
-                    <span className="absolute top-0 right-0 bg-red-500 text-white rounded-full h-4 w-4 text-xs flex items-center justify-center">
+                    <span className="absolute top-0 right-0 bg-red-500 text-white rounded-full h-4 w-4 text-[10px] flex items-center justify-center">
                       {notifications.filter((notif) => !notif.read).length}
                     </span>
                   )}
@@ -234,7 +251,7 @@ function Navbar() {
                 )}
               </div>
               {studentInfo && (
-                <div className="relative">
+                <div className="relative" ref={profileDropdownRef}>
                   <div className="flex items-center space-x-4">
                     <span className="text-white font-semibold">
                       {studentInfo.name}
@@ -249,10 +266,16 @@ function Navbar() {
                   {dropdownOpen && (
                     <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-2 z-10">
                       <Link
+                        to="/userprofile"
+                        className="block px-4 py-2 text-gray-700 hover:bg-gray-100"
+                      >
+                        Profile
+                      </Link>
+                      <Link
                         to="/profileSettings"
                         className="block px-4 py-2 text-gray-700 hover:bg-gray-100"
                       >
-                        Profile Settings
+                        Settings
                       </Link>
                       <button
                         onClick={logout}
@@ -267,38 +290,7 @@ function Navbar() {
             </div>
           </div>
         </div>
-
-        <div className="sm:hidden" id="mobile-menu">
-          <div className="space-y-1 px-2 pb-3 pt-2">
-            <Link
-              to="/studentDashboard"
-              className="text-gray-300 hover:bg-gray-700 hover:text-white block rounded-md px-3 py-2 text-base font-medium"
-            >
-              Dashboard
-            </Link>
-            <Link
-              to="/team"
-              className="text-gray-300 hover:bg-gray-700 hover:text-white block rounded-md px-3 py-2 text-base font-medium"
-            >
-              Team
-            </Link>
-            <Link
-              to="/projects"
-              className="text-gray-300 hover:bg-gray-700 hover:text-white block rounded-md px-3 py-2 text-base font-medium"
-            >
-              Projects
-            </Link>
-            <Link
-              to="/profileSettings"
-              className="text-gray-300 hover:bg-gray-700 hover:text-white block rounded-md px-3 py-2 text-base font-medium"
-            >
-              Settings
-            </Link>
-          </div>
-        </div>
       </nav>
-      {/* Alert for flash messages */}
-      {/* {flashMessage.status && <Alert message={flashMessage.message} />} */}
     </>
   );
 }

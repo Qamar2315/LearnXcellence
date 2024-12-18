@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useContext } from "react";
-
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import DotSpinner from "../components/DotSpinner"; // Adjust the path accordingly
@@ -66,7 +65,7 @@ function TeacherViva() {
 
   if (loading) {
     return (
-      <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+      <div className="fixed inset-0 bg-white flex justify-center items-center z-50">
         <DotSpinner />
       </div>
     );
@@ -110,35 +109,37 @@ function TeacherViva() {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 h-[calc(75vh-4rem)] overflow-y-auto">
             {vivas.length > 0 ? (
-              vivas.map((viva) => (
-                <div
-                  key={viva._id}
-                  onClick={() => handleVivaClick(viva._id)}
-                  className="bg-white shadow-lg rounded-lg p-6 cursor-pointer hover:shadow-xl transition-shadow duration-300 transition-transform transform hover:scale-105"
-                >
-                  <h3 className="text-xl font-semibold mb-2">
-                    Viva {viva._id}
-                  </h3>
-                  <p
-                    className={`mb-2 font-semibold ${
-                      viva.status === "taken"
-                        ? "text-green-600"
-                        : "text-yellow-500"
-                    }`}
+              vivas
+                .sort((a, b) => a._id.localeCompare(b._id))
+                .map((viva, index) => (
+                  <div
+                    key={viva._id}
+                    onClick={() => handleVivaClick(viva._id)}
+                    className="bg-white shadow-lg rounded-lg p-6 cursor-pointer hover:shadow-xl transition-shadow duration-300 transition-transform transform hover:scale-105"
                   >
-                    <strong>Status:</strong> {viva.status}
-                  </p>
+                    <h3 className="text-xl font-semibold mb-2">
+                      Viva {index + 1}
+                    </h3>
+                    <p
+                      className={`mb-2 font-semibold ${
+                        viva.status === "taken"
+                          ? "text-green-600"
+                          : "text-yellow-500"
+                      }`}
+                    >
+                      <strong>Status:</strong> {viva.status}
+                    </p>
 
-                  <p className="text-gray-600 mb-2">
-                    <strong>Date Created:</strong>{" "}
-                    {new Date(viva.dateCreated).toLocaleDateString()}
-                  </p>
-                  <p className="text-gray-600">
-                    <strong>Viva Date:</strong>{" "}
-                    {new Date(viva.vivaDate).toLocaleString()}
-                  </p>
-                </div>
-              ))
+                    <p className="text-gray-600 mb-2">
+                      <strong>Date Created:</strong>{" "}
+                      {new Date(viva.dateCreated).toLocaleDateString()}
+                    </p>
+                    <p className="text-gray-600">
+                      <strong>Viva Date:</strong>{" "}
+                      {new Date(viva.vivaDate).toLocaleString()}
+                    </p>
+                  </div>
+                ))
             ) : (
               <p>No vivas available</p>
             )}

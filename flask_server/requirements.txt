@@ -11,7 +11,8 @@ charset-normalizer==2.0.12
 click==8.1.7
 cmake==3.17.2
 colorama==0.4.6
-contourpy==1.2.1
+contourpy==1.2.1i\
+ yLK'.J
 cvzone==1.6.1
 cycler==0.12.1
 decorator==4.4.2
