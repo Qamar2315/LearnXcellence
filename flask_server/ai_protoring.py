@@ -124,5 +124,5 @@ def analyze_image(image_path, model, output_dir):
 
     # Save the annotated image to the output directory
     cv2.imwrite(os.path.join(output_dir, f"result_{image_name}"), img)
-
+    print(os.path.join(output_dir, f"result_{image_name}"))
     return json_result

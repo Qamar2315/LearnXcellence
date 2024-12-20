@@ -32,7 +32,6 @@ model_yolo = YOLO("./models/yolov8x.pt")
 loaded_model = joblib.load("./models/cheating_detection_model.pkl")
 
 protoring_output_dir = os.getenv('PROCTORING_OUTPUT_DIR')
-print(protoring_output_dir)
 
 @app.route('/')
 def home():
