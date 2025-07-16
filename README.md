@@ -107,6 +107,8 @@ Contributions are welcome! Please create a pull request with a detailed descript
 ## Contact
 
 Qamar Ul Islam - qamarislam1232@gmail.com
+Awais Daud - awaiscarni@gmail.com
+Waqas Khalid - waqaskh094@gmail.com 
 
 ## Acknowledgements
 
